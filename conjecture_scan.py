@@ -16,13 +16,29 @@ from graph_manager import GraphManager
 from verification.expressions import parse_expression
 
 
-PATTERN = re.compile(r"\b(open (?:problem|question|conjecture)|remains? (?:an? )?open|still open|unresolved|unproved|we conjecture|we ask whether|it is conjectured|conjecture\s+\d+(?:\.\d+)?\s*[:.]|conjecture:)", re.I)
+PATTERN = re.compile(r"\b(?:open (?:problem|question|conjecture)\b|remains? (?:an? )?open\b|still open\b|unresolved\b|unproved\b|we conjecture\b|we ask whether\b|it is conjectured\b|conjecture:)", re.I)
+NUMBERED = re.compile(r"\bConjecture\s+\d+(?:\.\d+)?\.\s*", re.I)
 RESOLVED = re.compile(r"\b(resolv(?:e|es|ed|ing)|prov(?:e|es|ed|ing)|confirm(?:s|ed|ing)?|settle(?:s|d)?|establish(?:es|ed)?)\b", re.I)
+META = re.compile(r"\b(?:following conjecture|(?:this|our) (?:work|paper) addresses|section \d+ discusses open problems|open problems and future directions)\b", re.I)
 
 
 def extract_candidates(text):
-    return [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", text)
-            if PATTERN.search(sentence) and not RESOLVED.search(sentence) and 20 <= len(sentence) <= 800][:10]
+    candidates = []
+    for match in NUMBERED.finditer(text):
+        body = re.split(r"\n(?:Note that|If the|References|Proof(?:\.|:)|Conjecture\b)",
+                        text[match.end():match.end() + 800], maxsplit=1, flags=re.I)[0]
+        body = re.split(r"(?<=\.)\s+(?=(?:\d+\s+)?[A-Z])", body, maxsplit=1)[0]
+        statement = " ".join((match.group() + body).split())[:800]
+        statement = re.sub(r"(?<=\.)\s+\d{1,3}$", "", statement)
+        if len(statement) >= 40 and not RESOLVED.search(statement):
+            candidates.append(statement)
+    for sentence in re.split(r"(?<=[.!?])\s+", text):
+        statement = " ".join(sentence.split())
+        if (PATTERN.search(statement) and not RESOLVED.search(statement) and not META.search(statement)
+                and not re.search(r"\bConjecture\s+\d+(?:\.\d+)?\.$", statement, re.I)
+                and 20 <= len(statement) <= 800):
+            candidates.append(statement)
+    return list(dict.fromkeys(candidates))[:10]
 
 
 def check_candidate(sentence):

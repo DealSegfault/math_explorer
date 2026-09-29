@@ -59,6 +59,15 @@ class PipelineTest(unittest.TestCase):
         self.assertEqual(check_candidate("Conjecture: x % 2 == 0")["model"], {"x": 1})
         self.assertEqual(extract_candidates("We resolved the conjecture. The problem remains open."),
                          ["The problem remains open."])
+        self.assertEqual(extract_candidates("Now, we propose the following conjecture:\nConjecture 5.2. "
+                                            "The inclusion is null-homotopic and the intersection is contractible.\n"
+                                            "Note that this is unknown."),
+                         ["Conjecture 5.2. The inclusion is null-homotopic and the intersection is contractible."])
+        self.assertEqual(extract_candidates("Section 5 discusses open problems and future directions."), [])
+        self.assertEqual(extract_candidates("Conjecture 1. Every graph has property P. On the other hand, proof is unknown."),
+                         ["Conjecture 1. Every graph has property P."])
+        self.assertEqual(extract_candidates("Conjecture 1. Every graph has property P. 30"),
+                         ["Conjecture 1. Every graph has property P."])
 
         class Indexer:
             def __init__(self):
