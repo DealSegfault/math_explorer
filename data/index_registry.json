@@ -102,5 +102,2785 @@
         "line_num": 40
       }
     ]
+  },
+  "arxiv_2603.11066": {
+    "file_path": "/Users/mac/.gemini/antigravity/scratch/math_explorer/data/papers/2603.11066.pdf",
+    "format": ".pdf",
+    "tree": {
+      "doc_name": "2603.11066.pdf",
+      "doc_title": "Exploring Collatz Dynamics with Human-LLM Collaboration",
+      "structure": [
+        {
+          "title": "Abstract",
+          "node_id": "0000",
+          "start_index": 1,
+          "end_index": 5
+        },
+        {
+          "title": "Introduction",
+          "node_id": "0001",
+          "start_index": 5,
+          "end_index": 11,
+          "nodes": [
+            {
+              "title": "E Contribution attribution tables",
+              "node_id": "0002",
+              "start_index": 5,
+              "end_index": 5
+            },
+            {
+              "title": "G Version history",
+              "node_id": "0003",
+              "start_index": 5,
+              "end_index": 8
+            },
+            {
+              "title": "Reading guide",
+              "node_id": "0004",
+              "start_index": 8,
+              "end_index": 9
+            },
+            {
+              "title": "Proof architecture and tier classification",
+              "node_id": "0005",
+              "start_index": 9,
+              "end_index": 9,
+              "key_items": [
+                "Step 1 (burst–gap route); Step 2 (phantom route); Step 3 (non-dependence of later sections)",
+                "Step 1 (burst–gap route)",
+                "Step 2 (phantom route)",
+                "Step 3 (non-dependence of later sections)"
+              ]
+            },
+            {
+              "title": "Status of results",
+              "node_id": "0006",
+              "start_index": 9,
+              "end_index": 11
+            }
+          ]
+        },
+        {
+          "title": "Notation and preliminaries",
+          "node_id": "0007",
+          "start_index": 11,
+          "end_index": 13
+        },
+        {
+          "title": "The 1/4 Persistent-Transition Law",
+          "node_id": "0008",
+          "start_index": 13,
+          "end_index": 14
+        },
+        {
+          "title": "The convergence chain",
+          "node_id": "0009",
+          "start_index": 14,
+          "end_index": 17,
+          "nodes": [
+            {
+              "title": "Entry–Occupancy Equivalence",
+              "node_id": "0010",
+              "start_index": 14,
+              "end_index": 14
+            },
+            {
+              "title": "Entry bound implies convergence",
+              "node_id": "0011",
+              "start_index": 14,
+              "end_index": 15,
+              "key_items": [
+                "4 The convergence chain",
+                "4.1 Entry–Occupancy Equivalence"
+              ]
+            },
+            {
+              "title": "The Persistent Exit Lemma",
+              "node_id": "0012",
+              "start_index": 15,
+              "end_index": 16
+            },
+            {
+              "title": "The Burst-Gap Criterion",
+              "node_id": "0013",
+              "start_index": 16,
+              "end_index": 17
+            }
+          ]
+        },
+        {
+          "title": "The Scrambling Lemma",
+          "node_id": "0014",
+          "start_index": 17,
+          "end_index": 19,
+          "key_items": [
+            "Statement and proof",
+            "5 The Scrambling Lemma",
+            "The pattern-determination bound"
+          ]
+        },
+        {
+          "title": "Known-Zone Decay",
+          "node_id": "0015",
+          "start_index": 19,
+          "end_index": 21
+        },
+        {
+          "title": "Phantom cycles and the affine census theorem",
+          "node_id": "0016",
+          "start_index": 21,
+          "end_index": 40,
+          "nodes": [
+            {
+              "title": "Phantom cycles and 2-adic roots; Known phantom families",
+              "node_id": "0017",
+              "start_index": 22,
+              "end_index": 22,
+              "key_items": [
+                "Phantom cycles and 2-adic roots",
+                "Known phantom families"
+              ]
+            },
+            {
+              "title": "The affine persistence mechanism",
+              "node_id": "0018",
+              "start_index": 22,
+              "end_index": 23,
+              "key_items": [
+                "7.1 Phantom cycles and 2-adic roots",
+                "7.2 Known phantom families"
+              ]
+            },
+            {
+              "title": "The census formula",
+              "node_id": "0019",
+              "start_index": 23,
+              "end_index": 24
+            },
+            {
+              "title": "Gamma monotonicity and the uniform bound",
+              "node_id": "0020",
+              "start_index": 24,
+              "end_index": 25
+            },
+            {
+              "title": "Universal census depth and the refined gain bound",
+              "node_id": "0021",
+              "start_index": 25,
+              "end_index": 30,
+              "nodes": [
+                {
+                  "title": "Universality of phantom families.",
+                  "node_id": "0022",
+                  "start_index": 25,
+                  "end_index": 27
+                },
+                {
+                  "title": "The per-orbit gain rate.",
+                  "node_id": "0023",
+                  "start_index": 27,
+                  "end_index": 29
+                },
+                {
+                  "title": "Step 3: rigorous analytic tail beyond K 0 = 500.",
+                  "node_id": "0024",
+                  "start_index": 29,
+                  "end_index": 30
+                }
+              ]
+            },
+            {
+              "title": "Reduction to intrinsic near-return and overlap",
+              "node_id": "0025",
+              "start_index": 30,
+              "end_index": 32
+            },
+            {
+              "title": "The weighted self-overlap theorem",
+              "node_id": "0026",
+              "start_index": 32,
+              "end_index": 33
+            },
+            {
+              "title": "The counting reduction",
+              "node_id": "0027",
+              "start_index": 33,
+              "end_index": 34
+            },
+            {
+              "title": "The period-based occurrence bound",
+              "node_id": "0028",
+              "start_index": 34,
+              "end_index": 34
+            },
+            {
+              "title": "Structural constraints on the least period",
+              "node_id": "0029",
+              "start_index": 34,
+              "end_index": 36,
+              "key_items": [
+                "7.10 The period-based occurrence bound"
+              ]
+            },
+            {
+              "title": "Periodic-core factorization and defect analysis",
+              "node_id": "0030",
+              "start_index": 36,
+              "end_index": 38
+            },
+            {
+              "title": "The uniqueness-threshold bound on the census constant",
+              "node_id": "0031",
+              "start_index": 38,
+              "end_index": 40,
+              "key_items": [
+                "Step 2 (End-of-cycle cancellation)"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Conditional convergence and reduction  to orbit equidistribution",
+          "node_id": "0032",
+          "start_index": 40,
+          "end_index": 46,
+          "nodes": [
+            {
+              "title": "The conditional convergence theorem",
+              "node_id": "0033",
+              "start_index": 40,
+              "end_index": 41,
+              "key_items": [
+                "8 Conditional convergence and reduction to orbit equidistribution"
+              ]
+            },
+            {
+              "title": "The Orbit Equidistribution Conjecture",
+              "node_id": "0034",
+              "start_index": 41,
+              "end_index": 41
+            },
+            {
+              "title": "The Weak Mixing Hypothesis",
+              "node_id": "0035",
+              "start_index": 41,
+              "end_index": 43,
+              "key_items": [
+                "8.2 The Orbit Equidistribution Conjecture"
+              ]
+            },
+            {
+              "title": "Conditional reduction theorems",
+              "node_id": "0036",
+              "start_index": 43,
+              "end_index": 46
+            }
+          ]
+        },
+        {
+          "title": "Toward the Weak Mixing Hypothesis",
+          "node_id": "0037",
+          "start_index": 46,
+          "end_index": 105,
+          "nodes": [
+            {
+              "title": "Shadow sparsity",
+              "node_id": "0038",
+              "start_index": 46,
+              "end_index": 47,
+              "key_items": [
+                "9 Toward the Weak Mixing Hypothesis"
+              ]
+            },
+            {
+              "title": "Repulsion-based shadow return time",
+              "node_id": "0039",
+              "start_index": 47,
+              "end_index": 48
+            },
+            {
+              "title": "Finite-depth reduction",
+              "node_id": "0040",
+              "start_index": 48,
+              "end_index": 49,
+              "key_items": [
+                "Low range"
+              ]
+            },
+            {
+              "title": "Hierarchical consistency",
+              "node_id": "0041",
+              "start_index": 49,
+              "end_index": 50
+            },
+            {
+              "title": "Depthwise discrepancy recurrence",
+              "node_id": "0042",
+              "start_index": 50,
+              "end_index": 53
+            },
+            {
+              "title": "Gain-observable recurrence",
+              "node_id": "0043",
+              "start_index": 53,
+              "end_index": 53
+            },
+            {
+              "title": "First lemmas toward the recurrence",
+              "node_id": "0044",
+              "start_index": 53,
+              "end_index": 60,
+              "key_items": [
+                "9.6 Gain-observable recurrence"
+              ]
+            },
+            {
+              "title": "Spectral analysis of the gain observable",
+              "node_id": "0045",
+              "start_index": 60,
+              "end_index": 64,
+              "nodes": [
+                {
+                  "title": "Cauchy–Schwarz tightness",
+                  "node_id": "0046",
+                  "start_index": 63,
+                  "end_index": 63
+                },
+                {
+                  "title": "Bit-position parity profile",
+                  "node_id": "0047",
+                  "start_index": 63,
+                  "end_index": 64
+                }
+              ]
+            },
+            {
+              "title": "The odd-skeleton crossing route",
+              "node_id": "0048",
+              "start_index": 64,
+              "end_index": 101,
+              "nodes": [
+                {
+                  "title": "Inductive step",
+                  "node_id": "0049",
+                  "start_index": 66,
+                  "end_index": 66
+                },
+                {
+                  "title": "Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2.",
+                  "node_id": "0050",
+                  "start_index": 66,
+                  "end_index": 101,
+                  "nodes": [
+                    {
+                      "title": "2 −(L+r all (L)−1) = 0.41936274883794 . . . .",
+                      "node_id": "0051",
+                      "start_index": 68,
+                      "end_index": 83,
+                      "nodes": [
+                        {
+                          "title": "Monte Carlo confirmation",
+                          "node_id": "0052",
+                          "start_index": 69,
+                          "end_index": 70
+                        },
+                        {
+                          "title": "Geometric ergodicity verification",
+                          "node_id": "0053",
+                          "start_index": 70,
+                          "end_index": 76
+                        },
+                        {
+                          "title": "Inductive step; Anti-burst bias",
+                          "node_id": "0054",
+                          "start_index": 76,
+                          "end_index": 76,
+                          "key_items": [
+                            "Inductive step",
+                            "Anti-burst bias"
+                          ]
+                        },
+                        {
+                          "title": "Cross-cascade depth independence",
+                          "node_id": "0055",
+                          "start_index": 76,
+                          "end_index": 83
+                        }
+                      ]
+                    },
+                    {
+                      "title": "Proof. Part (1)",
+                      "node_id": "0056",
+                      "start_index": 83,
+                      "end_index": 101
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Modular crossing strata",
+              "node_id": "0057",
+              "start_index": 101,
+              "end_index": 103
+            },
+            {
+              "title": "Summary of the attack surface",
+              "node_id": "0058",
+              "start_index": 103,
+              "end_index": 105
+            }
+          ]
+        },
+        {
+          "title": "The Sturmian Obstruction and the Carry Contamination Theorem",
+          "node_id": "0059",
+          "start_index": 105,
+          "end_index": 120,
+          "nodes": [
+            {
+              "title": "Sturmian words and orbit parameterization",
+              "node_id": "0060",
+              "start_index": 105,
+              "end_index": 106,
+              "key_items": [
+                "10 The Sturmian Obstruction and the Carry Contamination Theorem"
+              ]
+            },
+            {
+              "title": "The Carry Contamination Theorem",
+              "node_id": "0061",
+              "start_index": 106,
+              "end_index": 107
+            },
+            {
+              "title": "The Cantor set C-infinity and the Dichotomy",
+              "node_id": "0062",
+              "start_index": 107,
+              "end_index": 107
+            },
+            {
+              "title": "Refined mod-16/mod-32 transitions",
+              "node_id": "0063",
+              "start_index": 107,
+              "end_index": 108,
+              "key_items": [
+                "10.3 The Cantor set C ∞ and the Dichotomy",
+                "The orbit cannot be eventually periodic"
+              ]
+            },
+            {
+              "title": "The Carry Independence Conjecture and remaining gap",
+              "node_id": "0064",
+              "start_index": 108,
+              "end_index": 108
+            },
+            {
+              "title": "A scheduler-adversary formulation of compatibility",
+              "node_id": "0065",
+              "start_index": 108,
+              "end_index": 120,
+              "nodes": [
+                {
+                  "title": "10.5 The Carry Independence Conjecture and remaining gap",
+                  "node_id": "0066",
+                  "start_index": 108,
+                  "end_index": 109
+                },
+                {
+                  "title": "Compatible branch schedulers; The realizability problem",
+                  "node_id": "0067",
+                  "start_index": 109,
+                  "end_index": 109,
+                  "key_items": [
+                    "Compatible branch schedulers",
+                    "The realizability problem"
+                  ]
+                },
+                {
+                  "title": "Interpretation",
+                  "node_id": "0068",
+                  "start_index": 109,
+                  "end_index": 110,
+                  "key_items": [
+                    "10.6.1 Compatible branch schedulers",
+                    "10.6.2 The realizability problem"
+                  ]
+                },
+                {
+                  "title": "Future directions",
+                  "node_id": "0069",
+                  "start_index": 110,
+                  "end_index": 110
+                },
+                {
+                  "title": "Numerical exploration: constrained grammar and exhaustion",
+                  "node_id": "0070",
+                  "start_index": 110,
+                  "end_index": 120,
+                  "nodes": [
+                    {
+                      "title": "10.6.4 Future directions",
+                      "node_id": "0071",
+                      "start_index": 110,
+                      "end_index": 110
+                    },
+                    {
+                      "title": "Bit sensitivity and the carry automaton.",
+                      "node_id": "0072",
+                      "start_index": 110,
+                      "end_index": 111
+                    },
+                    {
+                      "title": "Exact valuations and the cycle density condition.",
+                      "node_id": "0073",
+                      "start_index": 111,
+                      "end_index": 112
+                    },
+                    {
+                      "title": "The bit race and the 31-block bottleneck.",
+                      "node_id": "0074",
+                      "start_index": 112,
+                      "end_index": 112
+                    },
+                    {
+                      "title": "Structural analysis: the safe sofic shift.",
+                      "node_id": "0075",
+                      "start_index": 112,
+                      "end_index": 113
+                    },
+                    {
+                      "title": "Cross-core dynamics and the death corridor.",
+                      "node_id": "0076",
+                      "start_index": 113,
+                      "end_index": 114
+                    },
+                    {
+                      "title": "Congruence tower and the bit-budget inequality.",
+                      "node_id": "0077",
+                      "start_index": 114,
+                      "end_index": 115
+                    },
+                    {
+                      "title": "Transfer operator and backward dynamics.",
+                      "node_id": "0078",
+                      "start_index": 115,
+                      "end_index": 116
+                    },
+                    {
+                      "title": "Cross-core periodic elimination (extended).",
+                      "node_id": "0079",
+                      "start_index": 116,
+                      "end_index": 117
+                    },
+                    {
+                      "title": "Number-theoretic structure of the obstruction.",
+                      "node_id": "0080",
+                      "start_index": 117,
+                      "end_index": 118
+                    },
+                    {
+                      "title": "Geometric convergence of the expected cycle count.",
+                      "node_id": "0081",
+                      "start_index": 118,
+                      "end_index": 119
+                    },
+                    {
+                      "title": "2-adic expansion and measure shrinkage (Push 33).",
+                      "node_id": "0082",
+                      "start_index": 119,
+                      "end_index": 120
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Position relative to prior work",
+          "node_id": "0083",
+          "start_index": 120,
+          "end_index": 124,
+          "key_items": [
+            "The distributional–pointwise barrier (Push 34).",
+            "The distributional-to-pointwise barrier: precise comparison with Tao",
+            "Concluding perspective"
+          ]
+        },
+        {
+          "title": "Note on LLM-assisted research methodology",
+          "node_id": "0084",
+          "start_index": 124,
+          "end_index": 141,
+          "nodes": [
+            {
+              "title": "The collaboration",
+              "node_id": "0085",
+              "start_index": 124,
+              "end_index": 124
+            },
+            {
+              "title": "The orchestration methodology",
+              "node_id": "0086",
+              "start_index": 124,
+              "end_index": 125,
+              "key_items": [
+                "12 Note on LLM-assisted research methodology",
+                "12.1 The collaboration"
+              ]
+            },
+            {
+              "title": "What the LLMs contributed",
+              "node_id": "0087",
+              "start_index": 125,
+              "end_index": 126
+            },
+            {
+              "title": "What the human contributed",
+              "node_id": "0088",
+              "start_index": 126,
+              "end_index": 128
+            },
+            {
+              "title": "Contribution attribution",
+              "node_id": "0089",
+              "start_index": 128,
+              "end_index": 128
+            },
+            {
+              "title": "Case study: the false Gap Lemma",
+              "node_id": "0090",
+              "start_index": 128,
+              "end_index": 129,
+              "key_items": [
+                "12.5 Contribution attribution"
+              ]
+            },
+            {
+              "title": "Case study: the CIC circularity",
+              "node_id": "0091",
+              "start_index": 129,
+              "end_index": 130
+            },
+            {
+              "title": "Error-correction log",
+              "node_id": "0092",
+              "start_index": 130,
+              "end_index": 133,
+              "nodes": [
+                {
+                  "title": "The circularity diagnosis. The key finding:; Lessons.; 12.8 Error-correction log",
+                  "node_id": "0093",
+                  "start_index": 130,
+                  "end_index": 130,
+                  "key_items": [
+                    "The circularity diagnosis. The key finding:",
+                    "Lessons.",
+                    "12.8 Error-correction log"
+                  ]
+                },
+                {
+                  "title": "Genuine catches (errors found and corrected).",
+                  "node_id": "0094",
+                  "start_index": 130,
+                  "end_index": 131
+                },
+                {
+                  "title": "False alarms (errors flagged that were not present).",
+                  "node_id": "0095",
+                  "start_index": 131,
+                  "end_index": 131
+                },
+                {
+                  "title": "Scope corrections (claims downgraded).",
+                  "node_id": "0096",
+                  "start_index": 131,
+                  "end_index": 132
+                },
+                {
+                  "title": "Original",
+                  "node_id": "0097",
+                  "start_index": 132,
+                  "end_index": 132
+                },
+                {
+                  "title": "Post-mortem: patterns in the error-correction process.",
+                  "node_id": "0098",
+                  "start_index": 132,
+                  "end_index": 133
+                }
+              ]
+            },
+            {
+              "title": "Broader implications",
+              "node_id": "0099",
+              "start_index": 133,
+              "end_index": 134
+            },
+            {
+              "title": "v3 collaboration milestones",
+              "node_id": "0100",
+              "start_index": 134,
+              "end_index": 135
+            },
+            {
+              "title": "v4 collaboration milestones",
+              "node_id": "0101",
+              "start_index": 135,
+              "end_index": 136
+            },
+            {
+              "title": "Status of revision targets and remaining open problems",
+              "node_id": "0102",
+              "start_index": 136,
+              "end_index": 141,
+              "nodes": [
+                {
+                  "title": "Target 1 (completed): Quantitative weakening of Conjecture 8.2.",
+                  "node_id": "0103",
+                  "start_index": 136,
+                  "end_index": 137
+                },
+                {
+                  "title": "Target 4 (completed): Structural programme toward the WMH.",
+                  "node_id": "0104",
+                  "start_index": 137,
+                  "end_index": 138,
+                  "key_items": [
+                    "Conclusion: the distributional-to-pointwise barrier"
+                  ]
+                },
+                {
+                  "title": "The broader problem class and why Collatz may be more tractable.",
+                  "node_id": "0105",
+                  "start_index": 138,
+                  "end_index": 140,
+                  "key_items": [
+                    "Status"
+                  ]
+                },
+                {
+                  "title": "Summary: complete separation of concerns.",
+                  "node_id": "0106",
+                  "start_index": 140,
+                  "end_index": 141
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "The architecture of the Syracuse obstruction",
+          "node_id": "0107",
+          "start_index": 141,
+          "end_index": 146,
+          "nodes": [
+            {
+              "title": "The Mersenne sieve bypass",
+              "node_id": "0108",
+              "start_index": 142,
+              "end_index": 143,
+              "key_items": [
+                "The common failure mode is precisely characterized:",
+                "The strongest quantitative result on the sieve path is:"
+              ]
+            },
+            {
+              "title": "The tautological structure of the AFI; Quantitative achievements",
+              "node_id": "0109",
+              "start_index": 143,
+              "end_index": 143,
+              "key_items": [
+                "The tautological structure of the AFI",
+                "Quantitative achievements"
+              ]
+            },
+            {
+              "title": "Relation to computational irreducibility",
+              "node_id": "0110",
+              "start_index": 143,
+              "end_index": 144,
+              "key_items": [
+                "13.2 The tautological structure of the AFI",
+                "13.3 Quantitative achievements"
+              ]
+            },
+            {
+              "title": "Assessment",
+              "node_id": "0111",
+              "start_index": 144,
+              "end_index": 146,
+              "key_items": [
+                "Acknowledgements",
+                "References"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Modular ranking certificates via DAG analysis",
+          "node_id": "0112",
+          "start_index": 146,
+          "end_index": 153,
+          "nodes": [
+            {
+              "title": "The net-positive state graph",
+              "node_id": "0113",
+              "start_index": 146,
+              "end_index": 146
+            },
+            {
+              "title": "Acyclicity and ranking functions",
+              "node_id": "0114",
+              "start_index": 146,
+              "end_index": 147,
+              "key_items": [
+                "A Modular ranking certificates via DAG analysis",
+                "A.1 The net-positive state graph"
+              ]
+            },
+            {
+              "title": "Computational verification",
+              "node_id": "0115",
+              "start_index": 147,
+              "end_index": 147
+            },
+            {
+              "title": "Non-liftability of net-positive cycles",
+              "node_id": "0116",
+              "start_index": 147,
+              "end_index": 148,
+              "key_items": [
+                "A.3 Computational verification"
+              ]
+            },
+            {
+              "title": "The carry parity obstruction",
+              "node_id": "0117",
+              "start_index": 148,
+              "end_index": 149
+            },
+            {
+              "title": "Re-entry analysis: the augmented return graph",
+              "node_id": "0118",
+              "start_index": 149,
+              "end_index": 149
+            },
+            {
+              "title": "Cycle genealogy and the birth obstruction",
+              "node_id": "0119",
+              "start_index": 149,
+              "end_index": 150,
+              "key_items": [
+                "A.6 Re-entry analysis: the augmented return graph"
+              ]
+            },
+            {
+              "title": "The Net-Positive Ranking Lemma",
+              "node_id": "0120",
+              "start_index": 150,
+              "end_index": 150
+            },
+            {
+              "title": "The exit-return reduction",
+              "node_id": "0121",
+              "start_index": 150,
+              "end_index": 151,
+              "key_items": [
+                "A.8 The Net-Positive Ranking Lemma"
+              ]
+            },
+            {
+              "title": "The s-invariant and positive-subgraph acyclicity",
+              "node_id": "0122",
+              "start_index": 151,
+              "end_index": 152
+            },
+            {
+              "title": "Reload dynamics and the budget equation",
+              "node_id": "0123",
+              "start_index": 152,
+              "end_index": 153
+            }
+          ]
+        },
+        {
+          "title": "Fiber-57 structural programme and the information bottleneck",
+          "node_id": "0124",
+          "start_index": 153,
+          "end_index": 159,
+          "nodes": [
+            {
+              "title": "Drift-sustaining chains and the pair-return automaton",
+              "node_id": "0125",
+              "start_index": 153,
+              "end_index": 154,
+              "key_items": [
+                "B Fiber-57 structural programme and the information bottleneck"
+              ]
+            },
+            {
+              "title": "Exact return structure of the sustaining branches",
+              "node_id": "0126",
+              "start_index": 154,
+              "end_index": 156
+            },
+            {
+              "title": "The invariant core and projective limit",
+              "node_id": "0127",
+              "start_index": 156,
+              "end_index": 156
+            },
+            {
+              "title": "The absorption theorem",
+              "node_id": "0128",
+              "start_index": 156,
+              "end_index": 157,
+              "key_items": [
+                "B.3 The invariant core and projective limit"
+              ]
+            },
+            {
+              "title": "The Absorption Bottleneck Lemma",
+              "node_id": "0129",
+              "start_index": 157,
+              "end_index": 157
+            },
+            {
+              "title": "The memory lower bound and theorem ladder",
+              "node_id": "0130",
+              "start_index": 157,
+              "end_index": 158,
+              "key_items": [
+                "Proof (computational); Note on small quotients",
+                "Proof (computational)",
+                "Note on small quotients",
+                "B.5 The Absorption Bottleneck Lemma"
+              ]
+            },
+            {
+              "title": "Branch anti-concentration reduction; Carry equidistribution and empirical verification; Path-conditional bijection and annealed closure",
+              "node_id": "0131",
+              "start_index": 158,
+              "end_index": 158,
+              "key_items": [
+                "Branch anti-concentration reduction",
+                "Carry equidistribution and empirical verification",
+                "Path-conditional bijection and annealed closure"
+              ]
+            },
+            {
+              "title": "Summary: the quantitative reduction",
+              "node_id": "0132",
+              "start_index": 158,
+              "end_index": 159,
+              "key_items": [
+                "B.7 Branch anti-concentration reduction; B.8 Carry equidistribution and empirical verification",
+                "B.7 Branch anti-concentration reduction",
+                "B.8 Carry equidistribution and empirical verification",
+                "B.9 Path-conditional bijection and annealed closure"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Unconditional cylinder-averaged closure on I2 via spectral contraction",
+          "node_id": "0133",
+          "start_index": 159,
+          "end_index": 195,
+          "nodes": [
+            {
+              "title": "Ruffini reduction of the depth-2 known-gap kernel",
+              "node_id": "0134",
+              "start_index": 159,
+              "end_index": 160,
+              "key_items": [
+                "Value",
+                "C Unconditional cylinder-averaged closure on"
+              ]
+            },
+            {
+              "title": "The unconditional extended spectral bound",
+              "node_id": "0135",
+              "start_index": 160,
+              "end_index": 161
+            },
+            {
+              "title": "Transient-prefix exponential tail on the cylinder-averaged mod-64 chain",
+              "node_id": "0136",
+              "start_index": 161,
+              "end_index": 161
+            },
+            {
+              "title": "Stationary visit rate and the unconditional sum bound",
+              "node_id": "0137",
+              "start_index": 161,
+              "end_index": 166,
+              "key_items": [
+                "C.3 Transient-prefix exponential tail on the cylinder-averaged mod-64 chain"
+              ]
+            },
+            {
+              "title": "The (C-2adic) bound on BF residue classes",
+              "node_id": "0138",
+              "start_index": 166,
+              "end_index": 168
+            },
+            {
+              "title": "Complete cascade algebra and the generic dynamics gap",
+              "node_id": "0139",
+              "start_index": 168,
+              "end_index": 180,
+              "nodes": [
+                {
+                  "title": "Post-cascade Generic",
+                  "node_id": "0140",
+                  "start_index": 171,
+                  "end_index": 180,
+                  "nodes": [
+                    {
+                      "title": "Route B: exact 2-adic pullback rigidity",
+                      "node_id": "0141",
+                      "start_index": 176,
+                      "end_index": 176
+                    },
+                    {
+                      "title": "The 3-bit shortfall theorem",
+                      "node_id": "0142",
+                      "start_index": 176,
+                      "end_index": 177
+                    },
+                    {
+                      "title": "Cascade-only compatibility; Post-cascade convergence",
+                      "node_id": "0143",
+                      "start_index": 177,
+                      "end_index": 177,
+                      "key_items": [
+                        "Cascade-only compatibility",
+                        "Post-cascade convergence"
+                      ]
+                    },
+                    {
+                      "title": "Divergence threshold and v 2 anti-correlation.",
+                      "node_id": "0144",
+                      "start_index": 177,
+                      "end_index": 180,
+                      "nodes": [
+                        {
+                          "title": "Coupling framework and noise independence; Disjoint-slice argument and weak dependence",
+                          "node_id": "0145",
+                          "start_index": 178,
+                          "end_index": 178,
+                          "key_items": [
+                            "Coupling framework and noise independence",
+                            "Disjoint-slice argument and weak dependence"
+                          ]
+                        },
+                        {
+                          "title": "Renewal argument and episode structure",
+                          "node_id": "0146",
+                          "start_index": 178,
+                          "end_index": 179
+                        },
+                        {
+                          "title": "Adversarial chain and unique ergodicity reduction; Spectral gap of the transfer operator (proved); Step 1: Universal no-target-sharing; Step 2: Row-sum decomposition; Step 4: Primitivity",
+                          "node_id": "0147",
+                          "start_index": 179,
+                          "end_index": 179,
+                          "key_items": [
+                            "Adversarial chain and unique ergodicity reduction",
+                            "Spectral gap of the transfer operator (proved)",
+                            "Step 1: Universal no-target-sharing",
+                            "Step 2: Row-sum decomposition",
+                            "Step 4: Primitivity"
+                          ]
+                        },
+                        {
+                          "title": "Step 5: Dobrushin contraction",
+                          "node_id": "0148",
+                          "start_index": 179,
+                          "end_index": 180
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Bridge programme: from spectral gap to individual orbits",
+              "node_id": "0149",
+              "start_index": 180,
+              "end_index": 182,
+              "key_items": [
+                "What is proved: non-atomic unique ergodicity.; Obstruction 2: measure-zero starting points (divergent orbits); Symmetric State Identity",
+                "What is proved: non-atomic unique ergodicity.",
+                "Obstruction 2: measure-zero starting points (divergent orbits)",
+                "Symmetric State Identity",
+                "Algebraic Parity Lock",
+                "Domain Vo id (computational); Rotation Constraint; Wa lk Sum Reformulation; Three-layer obstruction (computational); The cascade; Fundamental Identity; Explicit results",
+                "Domain Vo id (computational)",
+                "Rotation Constraint",
+                "Wa lk Sum Reformulation",
+                "Three-layer obstruction (computational)",
+                "The cascade",
+                "Fundamental Identity",
+                "Explicit results",
+                "Three-case cycle exclusion framework"
+              ]
+            },
+            {
+              "title": "Unified pointwise picture: Layers A, B, B', B'', C-Haar",
+              "node_id": "0150",
+              "start_index": 182,
+              "end_index": 183,
+              "key_items": [
+                "Unconditional range",
+                "Descent property"
+              ]
+            },
+            {
+              "title": "Non-restartability: a sharper reframing of the gap",
+              "node_id": "0151",
+              "start_index": 183,
+              "end_index": 187,
+              "key_items": [
+                "Algebraic structure of the BF exit"
+              ]
+            },
+            {
+              "title": "Density-1 cylinder boundedness via union bound",
+              "node_id": "0152",
+              "start_index": 187,
+              "end_index": 191,
+              "nodes": [
+                {
+                  "title": "An unconditional starting-point density bound",
+                  "node_id": "0153",
+                  "start_index": 189,
+                  "end_index": 191
+                }
+              ]
+            },
+            {
+              "title": "A tensor-rank law for the joint 2-adic/3-adic Syracuse transition operator",
+              "node_id": "0154",
+              "start_index": 191,
+              "end_index": 193,
+              "key_items": [
+                "Structural proof modulo Lemmas C.75 and C.76",
+                "Step 1: generic rows are rank-one",
+                "Numerical verification"
+              ]
+            },
+            {
+              "title": "Iterated tensor, spectral gap, and finite-resolution mixing",
+              "node_id": "0155",
+              "start_index": 193,
+              "end_index": 195
+            }
+          ]
+        },
+        {
+          "title": "Visualization-guided first-passage perspective",
+          "node_id": "0156",
+          "start_index": 195,
+          "end_index": 201,
+          "nodes": [
+            {
+              "title": "Touch growth and the apparently empty middle",
+              "node_id": "0157",
+              "start_index": 196,
+              "end_index": 197
+            },
+            {
+              "title": "The below-start criterion and finite stopping time",
+              "node_id": "0158",
+              "start_index": 197,
+              "end_index": 198
+            },
+            {
+              "title": "Heuristic proof paths and future visualizations",
+              "node_id": "0159",
+              "start_index": 198,
+              "end_index": 199,
+              "key_items": [
+                "Finite stopping time as a first-passage problem."
+              ]
+            },
+            {
+              "title": "Ensemble above-start decay: a lattice-path analysis",
+              "node_id": "0160",
+              "start_index": 199,
+              "end_index": 201,
+              "key_items": [
+                "Traffic-weighted and residue-colored onions."
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Contribution attribution tables",
+          "node_id": "0161",
+          "start_index": 201,
+          "end_index": 207
+        },
+        {
+          "title": "Syracuse chord diagrams",
+          "node_id": "0162",
+          "start_index": 207,
+          "end_index": 216,
+          "nodes": [
+            {
+              "title": "Compound carry incompatibility and transport graphs",
+              "node_id": "0163",
+              "start_index": 207,
+              "end_index": 210,
+              "key_items": [
+                "F Syracuse chord diagrams"
+              ]
+            },
+            {
+              "title": "Current status and sharpened open problem",
+              "node_id": "0164",
+              "start_index": 210,
+              "end_index": 216
+            }
+          ]
+        },
+        {
+          "title": "Version history",
+          "node_id": "0165",
+          "start_index": 216,
+          "end_index": 233
+        }
+      ],
+      "has_abstract_or_references_section": true,
+      "toc_source": "bookmarks",
+      "optimize": {
+        "merges": 42,
+        "expands": 0,
+        "same_page_merges": 14,
+        "same_page_dropped": 25,
+        "kept_collapsed": 0,
+        "before": {
+          "total_pages": 233,
+          "frontier_nodes": 200,
+          "worst_case_search_complexity": 23,
+          "average_search_complexity": 9.657,
+          "normalized_worst_case_complexity": 0.0987,
+          "max_depth": 5,
+          "mean_depth": 2.92,
+          "probability_mass": 1.7897
+        },
+        "after": {
+          "total_pages": 233,
+          "frontier_nodes": 151,
+          "worst_case_search_complexity": 23,
+          "average_search_complexity": 8.451,
+          "normalized_worst_case_complexity": 0.0987,
+          "max_depth": 5,
+          "mean_depth": 2.55,
+          "probability_mass": 1.5966
+        }
+      }
+    },
+    "nodes": [
+      {
+        "node_id": "0000",
+        "title": "Abstract",
+        "full_path": "Abstract",
+        "text": "",
+        "start_page": 1,
+        "end_page": 5,
+        "line_num": null
+      },
+      {
+        "node_id": "0001",
+        "title": "Introduction",
+        "full_path": "Introduction",
+        "text": "",
+        "start_page": 5,
+        "end_page": 11,
+        "line_num": null
+      },
+      {
+        "node_id": "0002",
+        "title": "E Contribution attribution tables",
+        "full_path": "Introduction > E Contribution attribution tables",
+        "text": "",
+        "start_page": 5,
+        "end_page": 5,
+        "line_num": null
+      },
+      {
+        "node_id": "0003",
+        "title": "G Version history",
+        "full_path": "Introduction > G Version history",
+        "text": "",
+        "start_page": 5,
+        "end_page": 8,
+        "line_num": null
+      },
+      {
+        "node_id": "0004",
+        "title": "Reading guide",
+        "full_path": "Introduction > Reading guide",
+        "text": "",
+        "start_page": 8,
+        "end_page": 9,
+        "line_num": null
+      },
+      {
+        "node_id": "0005",
+        "title": "Proof architecture and tier classification",
+        "full_path": "Introduction > Proof architecture and tier classification",
+        "text": "",
+        "start_page": 9,
+        "end_page": 9,
+        "line_num": null
+      },
+      {
+        "node_id": "0006",
+        "title": "Status of results",
+        "full_path": "Introduction > Status of results",
+        "text": "",
+        "start_page": 9,
+        "end_page": 11,
+        "line_num": null
+      },
+      {
+        "node_id": "0007",
+        "title": "Notation and preliminaries",
+        "full_path": "Notation and preliminaries",
+        "text": "",
+        "start_page": 11,
+        "end_page": 13,
+        "line_num": null
+      },
+      {
+        "node_id": "0008",
+        "title": "The 1/4 Persistent-Transition Law",
+        "full_path": "The 1/4 Persistent-Transition Law",
+        "text": "",
+        "start_page": 13,
+        "end_page": 14,
+        "line_num": null
+      },
+      {
+        "node_id": "0009",
+        "title": "The convergence chain",
+        "full_path": "The convergence chain",
+        "text": "",
+        "start_page": 14,
+        "end_page": 17,
+        "line_num": null
+      },
+      {
+        "node_id": "0010",
+        "title": "Entry–Occupancy Equivalence",
+        "full_path": "The convergence chain > Entry–Occupancy Equivalence",
+        "text": "",
+        "start_page": 14,
+        "end_page": 14,
+        "line_num": null
+      },
+      {
+        "node_id": "0011",
+        "title": "Entry bound implies convergence",
+        "full_path": "The convergence chain > Entry bound implies convergence",
+        "text": "",
+        "start_page": 14,
+        "end_page": 15,
+        "line_num": null
+      },
+      {
+        "node_id": "0012",
+        "title": "The Persistent Exit Lemma",
+        "full_path": "The convergence chain > The Persistent Exit Lemma",
+        "text": "",
+        "start_page": 15,
+        "end_page": 16,
+        "line_num": null
+      },
+      {
+        "node_id": "0013",
+        "title": "The Burst-Gap Criterion",
+        "full_path": "The convergence chain > The Burst-Gap Criterion",
+        "text": "",
+        "start_page": 16,
+        "end_page": 17,
+        "line_num": null
+      },
+      {
+        "node_id": "0014",
+        "title": "The Scrambling Lemma",
+        "full_path": "The Scrambling Lemma",
+        "text": "",
+        "start_page": 17,
+        "end_page": 19,
+        "line_num": null
+      },
+      {
+        "node_id": "0015",
+        "title": "Known-Zone Decay",
+        "full_path": "Known-Zone Decay",
+        "text": "",
+        "start_page": 19,
+        "end_page": 21,
+        "line_num": null
+      },
+      {
+        "node_id": "0016",
+        "title": "Phantom cycles and the affine census theorem",
+        "full_path": "Phantom cycles and the affine census theorem",
+        "text": "",
+        "start_page": 21,
+        "end_page": 40,
+        "line_num": null
+      },
+      {
+        "node_id": "0017",
+        "title": "Phantom cycles and 2-adic roots; Known phantom families",
+        "full_path": "Phantom cycles and the affine census theorem > Phantom cycles and 2-adic roots; Known phantom families",
+        "text": "",
+        "start_page": 22,
+        "end_page": 22,
+        "line_num": null
+      },
+      {
+        "node_id": "0018",
+        "title": "The affine persistence mechanism",
+        "full_path": "Phantom cycles and the affine census theorem > The affine persistence mechanism",
+        "text": "",
+        "start_page": 22,
+        "end_page": 23,
+        "line_num": null
+      },
+      {
+        "node_id": "0019",
+        "title": "The census formula",
+        "full_path": "Phantom cycles and the affine census theorem > The census formula",
+        "text": "",
+        "start_page": 23,
+        "end_page": 24,
+        "line_num": null
+      },
+      {
+        "node_id": "0020",
+        "title": "Gamma monotonicity and the uniform bound",
+        "full_path": "Phantom cycles and the affine census theorem > Gamma monotonicity and the uniform bound",
+        "text": "",
+        "start_page": 24,
+        "end_page": 25,
+        "line_num": null
+      },
+      {
+        "node_id": "0021",
+        "title": "Universal census depth and the refined gain bound",
+        "full_path": "Phantom cycles and the affine census theorem > Universal census depth and the refined gain bound",
+        "text": "",
+        "start_page": 25,
+        "end_page": 30,
+        "line_num": null
+      },
+      {
+        "node_id": "0022",
+        "title": "Universality of phantom families.",
+        "full_path": "Phantom cycles and the affine census theorem > Universal census depth and the refined gain bound > Universality of phantom families.",
+        "text": "",
+        "start_page": 25,
+        "end_page": 27,
+        "line_num": null
+      },
+      {
+        "node_id": "0023",
+        "title": "The per-orbit gain rate.",
+        "full_path": "Phantom cycles and the affine census theorem > Universal census depth and the refined gain bound > The per-orbit gain rate.",
+        "text": "",
+        "start_page": 27,
+        "end_page": 29,
+        "line_num": null
+      },
+      {
+        "node_id": "0024",
+        "title": "Step 3: rigorous analytic tail beyond K 0 = 500.",
+        "full_path": "Phantom cycles and the affine census theorem > Universal census depth and the refined gain bound > Step 3: rigorous analytic tail beyond K 0 = 500.",
+        "text": "",
+        "start_page": 29,
+        "end_page": 30,
+        "line_num": null
+      },
+      {
+        "node_id": "0025",
+        "title": "Reduction to intrinsic near-return and overlap",
+        "full_path": "Phantom cycles and the affine census theorem > Reduction to intrinsic near-return and overlap",
+        "text": "",
+        "start_page": 30,
+        "end_page": 32,
+        "line_num": null
+      },
+      {
+        "node_id": "0026",
+        "title": "The weighted self-overlap theorem",
+        "full_path": "Phantom cycles and the affine census theorem > The weighted self-overlap theorem",
+        "text": "",
+        "start_page": 32,
+        "end_page": 33,
+        "line_num": null
+      },
+      {
+        "node_id": "0027",
+        "title": "The counting reduction",
+        "full_path": "Phantom cycles and the affine census theorem > The counting reduction",
+        "text": "",
+        "start_page": 33,
+        "end_page": 34,
+        "line_num": null
+      },
+      {
+        "node_id": "0028",
+        "title": "The period-based occurrence bound",
+        "full_path": "Phantom cycles and the affine census theorem > The period-based occurrence bound",
+        "text": "",
+        "start_page": 34,
+        "end_page": 34,
+        "line_num": null
+      },
+      {
+        "node_id": "0029",
+        "title": "Structural constraints on the least period",
+        "full_path": "Phantom cycles and the affine census theorem > Structural constraints on the least period",
+        "text": "",
+        "start_page": 34,
+        "end_page": 36,
+        "line_num": null
+      },
+      {
+        "node_id": "0030",
+        "title": "Periodic-core factorization and defect analysis",
+        "full_path": "Phantom cycles and the affine census theorem > Periodic-core factorization and defect analysis",
+        "text": "",
+        "start_page": 36,
+        "end_page": 38,
+        "line_num": null
+      },
+      {
+        "node_id": "0031",
+        "title": "The uniqueness-threshold bound on the census constant",
+        "full_path": "Phantom cycles and the affine census theorem > The uniqueness-threshold bound on the census constant",
+        "text": "",
+        "start_page": 38,
+        "end_page": 40,
+        "line_num": null
+      },
+      {
+        "node_id": "0032",
+        "title": "Conditional convergence and reduction  to orbit equidistribution",
+        "full_path": "Conditional convergence and reduction  to orbit equidistribution",
+        "text": "",
+        "start_page": 40,
+        "end_page": 46,
+        "line_num": null
+      },
+      {
+        "node_id": "0033",
+        "title": "The conditional convergence theorem",
+        "full_path": "Conditional convergence and reduction  to orbit equidistribution > The conditional convergence theorem",
+        "text": "",
+        "start_page": 40,
+        "end_page": 41,
+        "line_num": null
+      },
+      {
+        "node_id": "0034",
+        "title": "The Orbit Equidistribution Conjecture",
+        "full_path": "Conditional convergence and reduction  to orbit equidistribution > The Orbit Equidistribution Conjecture",
+        "text": "",
+        "start_page": 41,
+        "end_page": 41,
+        "line_num": null
+      },
+      {
+        "node_id": "0035",
+        "title": "The Weak Mixing Hypothesis",
+        "full_path": "Conditional convergence and reduction  to orbit equidistribution > The Weak Mixing Hypothesis",
+        "text": "",
+        "start_page": 41,
+        "end_page": 43,
+        "line_num": null
+      },
+      {
+        "node_id": "0036",
+        "title": "Conditional reduction theorems",
+        "full_path": "Conditional convergence and reduction  to orbit equidistribution > Conditional reduction theorems",
+        "text": "",
+        "start_page": 43,
+        "end_page": 46,
+        "line_num": null
+      },
+      {
+        "node_id": "0037",
+        "title": "Toward the Weak Mixing Hypothesis",
+        "full_path": "Toward the Weak Mixing Hypothesis",
+        "text": "",
+        "start_page": 46,
+        "end_page": 105,
+        "line_num": null
+      },
+      {
+        "node_id": "0038",
+        "title": "Shadow sparsity",
+        "full_path": "Toward the Weak Mixing Hypothesis > Shadow sparsity",
+        "text": "",
+        "start_page": 46,
+        "end_page": 47,
+        "line_num": null
+      },
+      {
+        "node_id": "0039",
+        "title": "Repulsion-based shadow return time",
+        "full_path": "Toward the Weak Mixing Hypothesis > Repulsion-based shadow return time",
+        "text": "",
+        "start_page": 47,
+        "end_page": 48,
+        "line_num": null
+      },
+      {
+        "node_id": "0040",
+        "title": "Finite-depth reduction",
+        "full_path": "Toward the Weak Mixing Hypothesis > Finite-depth reduction",
+        "text": "",
+        "start_page": 48,
+        "end_page": 49,
+        "line_num": null
+      },
+      {
+        "node_id": "0041",
+        "title": "Hierarchical consistency",
+        "full_path": "Toward the Weak Mixing Hypothesis > Hierarchical consistency",
+        "text": "",
+        "start_page": 49,
+        "end_page": 50,
+        "line_num": null
+      },
+      {
+        "node_id": "0042",
+        "title": "Depthwise discrepancy recurrence",
+        "full_path": "Toward the Weak Mixing Hypothesis > Depthwise discrepancy recurrence",
+        "text": "",
+        "start_page": 50,
+        "end_page": 53,
+        "line_num": null
+      },
+      {
+        "node_id": "0043",
+        "title": "Gain-observable recurrence",
+        "full_path": "Toward the Weak Mixing Hypothesis > Gain-observable recurrence",
+        "text": "",
+        "start_page": 53,
+        "end_page": 53,
+        "line_num": null
+      },
+      {
+        "node_id": "0044",
+        "title": "First lemmas toward the recurrence",
+        "full_path": "Toward the Weak Mixing Hypothesis > First lemmas toward the recurrence",
+        "text": "",
+        "start_page": 53,
+        "end_page": 60,
+        "line_num": null
+      },
+      {
+        "node_id": "0045",
+        "title": "Spectral analysis of the gain observable",
+        "full_path": "Toward the Weak Mixing Hypothesis > Spectral analysis of the gain observable",
+        "text": "",
+        "start_page": 60,
+        "end_page": 64,
+        "line_num": null
+      },
+      {
+        "node_id": "0046",
+        "title": "Cauchy–Schwarz tightness",
+        "full_path": "Toward the Weak Mixing Hypothesis > Spectral analysis of the gain observable > Cauchy–Schwarz tightness",
+        "text": "",
+        "start_page": 63,
+        "end_page": 63,
+        "line_num": null
+      },
+      {
+        "node_id": "0047",
+        "title": "Bit-position parity profile",
+        "full_path": "Toward the Weak Mixing Hypothesis > Spectral analysis of the gain observable > Bit-position parity profile",
+        "text": "",
+        "start_page": 63,
+        "end_page": 64,
+        "line_num": null
+      },
+      {
+        "node_id": "0048",
+        "title": "The odd-skeleton crossing route",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route",
+        "text": "",
+        "start_page": 64,
+        "end_page": 101,
+        "line_num": null
+      },
+      {
+        "node_id": "0049",
+        "title": "Inductive step",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Inductive step",
+        "text": "",
+        "start_page": 66,
+        "end_page": 66,
+        "line_num": null
+      },
+      {
+        "node_id": "0050",
+        "title": "Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2.",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2.",
+        "text": "",
+        "start_page": 66,
+        "end_page": 101,
+        "line_num": null
+      },
+      {
+        "node_id": "0051",
+        "title": "2 −(L+r all (L)−1) = 0.41936274883794 . . . .",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2. > 2 −(L+r all (L)−1) = 0.41936274883794 . . . .",
+        "text": "",
+        "start_page": 68,
+        "end_page": 83,
+        "line_num": null
+      },
+      {
+        "node_id": "0052",
+        "title": "Monte Carlo confirmation",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2. > 2 −(L+r all (L)−1) = 0.41936274883794 . . . . > Monte Carlo confirmation",
+        "text": "",
+        "start_page": 69,
+        "end_page": 70,
+        "line_num": null
+      },
+      {
+        "node_id": "0053",
+        "title": "Geometric ergodicity verification",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2. > 2 −(L+r all (L)−1) = 0.41936274883794 . . . . > Geometric ergodicity verification",
+        "text": "",
+        "start_page": 70,
+        "end_page": 76,
+        "line_num": null
+      },
+      {
+        "node_id": "0054",
+        "title": "Inductive step; Anti-burst bias",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2. > 2 −(L+r all (L)−1) = 0.41936274883794 . . . . > Inductive step; Anti-burst bias",
+        "text": "",
+        "start_page": 76,
+        "end_page": 76,
+        "line_num": null
+      },
+      {
+        "node_id": "0055",
+        "title": "Cross-cascade depth independence",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2. > 2 −(L+r all (L)−1) = 0.41936274883794 . . . . > Cross-cascade depth independence",
+        "text": "",
+        "start_page": 76,
+        "end_page": 83,
+        "line_num": null
+      },
+      {
+        "node_id": "0056",
+        "title": "Proof. Part (1)",
+        "full_path": "Toward the Weak Mixing Hypothesis > The odd-skeleton crossing route > Pr(L i = ℓ, r i = k) = 2 −(ℓ+1) · 2 −(k−1) , ℓ ≥ 0, k ≥ 2. > Proof. Part (1)",
+        "text": "",
+        "start_page": 83,
+        "end_page": 101,
+        "line_num": null
+      },
+      {
+        "node_id": "0057",
+        "title": "Modular crossing strata",
+        "full_path": "Toward the Weak Mixing Hypothesis > Modular crossing strata",
+        "text": "",
+        "start_page": 101,
+        "end_page": 103,
+        "line_num": null
+      },
+      {
+        "node_id": "0058",
+        "title": "Summary of the attack surface",
+        "full_path": "Toward the Weak Mixing Hypothesis > Summary of the attack surface",
+        "text": "",
+        "start_page": 103,
+        "end_page": 105,
+        "line_num": null
+      },
+      {
+        "node_id": "0059",
+        "title": "The Sturmian Obstruction and the Carry Contamination Theorem",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem",
+        "text": "",
+        "start_page": 105,
+        "end_page": 120,
+        "line_num": null
+      },
+      {
+        "node_id": "0060",
+        "title": "Sturmian words and orbit parameterization",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > Sturmian words and orbit parameterization",
+        "text": "",
+        "start_page": 105,
+        "end_page": 106,
+        "line_num": null
+      },
+      {
+        "node_id": "0061",
+        "title": "The Carry Contamination Theorem",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > The Carry Contamination Theorem",
+        "text": "",
+        "start_page": 106,
+        "end_page": 107,
+        "line_num": null
+      },
+      {
+        "node_id": "0062",
+        "title": "The Cantor set C-infinity and the Dichotomy",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > The Cantor set C-infinity and the Dichotomy",
+        "text": "",
+        "start_page": 107,
+        "end_page": 107,
+        "line_num": null
+      },
+      {
+        "node_id": "0063",
+        "title": "Refined mod-16/mod-32 transitions",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > Refined mod-16/mod-32 transitions",
+        "text": "",
+        "start_page": 107,
+        "end_page": 108,
+        "line_num": null
+      },
+      {
+        "node_id": "0064",
+        "title": "The Carry Independence Conjecture and remaining gap",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > The Carry Independence Conjecture and remaining gap",
+        "text": "",
+        "start_page": 108,
+        "end_page": 108,
+        "line_num": null
+      },
+      {
+        "node_id": "0065",
+        "title": "A scheduler-adversary formulation of compatibility",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility",
+        "text": "",
+        "start_page": 108,
+        "end_page": 120,
+        "line_num": null
+      },
+      {
+        "node_id": "0066",
+        "title": "10.5 The Carry Independence Conjecture and remaining gap",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > 10.5 The Carry Independence Conjecture and remaining gap",
+        "text": "",
+        "start_page": 108,
+        "end_page": 109,
+        "line_num": null
+      },
+      {
+        "node_id": "0067",
+        "title": "Compatible branch schedulers; The realizability problem",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Compatible branch schedulers; The realizability problem",
+        "text": "",
+        "start_page": 109,
+        "end_page": 109,
+        "line_num": null
+      },
+      {
+        "node_id": "0068",
+        "title": "Interpretation",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Interpretation",
+        "text": "",
+        "start_page": 109,
+        "end_page": 110,
+        "line_num": null
+      },
+      {
+        "node_id": "0069",
+        "title": "Future directions",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Future directions",
+        "text": "",
+        "start_page": 110,
+        "end_page": 110,
+        "line_num": null
+      },
+      {
+        "node_id": "0070",
+        "title": "Numerical exploration: constrained grammar and exhaustion",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion",
+        "text": "",
+        "start_page": 110,
+        "end_page": 120,
+        "line_num": null
+      },
+      {
+        "node_id": "0071",
+        "title": "10.6.4 Future directions",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > 10.6.4 Future directions",
+        "text": "",
+        "start_page": 110,
+        "end_page": 110,
+        "line_num": null
+      },
+      {
+        "node_id": "0072",
+        "title": "Bit sensitivity and the carry automaton.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Bit sensitivity and the carry automaton.",
+        "text": "",
+        "start_page": 110,
+        "end_page": 111,
+        "line_num": null
+      },
+      {
+        "node_id": "0073",
+        "title": "Exact valuations and the cycle density condition.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Exact valuations and the cycle density condition.",
+        "text": "",
+        "start_page": 111,
+        "end_page": 112,
+        "line_num": null
+      },
+      {
+        "node_id": "0074",
+        "title": "The bit race and the 31-block bottleneck.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > The bit race and the 31-block bottleneck.",
+        "text": "",
+        "start_page": 112,
+        "end_page": 112,
+        "line_num": null
+      },
+      {
+        "node_id": "0075",
+        "title": "Structural analysis: the safe sofic shift.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Structural analysis: the safe sofic shift.",
+        "text": "",
+        "start_page": 112,
+        "end_page": 113,
+        "line_num": null
+      },
+      {
+        "node_id": "0076",
+        "title": "Cross-core dynamics and the death corridor.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Cross-core dynamics and the death corridor.",
+        "text": "",
+        "start_page": 113,
+        "end_page": 114,
+        "line_num": null
+      },
+      {
+        "node_id": "0077",
+        "title": "Congruence tower and the bit-budget inequality.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Congruence tower and the bit-budget inequality.",
+        "text": "",
+        "start_page": 114,
+        "end_page": 115,
+        "line_num": null
+      },
+      {
+        "node_id": "0078",
+        "title": "Transfer operator and backward dynamics.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Transfer operator and backward dynamics.",
+        "text": "",
+        "start_page": 115,
+        "end_page": 116,
+        "line_num": null
+      },
+      {
+        "node_id": "0079",
+        "title": "Cross-core periodic elimination (extended).",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Cross-core periodic elimination (extended).",
+        "text": "",
+        "start_page": 116,
+        "end_page": 117,
+        "line_num": null
+      },
+      {
+        "node_id": "0080",
+        "title": "Number-theoretic structure of the obstruction.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Number-theoretic structure of the obstruction.",
+        "text": "",
+        "start_page": 117,
+        "end_page": 118,
+        "line_num": null
+      },
+      {
+        "node_id": "0081",
+        "title": "Geometric convergence of the expected cycle count.",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > Geometric convergence of the expected cycle count.",
+        "text": "",
+        "start_page": 118,
+        "end_page": 119,
+        "line_num": null
+      },
+      {
+        "node_id": "0082",
+        "title": "2-adic expansion and measure shrinkage (Push 33).",
+        "full_path": "The Sturmian Obstruction and the Carry Contamination Theorem > A scheduler-adversary formulation of compatibility > Numerical exploration: constrained grammar and exhaustion > 2-adic expansion and measure shrinkage (Push 33).",
+        "text": "",
+        "start_page": 119,
+        "end_page": 120,
+        "line_num": null
+      },
+      {
+        "node_id": "0083",
+        "title": "Position relative to prior work",
+        "full_path": "Position relative to prior work",
+        "text": "",
+        "start_page": 120,
+        "end_page": 124,
+        "line_num": null
+      },
+      {
+        "node_id": "0084",
+        "title": "Note on LLM-assisted research methodology",
+        "full_path": "Note on LLM-assisted research methodology",
+        "text": "",
+        "start_page": 124,
+        "end_page": 141,
+        "line_num": null
+      },
+      {
+        "node_id": "0085",
+        "title": "The collaboration",
+        "full_path": "Note on LLM-assisted research methodology > The collaboration",
+        "text": "",
+        "start_page": 124,
+        "end_page": 124,
+        "line_num": null
+      },
+      {
+        "node_id": "0086",
+        "title": "The orchestration methodology",
+        "full_path": "Note on LLM-assisted research methodology > The orchestration methodology",
+        "text": "",
+        "start_page": 124,
+        "end_page": 125,
+        "line_num": null
+      },
+      {
+        "node_id": "0087",
+        "title": "What the LLMs contributed",
+        "full_path": "Note on LLM-assisted research methodology > What the LLMs contributed",
+        "text": "",
+        "start_page": 125,
+        "end_page": 126,
+        "line_num": null
+      },
+      {
+        "node_id": "0088",
+        "title": "What the human contributed",
+        "full_path": "Note on LLM-assisted research methodology > What the human contributed",
+        "text": "",
+        "start_page": 126,
+        "end_page": 128,
+        "line_num": null
+      },
+      {
+        "node_id": "0089",
+        "title": "Contribution attribution",
+        "full_path": "Note on LLM-assisted research methodology > Contribution attribution",
+        "text": "",
+        "start_page": 128,
+        "end_page": 128,
+        "line_num": null
+      },
+      {
+        "node_id": "0090",
+        "title": "Case study: the false Gap Lemma",
+        "full_path": "Note on LLM-assisted research methodology > Case study: the false Gap Lemma",
+        "text": "",
+        "start_page": 128,
+        "end_page": 129,
+        "line_num": null
+      },
+      {
+        "node_id": "0091",
+        "title": "Case study: the CIC circularity",
+        "full_path": "Note on LLM-assisted research methodology > Case study: the CIC circularity",
+        "text": "",
+        "start_page": 129,
+        "end_page": 130,
+        "line_num": null
+      },
+      {
+        "node_id": "0092",
+        "title": "Error-correction log",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log",
+        "text": "",
+        "start_page": 130,
+        "end_page": 133,
+        "line_num": null
+      },
+      {
+        "node_id": "0093",
+        "title": "The circularity diagnosis. The key finding:; Lessons.; 12.8 Error-correction log",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log > The circularity diagnosis. The key finding:; Lessons.; 12.8 Error-correction log",
+        "text": "",
+        "start_page": 130,
+        "end_page": 130,
+        "line_num": null
+      },
+      {
+        "node_id": "0094",
+        "title": "Genuine catches (errors found and corrected).",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log > Genuine catches (errors found and corrected).",
+        "text": "",
+        "start_page": 130,
+        "end_page": 131,
+        "line_num": null
+      },
+      {
+        "node_id": "0095",
+        "title": "False alarms (errors flagged that were not present).",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log > False alarms (errors flagged that were not present).",
+        "text": "",
+        "start_page": 131,
+        "end_page": 131,
+        "line_num": null
+      },
+      {
+        "node_id": "0096",
+        "title": "Scope corrections (claims downgraded).",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log > Scope corrections (claims downgraded).",
+        "text": "",
+        "start_page": 131,
+        "end_page": 132,
+        "line_num": null
+      },
+      {
+        "node_id": "0097",
+        "title": "Original",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log > Original",
+        "text": "",
+        "start_page": 132,
+        "end_page": 132,
+        "line_num": null
+      },
+      {
+        "node_id": "0098",
+        "title": "Post-mortem: patterns in the error-correction process.",
+        "full_path": "Note on LLM-assisted research methodology > Error-correction log > Post-mortem: patterns in the error-correction process.",
+        "text": "",
+        "start_page": 132,
+        "end_page": 133,
+        "line_num": null
+      },
+      {
+        "node_id": "0099",
+        "title": "Broader implications",
+        "full_path": "Note on LLM-assisted research methodology > Broader implications",
+        "text": "",
+        "start_page": 133,
+        "end_page": 134,
+        "line_num": null
+      },
+      {
+        "node_id": "0100",
+        "title": "v3 collaboration milestones",
+        "full_path": "Note on LLM-assisted research methodology > v3 collaboration milestones",
+        "text": "",
+        "start_page": 134,
+        "end_page": 135,
+        "line_num": null
+      },
+      {
+        "node_id": "0101",
+        "title": "v4 collaboration milestones",
+        "full_path": "Note on LLM-assisted research methodology > v4 collaboration milestones",
+        "text": "",
+        "start_page": 135,
+        "end_page": 136,
+        "line_num": null
+      },
+      {
+        "node_id": "0102",
+        "title": "Status of revision targets and remaining open problems",
+        "full_path": "Note on LLM-assisted research methodology > Status of revision targets and remaining open problems",
+        "text": "",
+        "start_page": 136,
+        "end_page": 141,
+        "line_num": null
+      },
+      {
+        "node_id": "0103",
+        "title": "Target 1 (completed): Quantitative weakening of Conjecture 8.2.",
+        "full_path": "Note on LLM-assisted research methodology > Status of revision targets and remaining open problems > Target 1 (completed): Quantitative weakening of Conjecture 8.2.",
+        "text": "",
+        "start_page": 136,
+        "end_page": 137,
+        "line_num": null
+      },
+      {
+        "node_id": "0104",
+        "title": "Target 4 (completed): Structural programme toward the WMH.",
+        "full_path": "Note on LLM-assisted research methodology > Status of revision targets and remaining open problems > Target 4 (completed): Structural programme toward the WMH.",
+        "text": "",
+        "start_page": 137,
+        "end_page": 138,
+        "line_num": null
+      },
+      {
+        "node_id": "0105",
+        "title": "The broader problem class and why Collatz may be more tractable.",
+        "full_path": "Note on LLM-assisted research methodology > Status of revision targets and remaining open problems > The broader problem class and why Collatz may be more tractable.",
+        "text": "",
+        "start_page": 138,
+        "end_page": 140,
+        "line_num": null
+      },
+      {
+        "node_id": "0106",
+        "title": "Summary: complete separation of concerns.",
+        "full_path": "Note on LLM-assisted research methodology > Status of revision targets and remaining open problems > Summary: complete separation of concerns.",
+        "text": "",
+        "start_page": 140,
+        "end_page": 141,
+        "line_num": null
+      },
+      {
+        "node_id": "0107",
+        "title": "The architecture of the Syracuse obstruction",
+        "full_path": "The architecture of the Syracuse obstruction",
+        "text": "",
+        "start_page": 141,
+        "end_page": 146,
+        "line_num": null
+      },
+      {
+        "node_id": "0108",
+        "title": "The Mersenne sieve bypass",
+        "full_path": "The architecture of the Syracuse obstruction > The Mersenne sieve bypass",
+        "text": "",
+        "start_page": 142,
+        "end_page": 143,
+        "line_num": null
+      },
+      {
+        "node_id": "0109",
+        "title": "The tautological structure of the AFI; Quantitative achievements",
+        "full_path": "The architecture of the Syracuse obstruction > The tautological structure of the AFI; Quantitative achievements",
+        "text": "",
+        "start_page": 143,
+        "end_page": 143,
+        "line_num": null
+      },
+      {
+        "node_id": "0110",
+        "title": "Relation to computational irreducibility",
+        "full_path": "The architecture of the Syracuse obstruction > Relation to computational irreducibility",
+        "text": "",
+        "start_page": 143,
+        "end_page": 144,
+        "line_num": null
+      },
+      {
+        "node_id": "0111",
+        "title": "Assessment",
+        "full_path": "The architecture of the Syracuse obstruction > Assessment",
+        "text": "",
+        "start_page": 144,
+        "end_page": 146,
+        "line_num": null
+      },
+      {
+        "node_id": "0112",
+        "title": "Modular ranking certificates via DAG analysis",
+        "full_path": "Modular ranking certificates via DAG analysis",
+        "text": "",
+        "start_page": 146,
+        "end_page": 153,
+        "line_num": null
+      },
+      {
+        "node_id": "0113",
+        "title": "The net-positive state graph",
+        "full_path": "Modular ranking certificates via DAG analysis > The net-positive state graph",
+        "text": "",
+        "start_page": 146,
+        "end_page": 146,
+        "line_num": null
+      },
+      {
+        "node_id": "0114",
+        "title": "Acyclicity and ranking functions",
+        "full_path": "Modular ranking certificates via DAG analysis > Acyclicity and ranking functions",
+        "text": "",
+        "start_page": 146,
+        "end_page": 147,
+        "line_num": null
+      },
+      {
+        "node_id": "0115",
+        "title": "Computational verification",
+        "full_path": "Modular ranking certificates via DAG analysis > Computational verification",
+        "text": "",
+        "start_page": 147,
+        "end_page": 147,
+        "line_num": null
+      },
+      {
+        "node_id": "0116",
+        "title": "Non-liftability of net-positive cycles",
+        "full_path": "Modular ranking certificates via DAG analysis > Non-liftability of net-positive cycles",
+        "text": "",
+        "start_page": 147,
+        "end_page": 148,
+        "line_num": null
+      },
+      {
+        "node_id": "0117",
+        "title": "The carry parity obstruction",
+        "full_path": "Modular ranking certificates via DAG analysis > The carry parity obstruction",
+        "text": "",
+        "start_page": 148,
+        "end_page": 149,
+        "line_num": null
+      },
+      {
+        "node_id": "0118",
+        "title": "Re-entry analysis: the augmented return graph",
+        "full_path": "Modular ranking certificates via DAG analysis > Re-entry analysis: the augmented return graph",
+        "text": "",
+        "start_page": 149,
+        "end_page": 149,
+        "line_num": null
+      },
+      {
+        "node_id": "0119",
+        "title": "Cycle genealogy and the birth obstruction",
+        "full_path": "Modular ranking certificates via DAG analysis > Cycle genealogy and the birth obstruction",
+        "text": "",
+        "start_page": 149,
+        "end_page": 150,
+        "line_num": null
+      },
+      {
+        "node_id": "0120",
+        "title": "The Net-Positive Ranking Lemma",
+        "full_path": "Modular ranking certificates via DAG analysis > The Net-Positive Ranking Lemma",
+        "text": "",
+        "start_page": 150,
+        "end_page": 150,
+        "line_num": null
+      },
+      {
+        "node_id": "0121",
+        "title": "The exit-return reduction",
+        "full_path": "Modular ranking certificates via DAG analysis > The exit-return reduction",
+        "text": "",
+        "start_page": 150,
+        "end_page": 151,
+        "line_num": null
+      },
+      {
+        "node_id": "0122",
+        "title": "The s-invariant and positive-subgraph acyclicity",
+        "full_path": "Modular ranking certificates via DAG analysis > The s-invariant and positive-subgraph acyclicity",
+        "text": "",
+        "start_page": 151,
+        "end_page": 152,
+        "line_num": null
+      },
+      {
+        "node_id": "0123",
+        "title": "Reload dynamics and the budget equation",
+        "full_path": "Modular ranking certificates via DAG analysis > Reload dynamics and the budget equation",
+        "text": "",
+        "start_page": 152,
+        "end_page": 153,
+        "line_num": null
+      },
+      {
+        "node_id": "0124",
+        "title": "Fiber-57 structural programme and the information bottleneck",
+        "full_path": "Fiber-57 structural programme and the information bottleneck",
+        "text": "",
+        "start_page": 153,
+        "end_page": 159,
+        "line_num": null
+      },
+      {
+        "node_id": "0125",
+        "title": "Drift-sustaining chains and the pair-return automaton",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > Drift-sustaining chains and the pair-return automaton",
+        "text": "",
+        "start_page": 153,
+        "end_page": 154,
+        "line_num": null
+      },
+      {
+        "node_id": "0126",
+        "title": "Exact return structure of the sustaining branches",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > Exact return structure of the sustaining branches",
+        "text": "",
+        "start_page": 154,
+        "end_page": 156,
+        "line_num": null
+      },
+      {
+        "node_id": "0127",
+        "title": "The invariant core and projective limit",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > The invariant core and projective limit",
+        "text": "",
+        "start_page": 156,
+        "end_page": 156,
+        "line_num": null
+      },
+      {
+        "node_id": "0128",
+        "title": "The absorption theorem",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > The absorption theorem",
+        "text": "",
+        "start_page": 156,
+        "end_page": 157,
+        "line_num": null
+      },
+      {
+        "node_id": "0129",
+        "title": "The Absorption Bottleneck Lemma",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > The Absorption Bottleneck Lemma",
+        "text": "",
+        "start_page": 157,
+        "end_page": 157,
+        "line_num": null
+      },
+      {
+        "node_id": "0130",
+        "title": "The memory lower bound and theorem ladder",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > The memory lower bound and theorem ladder",
+        "text": "",
+        "start_page": 157,
+        "end_page": 158,
+        "line_num": null
+      },
+      {
+        "node_id": "0131",
+        "title": "Branch anti-concentration reduction; Carry equidistribution and empirical verification; Path-conditional bijection and annealed closure",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > Branch anti-concentration reduction; Carry equidistribution and empirical verification; Path-conditional bijection and annealed closure",
+        "text": "",
+        "start_page": 158,
+        "end_page": 158,
+        "line_num": null
+      },
+      {
+        "node_id": "0132",
+        "title": "Summary: the quantitative reduction",
+        "full_path": "Fiber-57 structural programme and the information bottleneck > Summary: the quantitative reduction",
+        "text": "",
+        "start_page": 158,
+        "end_page": 159,
+        "line_num": null
+      },
+      {
+        "node_id": "0133",
+        "title": "Unconditional cylinder-averaged closure on I2 via spectral contraction",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction",
+        "text": "",
+        "start_page": 159,
+        "end_page": 195,
+        "line_num": null
+      },
+      {
+        "node_id": "0134",
+        "title": "Ruffini reduction of the depth-2 known-gap kernel",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Ruffini reduction of the depth-2 known-gap kernel",
+        "text": "",
+        "start_page": 159,
+        "end_page": 160,
+        "line_num": null
+      },
+      {
+        "node_id": "0135",
+        "title": "The unconditional extended spectral bound",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > The unconditional extended spectral bound",
+        "text": "",
+        "start_page": 160,
+        "end_page": 161,
+        "line_num": null
+      },
+      {
+        "node_id": "0136",
+        "title": "Transient-prefix exponential tail on the cylinder-averaged mod-64 chain",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Transient-prefix exponential tail on the cylinder-averaged mod-64 chain",
+        "text": "",
+        "start_page": 161,
+        "end_page": 161,
+        "line_num": null
+      },
+      {
+        "node_id": "0137",
+        "title": "Stationary visit rate and the unconditional sum bound",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Stationary visit rate and the unconditional sum bound",
+        "text": "",
+        "start_page": 161,
+        "end_page": 166,
+        "line_num": null
+      },
+      {
+        "node_id": "0138",
+        "title": "The (C-2adic) bound on BF residue classes",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > The (C-2adic) bound on BF residue classes",
+        "text": "",
+        "start_page": 166,
+        "end_page": 168,
+        "line_num": null
+      },
+      {
+        "node_id": "0139",
+        "title": "Complete cascade algebra and the generic dynamics gap",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap",
+        "text": "",
+        "start_page": 168,
+        "end_page": 180,
+        "line_num": null
+      },
+      {
+        "node_id": "0140",
+        "title": "Post-cascade Generic",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic",
+        "text": "",
+        "start_page": 171,
+        "end_page": 180,
+        "line_num": null
+      },
+      {
+        "node_id": "0141",
+        "title": "Route B: exact 2-adic pullback rigidity",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Route B: exact 2-adic pullback rigidity",
+        "text": "",
+        "start_page": 176,
+        "end_page": 176,
+        "line_num": null
+      },
+      {
+        "node_id": "0142",
+        "title": "The 3-bit shortfall theorem",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > The 3-bit shortfall theorem",
+        "text": "",
+        "start_page": 176,
+        "end_page": 177,
+        "line_num": null
+      },
+      {
+        "node_id": "0143",
+        "title": "Cascade-only compatibility; Post-cascade convergence",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Cascade-only compatibility; Post-cascade convergence",
+        "text": "",
+        "start_page": 177,
+        "end_page": 177,
+        "line_num": null
+      },
+      {
+        "node_id": "0144",
+        "title": "Divergence threshold and v 2 anti-correlation.",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Divergence threshold and v 2 anti-correlation.",
+        "text": "",
+        "start_page": 177,
+        "end_page": 180,
+        "line_num": null
+      },
+      {
+        "node_id": "0145",
+        "title": "Coupling framework and noise independence; Disjoint-slice argument and weak dependence",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Divergence threshold and v 2 anti-correlation. > Coupling framework and noise independence; Disjoint-slice argument and weak dependence",
+        "text": "",
+        "start_page": 178,
+        "end_page": 178,
+        "line_num": null
+      },
+      {
+        "node_id": "0146",
+        "title": "Renewal argument and episode structure",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Divergence threshold and v 2 anti-correlation. > Renewal argument and episode structure",
+        "text": "",
+        "start_page": 178,
+        "end_page": 179,
+        "line_num": null
+      },
+      {
+        "node_id": "0147",
+        "title": "Adversarial chain and unique ergodicity reduction; Spectral gap of the transfer operator (proved); Step 1: Universal no-target-sharing; Step 2: Row-sum decomposition; Step 4: Primitivity",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Divergence threshold and v 2 anti-correlation. > Adversarial chain and unique ergodicity reduction; Spectral gap of the transfer operator (proved); Step 1: Universal no-target-sharing; Step 2: Row-sum decomposition; Step 4: Primitivity",
+        "text": "",
+        "start_page": 179,
+        "end_page": 179,
+        "line_num": null
+      },
+      {
+        "node_id": "0148",
+        "title": "Step 5: Dobrushin contraction",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Complete cascade algebra and the generic dynamics gap > Post-cascade Generic > Divergence threshold and v 2 anti-correlation. > Step 5: Dobrushin contraction",
+        "text": "",
+        "start_page": 179,
+        "end_page": 180,
+        "line_num": null
+      },
+      {
+        "node_id": "0149",
+        "title": "Bridge programme: from spectral gap to individual orbits",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Bridge programme: from spectral gap to individual orbits",
+        "text": "",
+        "start_page": 180,
+        "end_page": 182,
+        "line_num": null
+      },
+      {
+        "node_id": "0150",
+        "title": "Unified pointwise picture: Layers A, B, B', B'', C-Haar",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Unified pointwise picture: Layers A, B, B', B'', C-Haar",
+        "text": "",
+        "start_page": 182,
+        "end_page": 183,
+        "line_num": null
+      },
+      {
+        "node_id": "0151",
+        "title": "Non-restartability: a sharper reframing of the gap",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Non-restartability: a sharper reframing of the gap",
+        "text": "",
+        "start_page": 183,
+        "end_page": 187,
+        "line_num": null
+      },
+      {
+        "node_id": "0152",
+        "title": "Density-1 cylinder boundedness via union bound",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Density-1 cylinder boundedness via union bound",
+        "text": "",
+        "start_page": 187,
+        "end_page": 191,
+        "line_num": null
+      },
+      {
+        "node_id": "0153",
+        "title": "An unconditional starting-point density bound",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Density-1 cylinder boundedness via union bound > An unconditional starting-point density bound",
+        "text": "",
+        "start_page": 189,
+        "end_page": 191,
+        "line_num": null
+      },
+      {
+        "node_id": "0154",
+        "title": "A tensor-rank law for the joint 2-adic/3-adic Syracuse transition operator",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > A tensor-rank law for the joint 2-adic/3-adic Syracuse transition operator",
+        "text": "",
+        "start_page": 191,
+        "end_page": 193,
+        "line_num": null
+      },
+      {
+        "node_id": "0155",
+        "title": "Iterated tensor, spectral gap, and finite-resolution mixing",
+        "full_path": "Unconditional cylinder-averaged closure on I2 via spectral contraction > Iterated tensor, spectral gap, and finite-resolution mixing",
+        "text": "",
+        "start_page": 193,
+        "end_page": 195,
+        "line_num": null
+      },
+      {
+        "node_id": "0156",
+        "title": "Visualization-guided first-passage perspective",
+        "full_path": "Visualization-guided first-passage perspective",
+        "text": "",
+        "start_page": 195,
+        "end_page": 201,
+        "line_num": null
+      },
+      {
+        "node_id": "0157",
+        "title": "Touch growth and the apparently empty middle",
+        "full_path": "Visualization-guided first-passage perspective > Touch growth and the apparently empty middle",
+        "text": "",
+        "start_page": 196,
+        "end_page": 197,
+        "line_num": null
+      },
+      {
+        "node_id": "0158",
+        "title": "The below-start criterion and finite stopping time",
+        "full_path": "Visualization-guided first-passage perspective > The below-start criterion and finite stopping time",
+        "text": "",
+        "start_page": 197,
+        "end_page": 198,
+        "line_num": null
+      },
+      {
+        "node_id": "0159",
+        "title": "Heuristic proof paths and future visualizations",
+        "full_path": "Visualization-guided first-passage perspective > Heuristic proof paths and future visualizations",
+        "text": "",
+        "start_page": 198,
+        "end_page": 199,
+        "line_num": null
+      },
+      {
+        "node_id": "0160",
+        "title": "Ensemble above-start decay: a lattice-path analysis",
+        "full_path": "Visualization-guided first-passage perspective > Ensemble above-start decay: a lattice-path analysis",
+        "text": "",
+        "start_page": 199,
+        "end_page": 201,
+        "line_num": null
+      },
+      {
+        "node_id": "0161",
+        "title": "Contribution attribution tables",
+        "full_path": "Contribution attribution tables",
+        "text": "",
+        "start_page": 201,
+        "end_page": 207,
+        "line_num": null
+      },
+      {
+        "node_id": "0162",
+        "title": "Syracuse chord diagrams",
+        "full_path": "Syracuse chord diagrams",
+        "text": "",
+        "start_page": 207,
+        "end_page": 216,
+        "line_num": null
+      },
+      {
+        "node_id": "0163",
+        "title": "Compound carry incompatibility and transport graphs",
+        "full_path": "Syracuse chord diagrams > Compound carry incompatibility and transport graphs",
+        "text": "",
+        "start_page": 207,
+        "end_page": 210,
+        "line_num": null
+      },
+      {
+        "node_id": "0164",
+        "title": "Current status and sharpened open problem",
+        "full_path": "Syracuse chord diagrams > Current status and sharpened open problem",
+        "text": "",
+        "start_page": 210,
+        "end_page": 216,
+        "line_num": null
+      },
+      {
+        "node_id": "0165",
+        "title": "Version history",
+        "full_path": "Version history",
+        "text": "",
+        "start_page": 216,
+        "end_page": 233,
+        "line_num": null
+      }
+    ]
   }
 }

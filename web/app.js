@@ -147,17 +147,20 @@ function updateTelemetry(data) {
 }
 
 /**
- * Apply Category Filters (All, Knowledge, RRSI)
+ * Apply Category Filters (All, Theorems, Proofs, RRSI)
  */
 function applyFilter() {
   if (!rawGraphData || !rawGraphData.nodes) return;
 
-  const knowledgeTypes = ['query', 'jev_decision', 'document', 'pageindex_node', 'violetto_proof', 'astra_proof', 'verification'];
+  const mathTypes = ['theorem', 'lemma', 'definition', 'conjecture', 'method'];
+  const proofTypes = ['query', 'jev_decision', 'document', 'pageindex_node', 'violetto_proof', 'astra_proof', 'verification', 'symbolic_verification'];
   const rrsiTypes = ['harness_state', 'mutation_proposal', 'critic_eval', 'pruner_decision', 'invariant_test'];
 
   let filteredNodes = rawGraphData.nodes;
-  if (activeFilter === 'knowledge') {
-    filteredNodes = rawGraphData.nodes.filter(n => knowledgeTypes.includes(n.type));
+  if (activeFilter === 'math') {
+    filteredNodes = rawGraphData.nodes.filter(n => mathTypes.includes(n.type));
+  } else if (activeFilter === 'knowledge') {
+    filteredNodes = rawGraphData.nodes.filter(n => proofTypes.includes(n.type));
   } else if (activeFilter === 'rrsi') {
     filteredNodes = rawGraphData.nodes.filter(n => rrsiTypes.includes(n.type));
   }
@@ -179,11 +182,11 @@ function showInspector(node) {
   elInspector.classList.add('open');
   elInspType.textContent = (node.type || 'NODE').toUpperCase();
   elInspType.style.background = node.color || '#00e5ff';
-  elInspGen.textContent = `GEN ${node.generation !== undefined ? node.generation : 0}`;
+  elInspGen.textContent = node.generation !== undefined ? `GEN ${node.generation}` : 'MATH THEOREM';
   elInspTitle.textContent = node.title || node.label || node.id;
   
-  const dateStr = node.timestamp ? new Date(node.timestamp * 1000).toLocaleString() : 'Baseline';
-  elInspTime.textContent = `Recorded: ${dateStr}`;
+  const dateStr = node.timestamp ? new Date(node.timestamp * 1000).toLocaleString() : 'Foundational';
+  elInspTime.textContent = `Node: ${node.id} | Recorded: ${dateStr}`;
 
   let html = '';
   const d = node.data || {};
@@ -298,6 +301,43 @@ function showInspector(node) {
       <div class="inspector-section">
         <div class="ins-label">Test Case Invariants</div>
         <pre>${escapeHtml(JSON.stringify(d.details || d, null, 2))}</pre>
+      </div>
+    `;
+  } else if (node.type === 'symbolic_verification') {
+    const isSound = d.is_verified || d.is_formally_sound;
+    const casV = d.cas_checks ? d.cas_checks.valid : d.valid_steps;
+    const casT = d.cas_checks ? d.cas_checks.total : d.total_steps_checked;
+    const smtV = d.smt_checks ? d.smt_checks.valid : 0;
+    const smtT = d.smt_checks ? d.smt_checks.total : 0;
+    const cexs = d.smt_checks ? d.smt_checks.counterexamples : [];
+
+    html = `
+      <div class="inspector-section">
+        <div class="ins-label">Deterministic Verification Ensemble (SymPy + Z3)</div>
+        <p><strong>Status:</strong> <span class="badge ${isSound ? 'badge-links' : 'badge-gen'}">${isSound ? 'FORMALLY SOUND' : 'STEP DISCREPANCY'}</span></p>
+        <p><strong>SymPy CAS Equalities:</strong> ${casV}/${casT} Valid</p>
+        ${smtT > 0 ? `<p><strong>Z3 SMT Congruences:</strong> ${smtV}/${smtT} Valid</p>` : ''}
+        ${d.extracted_answer ? `<p><strong>Extracted Boxed Answer:</strong> <code>${escapeHtml(d.extracted_answer)}</code></p>` : ''}
+        ${d.ground_truth !== undefined && d.ground_truth !== null ? `<p><strong>Ground Truth:</strong> <code>${escapeHtml(d.ground_truth)}</code> (${d.ground_truth_matched ? 'MATCHED' : 'MISMATCH'})</p>` : ''}
+      </div>
+      ${cexs && cexs.length > 0 ? `
+        <div class="inspector-section">
+          <div class="ins-label text-danger">Z3 Counterexample Detected</div>
+          <pre>${escapeHtml(JSON.stringify(cexs, null, 2))}</pre>
+        </div>
+      ` : ''}
+      <div class="inspector-section">
+        <div class="ins-label">Verified Mathematical Step Proofs</div>
+        <pre>${escapeHtml(JSON.stringify(d.steps || d.verified_steps || [], null, 2))}</pre>
+      </div>
+    `;
+  } else if (['theorem', 'lemma', 'definition', 'conjecture', 'method'].includes(node.type)) {
+    html = `
+      <div class="inspector-section">
+        <div class="ins-label">Mathematical ${node.type.toUpperCase()}</div>
+        <h3 style="color: #fff; margin: 4px 0 10px 0;">${escapeHtml(node.title)}</h3>
+        <p style="font-size: 13px; line-height: 1.5;">${escapeHtml(node.description || node.data.content || '')}</p>
+        ${node.centrality !== undefined ? `<p style="margin-top: 8px;"><strong>NetworkX PageRank Centrality:</strong> ${node.centrality}</p>` : ''}
       </div>
     `;
   } else {
@@ -539,10 +579,62 @@ function setupUIEvents() {
       await fetchGraph();
       await fetchHarness();
       hideInspector();
-    } catch (err) {
-      alert('Reset failed: ' + err);
+  // Run Benchmark Suite Button
+  const btnRunBm = document.getElementById('btn-run-benchmark');
+  if (btnRunBm) {
+    btnRunBm.addEventListener('click', async () => {
+      btnRunBm.disabled = true;
+      btnRunBm.querySelector('.spinner').classList.remove('hidden');
+      btnRunBm.querySelector('.btn-text').textContent = 'Evaluating Portfolio...';
+      try {
+        const res = await fetch('/api/benchmark/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        if (!res.ok) throw new Error('Benchmark execution failed');
+        await fetchBenchmark();
+        await fetchGraph();
+      } catch (err) {
+        alert('Benchmark error: ' + err.message);
+      } finally {
+        btnRunBm.disabled = false;
+        btnRunBm.querySelector('.spinner').classList.add('hidden');
+        btnRunBm.querySelector('.btn-text').textContent = 'Run Benchmark Suite';
+      }
+    });
+  }
+}
+
+async function fetchBenchmark() {
+  try {
+    const res = await fetch('/api/benchmark');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const elAcc = document.getElementById('bm-accuracy');
+      const elStep = document.getElementById('bm-step-pass');
+      const elLedger = document.getElementById('benchmark-ledger');
+      if (elAcc) elAcc.textContent = `${(data.overall_accuracy * 100).toFixed(1)}% (${data.solved_correctly}/${data.total_problems})`;
+      if (elStep) elStep.textContent = `${(data.symbolic_avg_pass_rate * 100).toFixed(1)}%`;
+      
+      let html = '';
+      for (const r of data.results) {
+        html += `
+          <div class="history-item">
+            <span class="gen-tag">${escapeHtml(r.id)}</span>
+            <strong>${r.correct ? '<span style="color:#00e676">PASS</span>' : '<span style="color:#ff1744">FAIL</span>'}</strong>
+            <div style="color: #94a3b8; margin-top: 2px;">
+              Engine: <code>${escapeHtml(r.engine_used)}</code> &bull; Ans: ${escapeHtml(r.extracted_answer || 'N/A')} &bull; Latency: ${r.latency_sec}s
+            </div>
+          </div>
+        `;
+      }
+      if (elLedger) elLedger.innerHTML = html;
     }
-  });
+  } catch (err) {
+    console.error('Failed to load benchmark:', err);
+  }
 }
 
 function resetProgressSteps() {

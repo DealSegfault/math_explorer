@@ -26,7 +26,15 @@ NODE_COLORS = {
     "mutation_proposal": "#ff9100",# Bright Orange
     "critic_eval": "#ffea00",      # Bright Yellow
     "pruner_decision": "#ff6d00",  # Dark Orange
-    "invariant_test": "#00e5ff"    # Light Cyan
+    "invariant_test": "#00e5ff",   # Light Cyan
+    "symbolic_verification": "#1de9b6", # Vivid Teal
+    # Mathematical Concept Nodes
+    "theorem": "#ffd600",          # Gold / Yellow
+    "lemma": "#00e676",            # Emerald Green
+    "definition": "#00b0ff",       # Electric Blue
+    "conjecture": "#ff9100",       # Vivid Orange
+    "counterexample": "#ff1744",   # Crimson Red
+    "method": "#d500f9"            # Neon Purple
 }
 
 NODE_SIZES = {
@@ -41,7 +49,14 @@ NODE_SIZES = {
     "mutation_proposal": 14,
     "critic_eval": 12,
     "pruner_decision": 12,
-    "invariant_test": 12
+    "invariant_test": 12,
+    "symbolic_verification": 13,
+    "theorem": 24,
+    "lemma": 18,
+    "definition": 16,
+    "conjecture": 24,
+    "counterexample": 18,
+    "method": 15
 }
 
 class GraphManager:
@@ -141,6 +156,19 @@ class GraphManager:
                 "curvature": 0.1
             })
 
+        # Seed Mathematical Concept Graph (Theorems, Lemmata, Definitions, Conjectures)
+        try:
+            from math_knowledge_graph import MathKnowledgeGraph
+            mkg = MathKnowledgeGraph()
+            mkg_data = mkg.export_3d_graph_format()
+            for m_node in mkg_data["nodes"]:
+                if m_node["id"] not in self.nodes:
+                    self.nodes[m_node["id"]] = m_node
+            for m_link in mkg_data["links"]:
+                self.links.append(m_link)
+        except Exception as e:
+            print(f"Notice: MathKnowledgeGraph seeding bypassed: {e}")
+
     def _save_unlocked(self):
         data = {
             "nodes": list(self.nodes.values()),
@@ -218,17 +246,19 @@ class GraphManager:
         solution_text: str,
         tokens_or_metrics: Dict[str, Any],
         gate_result: Dict[str, Any],
-        generation: int = 0
+        generation: int = 0,
+        symbolic_result: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Records an end-to-end exploration execution as an interconnected sub-graph:
-        HarnessGen -> Query -> JevDecision -> [Retrieved Tree Nodes] -> SolverProof -> Verification
+        HarnessGen -> Query -> JevDecision -> [Retrieved Tree Nodes] -> SolverProof -> Verification + SymbolicCheck
         """
         ts = int(time.time() * 1000)
         query_id = f"query_{ts}"
         jev_id = f"jev_{ts}"
         proof_id = f"proof_{ts}"
         gate_id = f"gate_{ts}"
+        sym_id = f"sym_{ts}"
 
         # 1. Query Node
         self.add_node(
@@ -303,6 +333,38 @@ class GraphManager:
             generation=generation
         )
         self.add_link(proof_id, gate_id, label="verified_by", color="#76ff03")
+
+        # 6. Symbolic Verification Node (SymPy)
+        if symbolic_result:
+            sound = symbolic_result.get("is_formally_sound", True)
+            valid_steps = symbolic_result.get("valid_steps", 0)
+            total_steps = symbolic_result.get("total_steps_checked", 0)
+            ans = symbolic_result.get("extracted_answer", "")
+            lbl = f"SymPy: {valid_steps}/{total_steps} Steps Valid"
+            if ans:
+                lbl += f" (Ans: {ans})"
+            self.add_node(
+                node_id=sym_id,
+                node_type="symbolic_verification",
+                label=lbl,
+                title=f"SymPy Verification: {'SOUND' if sound else 'DISCREPANCY'}",
+                data=symbolic_result,
+                generation=generation
+            )
+            self.add_link(proof_id, sym_id, label="symbolically_verified_by", color="#1de9b6")
+
+        # 7. Mathematical Concept Knowledge Graph Linking
+        combined_text = (query + " " + solution_text).lower()
+        if "quadratic reciprocity" in combined_text and "thm_quad_recip" in self.nodes:
+            self.add_link(proof_id, "thm_quad_recip", label="USES_THEOREM", color="#ffd600", particles=True)
+        if ("euler's criterion" in combined_text or "euler criterion" in combined_text) and "lem_euler_crit" in self.nodes:
+            self.add_link(proof_id, "lem_euler_crit", label="USES_LEMMA", color="#00e676")
+        if "legendre" in combined_text and "def_legendre" in self.nodes:
+            self.add_link(proof_id, "def_legendre", label="APPLIES_DEFINITION", color="#00b0ff")
+        if "collatz" in combined_text and "conj_collatz" in self.nodes:
+            self.add_link(proof_id, "conj_collatz", label="INVESTIGATES_CONJECTURE", color="#ff9100", particles=True)
+        if "baker" in combined_text and "meth_baker" in self.nodes:
+            self.add_link(proof_id, "meth_baker", label="APPLIES_METHOD", color="#d500f9")
 
         return query_id
 

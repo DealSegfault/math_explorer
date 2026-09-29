@@ -97,3 +97,86 @@ class MathDocIndexer:
                 node_with_doc["doc_name"] = doc_name
                 all_nodes.append(node_with_doc)
         return all_nodes
+
+    def get_document_tree(self, doc_name: str) -> List[Dict[str, Any]]:
+        doc = self.registry.get(doc_name)
+        if not doc:
+            raise KeyError(f"Document '{doc_name}' not found in index registry.")
+        return doc.get("tree", {}).get("structure", [])
+
+    def hierarchical_search(
+        self,
+        query: str,
+        router,
+        doc_name: Optional[str] = None,
+        branch_beam: int = 2,
+        max_depth: int = 4
+    ) -> List[Dict[str, Any]]:
+        """
+        True Top-Down Hierarchical Tree Search.
+        Instead of O(N) flattening and scoring every node, descends recursively:
+        Root -> Select top branch_beam sections via JEV -> Drill down to sub-sections/lemmata.
+        """
+        docs_to_search = [doc_name] if doc_name else list(self.registry.keys())
+        results = []
+
+        for d in docs_to_search:
+            doc_entry = self.registry.get(d)
+            if not doc_entry:
+                continue
+            structure = doc_entry.get("tree", {}).get("structure", [])
+            if not structure:
+                continue
+
+            current_candidates = structure
+            depth = 0
+
+            while current_candidates and depth < max_depth:
+                # Format candidate titles for JEV ranking
+                scored_candidates = []
+                for item in current_candidates:
+                    title = item.get("title", "Untitled")
+                    summary = item.get("text", "")[:300] or item.get("summary", "")[:300]
+                    # Score node relevance with JEV
+                    score = router.score_node_relevance(query, f"{title}: {summary}")
+                    scored_candidates.append({
+                        "node_id": item.get("node_id", "node"),
+                        "title": title,
+                        "text": item.get("text", "") or item.get("summary", ""),
+                        "jev_score": score,
+                        "doc_name": d,
+                        "children": item.get("nodes", [])
+                    })
+
+                # Sort by score descending
+                scored_candidates.sort(key=lambda x: x["jev_score"], reverse=True)
+                top_branches = scored_candidates[:branch_beam]
+
+                # Collect the best matching lemmata/sections at this level
+                for b in top_branches:
+                    results.append({
+                        "node_id": b["node_id"],
+                        "title": b["title"],
+                        "text": b["text"],
+                        "jev_score": b["jev_score"],
+                        "doc_name": d,
+                        "depth": depth
+                    })
+
+                # Prepare next level candidates from children of top branches
+                next_candidates = []
+                for b in top_branches:
+                    next_candidates.extend(b.get("children", []))
+
+                current_candidates = next_candidates
+                depth += 1
+
+        # Deduplicate and sort globally by score
+        seen = set()
+        deduped = []
+        for r in sorted(results, key=lambda x: x["jev_score"], reverse=True):
+            if r["node_id"] not in seen and r["text"]:
+                seen.add(r["node_id"])
+                deduped.append(r)
+
+        return deduped[:branch_beam * 2]

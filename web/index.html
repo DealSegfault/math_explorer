@@ -47,7 +47,8 @@
     <!-- Layer Filter Buttons -->
     <div class="filter-controls">
       <button class="filter-btn active" data-filter="all">ALL</button>
-      <button class="filter-btn" data-filter="knowledge">KNOWLEDGE GRAPH</button>
+      <button class="filter-btn" data-filter="math">THEOREMS & LEMMATA</button>
+      <button class="filter-btn" data-filter="knowledge">PROOFS & SOLVERS</button>
       <button class="filter-btn" data-filter="rrsi">RRSI EVOLUTION</button>
     </div>
   </header>
@@ -55,9 +56,10 @@
   <!-- Left Sidebar: Controls & Live Operations -->
   <aside class="sidebar-left glass-panel">
     <div class="tabs">
-      <button class="tab-btn active" data-tab="tab-explore">Math Explorer</button>
+      <button class="tab-btn active" data-tab="tab-explore">Explorer</button>
       <button class="tab-btn" data-tab="tab-rrsi">RRSI Engine</button>
-      <button class="tab-btn" data-tab="tab-harness">Active Harness</button>
+      <button class="tab-btn" data-tab="tab-benchmark">Benchmarks</button>
+      <button class="tab-btn" data-tab="tab-harness">Harness</button>
     </div>
 
     <!-- Tab 1: Live Mathematical Exploration -->
@@ -144,7 +146,38 @@
       </div>
     </div>
 
-    <!-- Tab 3: Active Harness Configuration -->
+    <!-- Tab 3: Benchmarks & Empirical Evaluation -->
+    <div class="tab-content" id="tab-benchmark">
+      <div class="section-title">Empirical Benchmark Scoreboard</div>
+      <p class="section-desc">Competition-grade validation (AIME, AMC, Putnam) across CAS, SMT, and LLM tiers.</p>
+      
+      <div class="metric-card">
+        <div class="metric-row">
+          <span class="m-label">Overall Accuracy</span>
+          <span class="m-val text-success" id="bm-accuracy">66.7%</span>
+        </div>
+        <div class="metric-row">
+          <span class="m-label">SymPy Step Validation</span>
+          <span class="m-val" id="bm-step-pass">100.0%</span>
+        </div>
+        <div class="metric-row">
+          <span class="m-label">Z3 SMT Check Rate</span>
+          <span class="m-val" id="bm-smt-pass">100.0%</span>
+        </div>
+      </div>
+
+      <button id="btn-run-benchmark" class="btn btn-primary" style="margin-bottom: 14px;">
+        <span class="btn-text">Run Benchmark Suite</span>
+        <span class="spinner hidden"></span>
+      </button>
+
+      <div class="section-title">Problem Outcome Ledger</div>
+      <div id="benchmark-ledger" class="history-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Tab 4: Active Harness Configuration -->
     <div class="tab-content" id="tab-harness">
       <div class="section-title">Active Harness Parameters</div>
       <p class="section-desc">Current parameter state governing routing thresholds and local model inference.</p>
@@ -169,7 +202,7 @@
     <div class="timestamp" id="insp-time"></div>
 
     <div class="inspector-body" id="insp-body">
-      <p class="placeholder-text">Click on any glowing sphere in the 3D graph to view its detailed mathematical proof, JEV routing decisions, PageIndex tree fragments, or RRSI mutation records.</p>
+      <p class="placeholder-text">Click on any glowing sphere in the 3D graph to view its detailed mathematical proof, theorem dependencies, PageIndex tree fragments, or RRSI mutation records.</p>
     </div>
   </aside>
 
@@ -182,14 +215,14 @@
 
   <!-- Bottom Legend Bar -->
   <footer class="legend-bar glass-footer">
-    <div class="legend-item"><span class="dot" style="background: #00e5ff;"></span> Query</div>
-    <div class="legend-item"><span class="dot" style="background: #ffd600;"></span> JEV Triage</div>
-    <div class="legend-item"><span class="dot" style="background: #2979ff;"></span> Corpus / PageIndex</div>
+    <div class="legend-item"><span class="dot" style="background: #ffd600;"></span> Theorem</div>
+    <div class="legend-item"><span class="dot" style="background: #00e676;"></span> Lemma</div>
+    <div class="legend-item"><span class="dot" style="background: #00b0ff;"></span> Definition</div>
+    <div class="legend-item"><span class="dot" style="background: #ff9100;"></span> Conjecture</div>
+    <div class="legend-item"><span class="dot" style="background: #1de9b6;"></span> SymPy / Z3</div>
     <div class="legend-item"><span class="dot" style="background: #d500f9;"></span> Violetto (MPS)</div>
     <div class="legend-item"><span class="dot" style="background: #00e676;"></span> Codex Astra</div>
-    <div class="legend-item"><span class="dot" style="background: #76ff03;"></span> Verification</div>
     <div class="legend-item"><span class="dot" style="background: #ff1744;"></span> Harness Gen</div>
-    <div class="legend-item"><span class="dot" style="background: #ff9100;"></span> RRSI Mutation</div>
   </footer>
 
   <!-- Application Logic -->

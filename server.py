@@ -9,6 +9,7 @@ Serves interactive Three.js WebGL interface and endpoints for:
 
 import os
 import sys
+import json
 from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -103,6 +104,68 @@ async def post_graph_reset():
         harness.gm.reset_graph()
         return JSONResponse(content={"status": "reset_successful"})
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/benchmark")
+async def get_benchmark():
+    """Returns latest benchmark evaluation results."""
+    bm_path = os.path.join(BASE_DIR, "data", "benchmark_results.json")
+    if not os.path.exists(bm_path):
+        return JSONResponse(content={"status": "not_run_yet", "results": []})
+    try:
+        with open(bm_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return JSONResponse(content=data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class BenchmarkRunRequest(BaseModel):
+    engine: Optional[str] = None
+
+@app.post("/api/benchmark/run")
+async def post_benchmark_run(req: BenchmarkRunRequest):
+    """Executes automated benchmark suite across AIME / AMC / Putnam problems."""
+    from benchmark_suite import BenchmarkSuite
+    try:
+        suite = BenchmarkSuite()
+        res = suite.run_benchmark(engine_override=req.engine)
+        return JSONResponse(content=res)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+class RRSILoopRequest(BaseModel):
+    steps: int = 10
+
+@app.post("/api/rrsi/loop")
+async def post_rrsi_loop(req: RRSILoopRequest):
+    """Executes multi-generation autonomous RRSI loop."""
+    from rrsi_autonomous_runner import AutonomousRRSIRunner
+    try:
+        runner = AutonomousRRSIRunner(target_generations=req.steps)
+        summary = runner.run_evolution_loop()
+        return JSONResponse(content=summary)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ConjectureRequest(BaseModel):
+    idx: int = 0
+
+@app.post("/api/conjecture/explore")
+async def post_conjecture_explore(req: ConjectureRequest):
+    """Explores an open conjecture with arXiv crawl, PageIndex tree, and Codex Astra."""
+    from conjecture_crawler import ConjectureCrawler, SAMPLE_CONJECTURES
+    try:
+        crawler = ConjectureCrawler()
+        target = SAMPLE_CONJECTURES[req.idx % len(SAMPLE_CONJECTURES)]
+        res = crawler.explore_conjecture(target)
+        return JSONResponse(content=res)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

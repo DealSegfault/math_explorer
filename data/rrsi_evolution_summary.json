@@ -1,0 +1,1823 @@
+{
+  "start_generation": 2,
+  "final_generation": 12,
+  "cycles_executed": 10,
+  "total_time_sec": 5.62,
+  "initial_config": {
+    "generation": 2,
+    "prompt_system_style": "rigorous_math_proof",
+    "jev_difficulty_threshold": 2.75,
+    "jev_arxiv_threshold": 0.69,
+    "top_k_retrieval": 2,
+    "violetto_temperature": 0.6,
+    "violetto_top_k": 50,
+    "search_strategy": "hierarchical_pageindex",
+    "verification_strictness": 0.7,
+    "annealed_budget": 0.85,
+    "history": [
+      {
+        "generation": 1,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 1.0,
+          "generation": 1,
+          "timestamp": 1790644108.677351,
+          "hypothesis": "Adjusting difficulty routing barrier to 2.75 optimizes Violetto vs Codex Astra triage efficiency.",
+          "field": "jev_difficulty_threshold",
+          "old_val": 2.5,
+          "new_val": 2.75,
+          "change_summary": "jev_difficulty_threshold: 2.5 -> 2.75"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.886,
+          "reason": "Component mutation 'jev_difficulty_threshold: 2.5 -> 2.75' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.886,
+          "reason": "Sufficient utility delta (0.89) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790644108.67737
+      },
+      {
+        "generation": 2,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.85,
+          "generation": 2,
+          "timestamp": 1790644229.500921,
+          "hypothesis": "Modulating arXiv retrieval gating to 0.69 balances literature grounding vs low-latency answering.",
+          "field": "jev_arxiv_threshold",
+          "old_val": 0.65,
+          "new_val": 0.69,
+          "change_summary": "jev_arxiv_threshold: 0.65 -> 0.69"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.891,
+          "reason": "Component mutation 'jev_arxiv_threshold: 0.65 -> 0.69' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.878,
+          "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790644229.50095
+      },
+      {
+        "generation": 3,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.7224999999999999,
+          "generation": 3,
+          "timestamp": 1790645098.336985,
+          "hypothesis": "Modulating arXiv retrieval gating to 0.62 balances literature grounding vs low-latency answering.",
+          "field": "jev_arxiv_threshold",
+          "old_val": 0.69,
+          "new_val": 0.62,
+          "change_summary": "jev_arxiv_threshold: 0.69 -> 0.62"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.9,
+          "reason": "Component mutation 'jev_arxiv_threshold: 0.69 -> 0.62' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.875,
+          "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645098.337031
+      },
+      {
+        "generation": 4,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.6141249999999999,
+          "generation": 4,
+          "timestamp": 1790645098.849786,
+          "hypothesis": "Adjusting difficulty routing barrier to 2.66 optimizes Violetto vs Codex Astra triage efficiency.",
+          "field": "jev_difficulty_threshold",
+          "old_val": 2.75,
+          "new_val": 2.66,
+          "change_summary": "jev_difficulty_threshold: 2.75 -> 2.66"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.784,
+          "reason": "Component mutation 'jev_difficulty_threshold: 2.75 -> 2.66' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.754,
+          "reason": "Sufficient utility delta (0.75) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645098.8501492
+      },
+      {
+        "generation": 5,
+        "proposal": {
+          "component": "prompt_style",
+          "budget": 0.5220062499999999,
+          "generation": 5,
+          "timestamp": 1790645099.3953311,
+          "field": "prompt_system_style",
+          "old_val": "rigorous_math_proof",
+          "new_val": "lemma_stepwise_decomposition",
+          "change_summary": "Switch to lemma_stepwise_decomposition",
+          "hypothesis": "Reframing reasoning prompts as 'lemma_stepwise_decomposition' encourages deeper deductive structure for high-difficulty queries."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.873,
+          "reason": "Component mutation 'Switch to lemma_stepwise_decomposition' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.831,
+          "reason": "Sufficient utility delta (0.83) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645099.3954198
+      },
+      {
+        "generation": 6,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.44370531249999995,
+          "generation": 6,
+          "timestamp": 1790645099.941911,
+          "field": "top_k_retrieval",
+          "old_val": 2,
+          "new_val": 1,
+          "change_summary": "top_k_retrieval: 2 -> 1",
+          "hypothesis": "Retrieving 1 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.913,
+          "reason": "Component mutation 'top_k_retrieval: 2 -> 1' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.862,
+          "reason": "Sufficient utility delta (0.86) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645099.941997
+      },
+      {
+        "generation": 7,
+        "proposal": {
+          "component": "sampling_params",
+          "budget": 0.37714951562499993,
+          "generation": 7,
+          "timestamp": 1790645100.494545,
+          "hypothesis": "Setting Violetto temperature to 0.62 promotes focused mathematical coherence.",
+          "field": "violetto_temperature",
+          "old_val": 0.6,
+          "new_val": 0.62,
+          "change_summary": "violetto_temperature: 0.6 -> 0.62"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.813,
+          "reason": "Component mutation 'violetto_temperature: 0.6 -> 0.62' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.762,
+          "reason": "Sufficient utility delta (0.76) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645100.494646
+      },
+      {
+        "generation": 8,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.3205770882812499,
+          "generation": 8,
+          "timestamp": 1790645101.056132,
+          "field": "top_k_retrieval",
+          "old_val": 1,
+          "new_val": 2,
+          "change_summary": "top_k_retrieval: 1 -> 2",
+          "hypothesis": "Retrieving 2 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.909,
+          "reason": "Component mutation 'top_k_retrieval: 1 -> 2' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.847,
+          "reason": "Sufficient utility delta (0.85) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645101.056192
+      },
+      {
+        "generation": 9,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.27249052503906246,
+          "generation": 9,
+          "timestamp": 1790645101.618297,
+          "hypothesis": "Adjusting difficulty routing barrier to 2.59 optimizes Violetto vs Codex Astra triage efficiency.",
+          "field": "jev_difficulty_threshold",
+          "old_val": 2.66,
+          "new_val": 2.59,
+          "change_summary": "jev_difficulty_threshold: 2.66 -> 2.59"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.922,
+          "reason": "Component mutation 'jev_difficulty_threshold: 2.66 -> 2.59' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.855,
+          "reason": "Sufficient utility delta (0.85) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645101.6183722
+      },
+      {
+        "generation": 10,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.23161694628320306,
+          "generation": 10,
+          "timestamp": 1790645102.192888,
+          "hypothesis": "Modulating arXiv retrieval gating to 0.61 balances literature grounding vs low-latency answering.",
+          "field": "jev_arxiv_threshold",
+          "old_val": 0.62,
+          "new_val": 0.61,
+          "change_summary": "jev_arxiv_threshold: 0.62 -> 0.61"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.958,
+          "reason": "Component mutation 'jev_arxiv_threshold: 0.62 -> 0.61' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.884,
+          "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645102.192984
+      },
+      {
+        "generation": 11,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.1968744043407226,
+          "generation": 11,
+          "timestamp": 1790645102.776203,
+          "field": "top_k_retrieval",
+          "old_val": 2,
+          "new_val": 3,
+          "change_summary": "top_k_retrieval: 2 -> 3",
+          "hypothesis": "Retrieving 3 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.822,
+          "reason": "Component mutation 'top_k_retrieval: 2 -> 3' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.756,
+          "reason": "Sufficient utility delta (0.76) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645102.7762518
+      },
+      {
+        "generation": 12,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.1673432436896142,
+          "generation": 12,
+          "timestamp": 1790645103.362009,
+          "field": "top_k_retrieval",
+          "old_val": 3,
+          "new_val": 2,
+          "change_summary": "top_k_retrieval: 3 -> 2",
+          "hypothesis": "Retrieving 2 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.82,
+          "reason": "Component mutation 'top_k_retrieval: 3 -> 2' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.752,
+          "reason": "Sufficient utility delta (0.75) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645103.362178
+      }
+    ]
+  },
+  "final_optimized_config": {
+    "generation": 12,
+    "prompt_system_style": "lemma_stepwise_decomposition",
+    "jev_difficulty_threshold": 2.59,
+    "jev_arxiv_threshold": 0.61,
+    "top_k_retrieval": 2,
+    "violetto_temperature": 0.62,
+    "violetto_top_k": 50,
+    "search_strategy": "hierarchical_pageindex",
+    "verification_strictness": 0.7,
+    "annealed_budget": 0.167,
+    "history": [
+      {
+        "generation": 1,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 1.0,
+          "generation": 1,
+          "timestamp": 1790644108.677351,
+          "hypothesis": "Adjusting difficulty routing barrier to 2.75 optimizes Violetto vs Codex Astra triage efficiency.",
+          "field": "jev_difficulty_threshold",
+          "old_val": 2.5,
+          "new_val": 2.75,
+          "change_summary": "jev_difficulty_threshold: 2.5 -> 2.75"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.886,
+          "reason": "Component mutation 'jev_difficulty_threshold: 2.5 -> 2.75' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.886,
+          "reason": "Sufficient utility delta (0.89) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790644108.67737
+      },
+      {
+        "generation": 2,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.85,
+          "generation": 2,
+          "timestamp": 1790644229.500921,
+          "hypothesis": "Modulating arXiv retrieval gating to 0.69 balances literature grounding vs low-latency answering.",
+          "field": "jev_arxiv_threshold",
+          "old_val": 0.65,
+          "new_val": 0.69,
+          "change_summary": "jev_arxiv_threshold: 0.65 -> 0.69"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.891,
+          "reason": "Component mutation 'jev_arxiv_threshold: 0.65 -> 0.69' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.878,
+          "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790644229.50095
+      },
+      {
+        "generation": 3,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.7224999999999999,
+          "generation": 3,
+          "timestamp": 1790645098.336985,
+          "hypothesis": "Modulating arXiv retrieval gating to 0.62 balances literature grounding vs low-latency answering.",
+          "field": "jev_arxiv_threshold",
+          "old_val": 0.69,
+          "new_val": 0.62,
+          "change_summary": "jev_arxiv_threshold: 0.69 -> 0.62"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.9,
+          "reason": "Component mutation 'jev_arxiv_threshold: 0.69 -> 0.62' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.875,
+          "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645098.337031
+      },
+      {
+        "generation": 4,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.6141249999999999,
+          "generation": 4,
+          "timestamp": 1790645098.849786,
+          "hypothesis": "Adjusting difficulty routing barrier to 2.66 optimizes Violetto vs Codex Astra triage efficiency.",
+          "field": "jev_difficulty_threshold",
+          "old_val": 2.75,
+          "new_val": 2.66,
+          "change_summary": "jev_difficulty_threshold: 2.75 -> 2.66"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.784,
+          "reason": "Component mutation 'jev_difficulty_threshold: 2.75 -> 2.66' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.754,
+          "reason": "Sufficient utility delta (0.75) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645098.8501492
+      },
+      {
+        "generation": 5,
+        "proposal": {
+          "component": "prompt_style",
+          "budget": 0.5220062499999999,
+          "generation": 5,
+          "timestamp": 1790645099.3953311,
+          "field": "prompt_system_style",
+          "old_val": "rigorous_math_proof",
+          "new_val": "lemma_stepwise_decomposition",
+          "change_summary": "Switch to lemma_stepwise_decomposition",
+          "hypothesis": "Reframing reasoning prompts as 'lemma_stepwise_decomposition' encourages deeper deductive structure for high-difficulty queries."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.873,
+          "reason": "Component mutation 'Switch to lemma_stepwise_decomposition' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.831,
+          "reason": "Sufficient utility delta (0.83) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645099.3954198
+      },
+      {
+        "generation": 6,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.44370531249999995,
+          "generation": 6,
+          "timestamp": 1790645099.941911,
+          "field": "top_k_retrieval",
+          "old_val": 2,
+          "new_val": 1,
+          "change_summary": "top_k_retrieval: 2 -> 1",
+          "hypothesis": "Retrieving 1 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.913,
+          "reason": "Component mutation 'top_k_retrieval: 2 -> 1' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.862,
+          "reason": "Sufficient utility delta (0.86) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645099.941997
+      },
+      {
+        "generation": 7,
+        "proposal": {
+          "component": "sampling_params",
+          "budget": 0.37714951562499993,
+          "generation": 7,
+          "timestamp": 1790645100.494545,
+          "hypothesis": "Setting Violetto temperature to 0.62 promotes focused mathematical coherence.",
+          "field": "violetto_temperature",
+          "old_val": 0.6,
+          "new_val": 0.62,
+          "change_summary": "violetto_temperature: 0.6 -> 0.62"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.813,
+          "reason": "Component mutation 'violetto_temperature: 0.6 -> 0.62' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.762,
+          "reason": "Sufficient utility delta (0.76) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645100.494646
+      },
+      {
+        "generation": 8,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.3205770882812499,
+          "generation": 8,
+          "timestamp": 1790645101.056132,
+          "field": "top_k_retrieval",
+          "old_val": 1,
+          "new_val": 2,
+          "change_summary": "top_k_retrieval: 1 -> 2",
+          "hypothesis": "Retrieving 2 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.909,
+          "reason": "Component mutation 'top_k_retrieval: 1 -> 2' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.847,
+          "reason": "Sufficient utility delta (0.85) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645101.056192
+      },
+      {
+        "generation": 9,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.27249052503906246,
+          "generation": 9,
+          "timestamp": 1790645101.618297,
+          "hypothesis": "Adjusting difficulty routing barrier to 2.59 optimizes Violetto vs Codex Astra triage efficiency.",
+          "field": "jev_difficulty_threshold",
+          "old_val": 2.66,
+          "new_val": 2.59,
+          "change_summary": "jev_difficulty_threshold: 2.66 -> 2.59"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.922,
+          "reason": "Component mutation 'jev_difficulty_threshold: 2.66 -> 2.59' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.855,
+          "reason": "Sufficient utility delta (0.85) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645101.6183722
+      },
+      {
+        "generation": 10,
+        "proposal": {
+          "component": "jev_thresholds",
+          "budget": 0.23161694628320306,
+          "generation": 10,
+          "timestamp": 1790645102.192888,
+          "hypothesis": "Modulating arXiv retrieval gating to 0.61 balances literature grounding vs low-latency answering.",
+          "field": "jev_arxiv_threshold",
+          "old_val": 0.62,
+          "new_val": 0.61,
+          "change_summary": "jev_arxiv_threshold: 0.62 -> 0.61"
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.958,
+          "reason": "Component mutation 'jev_arxiv_threshold: 0.62 -> 0.61' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.884,
+          "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645102.192984
+      },
+      {
+        "generation": 11,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.1968744043407226,
+          "generation": 11,
+          "timestamp": 1790645102.776203,
+          "field": "top_k_retrieval",
+          "old_val": 2,
+          "new_val": 3,
+          "change_summary": "top_k_retrieval: 2 -> 3",
+          "hypothesis": "Retrieving 3 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.822,
+          "reason": "Component mutation 'top_k_retrieval: 2 -> 3' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.756,
+          "reason": "Sufficient utility delta (0.76) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645102.7762518
+      },
+      {
+        "generation": 12,
+        "proposal": {
+          "component": "retrieval_depth",
+          "budget": 0.1673432436896142,
+          "generation": 12,
+          "timestamp": 1790645103.362009,
+          "field": "top_k_retrieval",
+          "old_val": 3,
+          "new_val": 2,
+          "change_summary": "top_k_retrieval: 3 -> 2",
+          "hypothesis": "Retrieving 2 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+        },
+        "critic": {
+          "verdict": "ACCEPT",
+          "generalization_score": 0.82,
+          "reason": "Component mutation 'top_k_retrieval: 3 -> 2' preserves invariant bounds and enhances search space coverage."
+        },
+        "pruner": {
+          "action": "KEEP",
+          "utility_score": 0.752,
+          "reason": "Sufficient utility delta (0.75) on Pareto frontier."
+        },
+        "invariants": {
+          "total": 4,
+          "passed": 4,
+          "all_passed": true,
+          "details": [
+            {
+              "name": "Fermat Little Theorem Property",
+              "expr": "(2 ** (11 - 1)) % 11 == 1",
+              "passed": true
+            },
+            {
+              "name": "Quadratic Reciprocity Parity for (3, 5)",
+              "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+              "passed": true
+            },
+            {
+              "name": "Eisenstein Norm Multiplicativity",
+              "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+              "passed": true
+            },
+            {
+              "name": "Euler Criterion Consistency for (2, 7)",
+              "expr": "pow(2, (7-1)//2, 7) == 1",
+              "passed": true
+            }
+          ]
+        },
+        "timestamp": 1790645103.362178
+      }
+    ]
+  },
+  "history": [
+    {
+      "cycle": 1,
+      "generation": 3,
+      "proposal": {
+        "component": "jev_thresholds",
+        "budget": 0.7224999999999999,
+        "generation": 3,
+        "timestamp": 1790645098.336985,
+        "hypothesis": "Modulating arXiv retrieval gating to 0.62 balances literature grounding vs low-latency answering.",
+        "field": "jev_arxiv_threshold",
+        "old_val": 0.69,
+        "new_val": 0.62,
+        "change_summary": "jev_arxiv_threshold: 0.69 -> 0.62"
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.9,
+        "reason": "Component mutation 'jev_arxiv_threshold: 0.69 -> 0.62' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.875,
+        "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 2,
+      "generation": 4,
+      "proposal": {
+        "component": "jev_thresholds",
+        "budget": 0.6141249999999999,
+        "generation": 4,
+        "timestamp": 1790645098.849786,
+        "hypothesis": "Adjusting difficulty routing barrier to 2.66 optimizes Violetto vs Codex Astra triage efficiency.",
+        "field": "jev_difficulty_threshold",
+        "old_val": 2.75,
+        "new_val": 2.66,
+        "change_summary": "jev_difficulty_threshold: 2.75 -> 2.66"
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.784,
+        "reason": "Component mutation 'jev_difficulty_threshold: 2.75 -> 2.66' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.754,
+        "reason": "Sufficient utility delta (0.75) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 3,
+      "generation": 5,
+      "proposal": {
+        "component": "prompt_style",
+        "budget": 0.5220062499999999,
+        "generation": 5,
+        "timestamp": 1790645099.3953311,
+        "field": "prompt_system_style",
+        "old_val": "rigorous_math_proof",
+        "new_val": "lemma_stepwise_decomposition",
+        "change_summary": "Switch to lemma_stepwise_decomposition",
+        "hypothesis": "Reframing reasoning prompts as 'lemma_stepwise_decomposition' encourages deeper deductive structure for high-difficulty queries."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.873,
+        "reason": "Component mutation 'Switch to lemma_stepwise_decomposition' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.831,
+        "reason": "Sufficient utility delta (0.83) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 4,
+      "generation": 6,
+      "proposal": {
+        "component": "retrieval_depth",
+        "budget": 0.44370531249999995,
+        "generation": 6,
+        "timestamp": 1790645099.941911,
+        "field": "top_k_retrieval",
+        "old_val": 2,
+        "new_val": 1,
+        "change_summary": "top_k_retrieval: 2 -> 1",
+        "hypothesis": "Retrieving 1 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.913,
+        "reason": "Component mutation 'top_k_retrieval: 2 -> 1' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.862,
+        "reason": "Sufficient utility delta (0.86) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 5,
+      "generation": 7,
+      "proposal": {
+        "component": "sampling_params",
+        "budget": 0.37714951562499993,
+        "generation": 7,
+        "timestamp": 1790645100.494545,
+        "hypothesis": "Setting Violetto temperature to 0.62 promotes focused mathematical coherence.",
+        "field": "violetto_temperature",
+        "old_val": 0.6,
+        "new_val": 0.62,
+        "change_summary": "violetto_temperature: 0.6 -> 0.62"
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.813,
+        "reason": "Component mutation 'violetto_temperature: 0.6 -> 0.62' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.762,
+        "reason": "Sufficient utility delta (0.76) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 6,
+      "generation": 8,
+      "proposal": {
+        "component": "retrieval_depth",
+        "budget": 0.3205770882812499,
+        "generation": 8,
+        "timestamp": 1790645101.056132,
+        "field": "top_k_retrieval",
+        "old_val": 1,
+        "new_val": 2,
+        "change_summary": "top_k_retrieval: 1 -> 2",
+        "hypothesis": "Retrieving 2 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.909,
+        "reason": "Component mutation 'top_k_retrieval: 1 -> 2' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.847,
+        "reason": "Sufficient utility delta (0.85) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 7,
+      "generation": 9,
+      "proposal": {
+        "component": "jev_thresholds",
+        "budget": 0.27249052503906246,
+        "generation": 9,
+        "timestamp": 1790645101.618297,
+        "hypothesis": "Adjusting difficulty routing barrier to 2.59 optimizes Violetto vs Codex Astra triage efficiency.",
+        "field": "jev_difficulty_threshold",
+        "old_val": 2.66,
+        "new_val": 2.59,
+        "change_summary": "jev_difficulty_threshold: 2.66 -> 2.59"
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.922,
+        "reason": "Component mutation 'jev_difficulty_threshold: 2.66 -> 2.59' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.855,
+        "reason": "Sufficient utility delta (0.85) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 8,
+      "generation": 10,
+      "proposal": {
+        "component": "jev_thresholds",
+        "budget": 0.23161694628320306,
+        "generation": 10,
+        "timestamp": 1790645102.192888,
+        "hypothesis": "Modulating arXiv retrieval gating to 0.61 balances literature grounding vs low-latency answering.",
+        "field": "jev_arxiv_threshold",
+        "old_val": 0.62,
+        "new_val": 0.61,
+        "change_summary": "jev_arxiv_threshold: 0.62 -> 0.61"
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.958,
+        "reason": "Component mutation 'jev_arxiv_threshold: 0.62 -> 0.61' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.884,
+        "reason": "Sufficient utility delta (0.88) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 9,
+      "generation": 11,
+      "proposal": {
+        "component": "retrieval_depth",
+        "budget": 0.1968744043407226,
+        "generation": 11,
+        "timestamp": 1790645102.776203,
+        "field": "top_k_retrieval",
+        "old_val": 2,
+        "new_val": 3,
+        "change_summary": "top_k_retrieval: 2 -> 3",
+        "hypothesis": "Retrieving 3 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.822,
+        "reason": "Component mutation 'top_k_retrieval: 2 -> 3' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.756,
+        "reason": "Sufficient utility delta (0.76) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "cycle": 10,
+      "generation": 12,
+      "proposal": {
+        "component": "retrieval_depth",
+        "budget": 0.1673432436896142,
+        "generation": 12,
+        "timestamp": 1790645103.362009,
+        "field": "top_k_retrieval",
+        "old_val": 3,
+        "new_val": 2,
+        "change_summary": "top_k_retrieval: 3 -> 2",
+        "hypothesis": "Retrieving 2 PageIndex tree nodes strikes higher signal-to-noise ratio in prompt context."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "generalization_score": 0.82,
+        "reason": "Component mutation 'top_k_retrieval: 3 -> 2' preserves invariant bounds and enhances search space coverage."
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 0.752,
+        "reason": "Sufficient utility delta (0.75) on Pareto frontier."
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Property",
+            "expr": "(2 ** (11 - 1)) % 11 == 1",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity for (3, 5)",
+            "expr": "(-1) ** (((3-1)//2) * ((5-1)//2)) == 1",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity",
+            "expr": "Norm(z1*z2) == Norm(z1)*Norm(z2)",
+            "passed": true
+          },
+          {
+            "name": "Euler Criterion Consistency for (2, 7)",
+            "expr": "pow(2, (7-1)//2, 7) == 1",
+            "passed": true
+          }
+        ]
+      }
+    }
+  ],
+  "graph_stats": {
+    "total_nodes": 77,
+    "total_links": 91,
+    "types": {
+      "document": 1,
+      "violetto_proof": 1,
+      "pageindex_node": 7,
+      "critic_eval": 12,
+      "astra_proof": 1,
+      "verification": 2,
+      "query": 2,
+      "jev_decision": 2,
+      "pruner_decision": 12,
+      "invariant_test": 12,
+      "harness_state": 13,
+      "mutation_proposal": 12
+    },
+    "timestamp": 1790645103.9612749
+  }
+}
