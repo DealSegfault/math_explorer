@@ -54,13 +54,8 @@ class CacheManager:
 
     @staticmethod
     def hash_key(*args) -> str:
-        h = hashlib.sha256()
-        for a in args:
-            if isinstance(a, dict) or isinstance(a, list):
-                h.update(json.dumps(a, sort_keys=True).encode("utf-8"))
-            else:
-                h.update(str(a).strip().lower().encode("utf-8"))
-        return h.hexdigest()
+        payload = json.dumps(args, sort_keys=True, ensure_ascii=False, default=str)
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def get(self, namespace: str, key: str) -> Optional[Any]:
         try:

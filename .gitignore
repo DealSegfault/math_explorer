@@ -21,6 +21,9 @@ data/index_registry.json
 data/benchmark_results.json
 data/rrsi_evolution_summary.json
 data/conjecture_*.json
+data/server.log
+data/finance_episodes.jsonl
+data/finance_runs/
 
 # Secrets
 .env

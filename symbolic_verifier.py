@@ -8,6 +8,7 @@ check modular congruences, validate arithmetic transitions, and isolate final bo
 import re
 import math
 import sympy as sp
+from verification.expressions import parse_expression
 from typing import Dict, Any, List, Optional, Tuple
 
 class SymbolicVerifier:
@@ -48,8 +49,8 @@ class SymbolicVerifier:
             lhs_clean = self.clean_latex_expr(lhs_str)
             rhs_clean = self.clean_latex_expr(rhs_str)
             
-            lhs_val = sp.sympify(lhs_clean)
-            rhs_val = sp.sympify(rhs_clean)
+            lhs_val = parse_expression(lhs_clean)
+            rhs_val = parse_expression(rhs_clean)
             
             diff = sp.simplify(lhs_val - rhs_val)
             if diff == 0:
@@ -62,9 +63,9 @@ class SymbolicVerifier:
     def verify_congruence(self, a_str: str, b_str: str, m_str: str) -> Tuple[bool, str]:
         """Checks if a = b (mod m)."""
         try:
-            a = sp.sympify(self.clean_latex_expr(a_str))
-            b = sp.sympify(self.clean_latex_expr(b_str))
-            m = sp.sympify(self.clean_latex_expr(m_str))
+            a = parse_expression(self.clean_latex_expr(a_str))
+            b = parse_expression(self.clean_latex_expr(b_str))
+            m = parse_expression(self.clean_latex_expr(m_str))
             if (a - b) % m == 0:
                 return True, f"Congruence holds modulo {m}"
             return False, f"{a} is not congruent to {b} modulo {m}"
@@ -167,7 +168,7 @@ class SymbolicVerifier:
             clean_ans = self.clean_latex_expr(extracted_answer)
             clean_gt = self.clean_latex_expr(str(ground_truth))
             try:
-                diff = sp.simplify(sp.sympify(clean_ans) - sp.sympify(clean_gt))
+                diff = sp.simplify(parse_expression(clean_ans) - parse_expression(clean_gt))
                 ground_truth_matched = (diff == 0)
             except Exception:
                 ground_truth_matched = (clean_ans.lower() == clean_gt.lower())

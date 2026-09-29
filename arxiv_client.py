@@ -2,6 +2,7 @@ import os
 import re
 import urllib.request
 import urllib.parse
+from config import PAPERS_DIR
 from typing import List, Dict, Any, Optional
 
 class ArxivClient:
@@ -13,7 +14,7 @@ class ArxivClient:
     BASE_PDF_URL = "https://arxiv.org/pdf/"
     BASE_ABS_URL = "https://arxiv.org/abs/"
 
-    def __init__(self, download_dir: str = "/Users/mac/.gemini/antigravity/scratch/math_explorer/data/papers"):
+    def __init__(self, download_dir: str = str(PAPERS_DIR)):
         self.download_dir = download_dir
         os.makedirs(self.download_dir, exist_ok=True)
 

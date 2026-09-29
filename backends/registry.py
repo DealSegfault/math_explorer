@@ -5,12 +5,12 @@ Routes mathematical tasks to the optimal engine in the portfolio:
 SymPy CAS, Z3 SMT, Local Violetto 1B (MPS), or Frontier Codex Astra (xhigh).
 """
 
+from __future__ import annotations
+
 from typing import Dict, Any, Optional, List
 from backends.base import SolverBackend
 from backends.sympy_backend import SymPyBackend
 from backends.z3_backend import Z3Backend
-from backends.violetto_backend import ViolettoBackend
-from backends.codex_astra_backend import CodexAstraBackend
 
 class SolverRegistry:
     def __init__(self, violetto_model_path: Optional[str] = None):
@@ -24,12 +24,14 @@ class SolverRegistry:
     @property
     def violetto(self) -> ViolettoBackend:
         if self._violetto is None:
+            from backends.violetto_backend import ViolettoBackend
             self._violetto = ViolettoBackend(model_path=self._violetto_path) if self._violetto_path else ViolettoBackend()
         return self._violetto
 
     @property
     def astra(self) -> CodexAstraBackend:
         if self._astra is None:
+            from backends.codex_astra_backend import CodexAstraBackend
             self._astra = CodexAstraBackend()
         return self._astra
 
@@ -38,6 +40,7 @@ class SolverRegistry:
         query: str,
         routing: Dict[str, Any],
         difficulty_threshold: float = 2.5,
+        confidence_threshold: float = 0.6,
         engine_override: Optional[str] = None
     ) -> SolverBackend:
         """
@@ -52,41 +55,30 @@ class SolverRegistry:
                 return self.violetto
             elif engine_override in ["codex_astra", "astra"]:
                 return self.astra
+            raise ValueError(f"Unknown engine: {engine_override}")
 
-        recommended = routing.get("recommended_engine", "")
-        # 1. Check if JEV recommended python_solver or SymPy can handle directly
-        if recommended == "python_solver" and (self.sympy.can_handle(query) or self.z3.can_handle(query)):
-            if self.z3.can_handle(query) and not self.sympy.can_handle(query):
-                return self.z3
-            return self.sympy
-
-        # 2. Check if query is an exact symbolic computation
+        # 1. Deterministic capability checks always outrank model judgments.
         if self.sympy.can_handle(query):
-            # Prioritize deterministic CAS when applicable
             return self.sympy
 
-        # 3. SMT / constraint check
+        # 2. SMT / constraint check
         if self.z3.can_handle(query):
             return self.z3
 
-        # 4. LLM Routing based on difficulty threshold
+        # 3. JEV supplies features; code owns the confidence-gated policy.
         diff = routing.get("difficulty_score", 0.0)
-        if diff >= difficulty_threshold:
+        confidence = routing.get("routing_confidence", 1.0)
+        if diff >= difficulty_threshold and confidence >= confidence_threshold:
             return self.astra
         return self.violetto
 
     def get_backend_by_name(self, name: str) -> Optional[SolverBackend]:
-        backends = {
-            "sympy": self.sympy,
-            "sympy_cas": self.sympy,
-            "python_solver": self.sympy,
-            "z3": self.z3,
-            "z3_smt": self.z3,
-            "local_violetto": self.violetto,
-            "violetto": self.violetto,
-            "codex_astra": self.astra,
-            "astra": self.astra
+        attributes = {
+            "sympy": "sympy", "sympy_cas": "sympy", "python_solver": "sympy",
+            "z3": "z3", "z3_smt": "z3", "local_violetto": "violetto",
+            "violetto": "violetto", "codex_astra": "astra", "astra": "astra"
         }
-        return backends.get(name)
+        attribute = attributes.get(name)
+        return getattr(self, attribute) if attribute else None
 
     get_backend = get_backend_by_name

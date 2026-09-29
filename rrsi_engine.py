@@ -11,18 +11,22 @@ Completely deterministic and empirical:
 import os
 import json
 import time
+import math
+from statistics import median
 import sympy as sp
 import z3
 from typing import Dict, Any, List, Tuple, Optional
-from config import DATA_DIR
+from config import DATA_DIR, CORPUS_DIR
 from graph_manager import GraphManager
 
 HARNESS_CONFIG_PATH = str(DATA_DIR / "current_harness.json")
 
 DEFAULT_HARNESS = {
     "generation": 0,
+    "attempt": 0,
     "prompt_system_style": "rigorous_math_proof",
     "jev_difficulty_threshold": 2.5,
+    "jev_confidence_threshold": 0.60,
     "jev_arxiv_threshold": 0.65,
     "top_k_retrieval": 2,
     "violetto_temperature": 0.6,
@@ -44,28 +48,25 @@ SEARCH_STRATEGIES = [
     "flat_topk"
 ]
 
-# Held-out empirical benchmark suite for RRSI paired evaluations
-HELD_OUT_BENCHMARK = [
+# Problems without SymPy/Z3 patterns: exercise the actual LLM route.
+LLM_BENCHMARK = [
     {
-        "id": "ARITHMETIC_SIEVE_6_4_9",
-        "query": "Count all integers n < 1000 such that n is divisible by 6, not divisible by 4, and not divisible by 9.",
-        "ground_truth": "55"
+        "id": "PRIME_BELOW_30", "query": "What is the largest prime smaller than thirty? Give the answer in \\boxed{}.",
+        "ground_truth": "29"
     },
     {
-        "id": "DIVISORS_2024_MULT_4",
-        "query": "How many positive integer factors of 2024 are multiples of 4?",
-        "ground_truth": "8"
-    },
-    {
-        "id": "QUADRATIC_RECIPROCITY_11_13",
-        "query": "Compute the Legendre symbol (11/13) using the Law of Quadratic Reciprocity.",
-        "ground_truth": "-1"
-    },
-    {
-        "id": "ROOTS_OF_UNITY_DIVISIBILITY",
-        "query": "Find the number of positive integers n <= 100 such that x^2 + x + 1 divides x^(2n) + 1 in R[x].",
-        "ground_truth": "0"
+        "id": "TRIANGULAR_20", "query": "What is the sum of the first twenty positive integers? Give the answer in \\boxed{}.",
+        "ground_truth": "210"
     }
+]
+
+RETRIEVAL_BENCHMARK = [
+    {"id": "RECIPROCITY_LAW", "query": "Gauss quadratic reciprocity law for two odd primes",
+     "doc_name": "ANT_Reciprocity", "expected_node_ids": ["0003"]},
+    {"id": "EISENSTEIN_CUBIC", "query": "Cubic reciprocity for primary primes in Eisenstein integers",
+     "doc_name": "ANT_Reciprocity", "expected_node_ids": ["0004"]},
+    {"id": "ARTIN_MAP", "query": "Artin map Frobenius unramified prime ideal abelian extension",
+     "doc_name": "ANT_Reciprocity", "expected_node_ids": ["0005"]}
 ]
 
 class RRSIEngine:
@@ -257,58 +258,85 @@ class RRSIEngine:
         Runs baseline harness vs candidate harness on held-out problems.
         Computes exact delta accuracy, latency, and regressions.
         """
-        baseline_results = []
-        candidate_results = []
+        fields = [k for k in ("top_k_retrieval", "search_strategy", "jev_difficulty_threshold",
+                              "jev_arxiv_threshold", "prompt_system_style", "violetto_temperature")
+                  if candidate_config.get(k) != self.config.get(k)]
+        if len(fields) != 1:
+            return {"verdict": "REJECT", "reason": "Benchmark requires exactly one changed live knob."}
+        field = fields[0]
+        retrieval = field in ("top_k_retrieval", "search_strategy", "jev_arxiv_threshold")
+        problems = RETRIEVAL_BENCHMARK if retrieval else LLM_BENCHMARK
+        baseline_scores, candidate_scores, base_lats, cand_lats, base_costs, cand_costs = [], [], [], [], [], []
         regressions = 0
+        changed_outputs = 0
+        try:
+            owner = getattr(harness_runner, "__self__", None)
+            if retrieval and owner and hasattr(owner, "indexer") and "ANT_Reciprocity" not in owner.indexer.list_documents():
+                owner.indexer.index_document(str(CORPUS_DIR / "algebraic_number_theory.md"), "ANT_Reciprocity")
+            for prob in problems:
+                repeats = (0, 1) if field in ("prompt_system_style", "violetto_temperature") else (None,)
+                for seed in repeats:
+                    kwargs = {"ground_truth": prob.get("ground_truth"), "persist": False}
+                    if retrieval:
+                        kwargs.update({"evaluation_mode": "arxiv_gate" if field == "jev_arxiv_threshold" else "retrieval",
+                                       "doc_name": prob["doc_name"], "expected_node_ids": prob["expected_node_ids"]})
+                        if field == "jev_arxiv_threshold":
+                            kwargs["routing_override"] = {"needs_arxiv_prob": (self.config[field] + candidate_config[field]) / 2}
+                    elif field == "jev_difficulty_threshold":
+                        kwargs["routing_override"] = {"difficulty_score": (self.config[field] + candidate_config[field]) / 2,
+                                                       "recommended_engine": "local_violetto", "needs_arxiv_prob": 0.0}
+                        kwargs.update({"evaluation_mode": "routing", "max_tokens": 256})
+                    else:
+                        kwargs.update({"evaluation_mode": "solver", "engine": "local_violetto",
+                                       "seed": seed, "max_tokens": 256})
 
-        for prob in HELD_OUT_BENCHMARK:
-            q = prob["query"]
-            gt = prob["ground_truth"]
+                    base = harness_runner(prob["query"], config=self.config, **kwargs)
+                    cand = harness_runner(prob["query"], config=candidate_config, **kwargs)
+                    for out, scores, lats, costs in ((base, baseline_scores, base_lats, base_costs),
+                                                     (cand, candidate_scores, cand_lats, cand_costs)):
+                        verified = out.get("verification") or out.get("symbolic_verification", {})
+                        scores.append(out.get("metrics", {}).get("recall_at_k", float(
+                            verified.get("ground_truth_matched") is True and verified.get("status") == "VERIFIED")))
+                        telemetry = out.get("metrics", {}).get("telemetry", {})
+                        lats.append(telemetry["total_ms"] / 1000.0)
+                        costs.append(telemetry["compute_cost_units"])
+                    regressions += candidate_scores[-1] < baseline_scores[-1]
+                    changed_outputs += ([(n.get("node_id"), n.get("doc_name")) for n in base.get("retrieved_nodes", [])],
+                                        base.get("solver_engine"), base.get("solution")) != (
+                                        [(n.get("node_id"), n.get("doc_name")) for n in cand.get("retrieved_nodes", [])],
+                                        cand.get("solver_engine"), cand.get("solution"))
+        except Exception as exc:
+            return {"verdict": "REJECT", "reason": f"Benchmark could not measure {field}: {exc}"}
 
-            # Run with baseline config (no graph state pollution)
-            base_out = harness_runner(q, config=self.config, ground_truth=gt, persist=False)
-            base_v = base_out.get("verification") or base_out.get("symbolic_verification", {})
-            base_correct = (base_v.get("ground_truth_matched") is True)
-            baseline_results.append(base_correct)
-
-            # Run with candidate config (no graph state pollution)
-            cand_out = harness_runner(q, config=candidate_config, ground_truth=gt, persist=False)
-            cand_v = cand_out.get("verification") or cand_out.get("symbolic_verification", {})
-            cand_correct = (cand_v.get("ground_truth_matched") is True)
-            candidate_results.append(cand_correct)
-
-            base_lat = base_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0
-            cand_lat = cand_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0
-
-            if base_correct and not cand_correct:
-                regressions += 1
-
-        base_acc = sum(baseline_results) / len(baseline_results)
-        cand_acc = sum(candidate_results) / len(candidate_results)
-        delta_acc = round(cand_acc - base_acc, 3)
-
-        # Multi-objective Pareto Utility: U = Q - λ_L * L - λ_C * C (arXiv:2609.24972 Section 4)
-        lambda_L = 0.12
-        norm_base_lat = min(1.0, base_lat / 15.0)
-        norm_cand_lat = min(1.0, cand_lat / 15.0)
-
-        base_u = round(base_acc - lambda_L * norm_base_lat, 3)
-        cand_u = round(cand_acc - lambda_L * norm_cand_lat, 3)
-        delta_u = round(cand_u - base_u, 3)
-
-        verdict = "ACCEPT" if (regressions == 0 and (delta_u >= 0.0 or delta_acc > 0.0)) else "REJECT"
-
-        return {
-            "verdict": verdict,
-            "baseline_accuracy": base_acc,
-            "candidate_accuracy": cand_acc,
-            "delta_accuracy": delta_acc,
-            "pareto_utility": cand_u,
-            "delta_utility": delta_u,
-            "regressions": regressions,
-            "generalization_score": round(cand_acc, 3),
-            "reason": f"Paired benchmark: {sum(candidate_results)}/{len(candidate_results)} passed (regressions: {regressions}, Δacc: {delta_acc:+.2f}, Δutility: {delta_u:+.2f})"
-        }
+        n = len(baseline_scores)
+        base_acc, cand_acc = sum(baseline_scores) / n, sum(candidate_scores) / n
+        base_lat, cand_lat = sum(base_lats) / n, sum(cand_lats) / n
+        base_p95 = sorted(base_lats)[math.ceil(0.95 * n) - 1]
+        cand_p95 = sorted(cand_lats)[math.ceil(0.95 * n) - 1]
+        base_cost, cand_cost = sum(base_costs) / n, sum(cand_costs) / n
+        # U = quality - λL × normalized mean latency - λC × mean compute-tier cost.
+        base_u = base_acc - 0.12 * min(1.0, base_lat / 15.0) - 0.01 * base_cost
+        cand_u = cand_acc - 0.12 * min(1.0, cand_lat / 15.0) - 0.01 * cand_cost
+        delta_u = cand_u - base_u
+        exposed = changed_outputs > 0 or field == "search_strategy"
+        # The local gate fixture cannot price a real arXiv fetch, so it may diagnose but never promote that knob.
+        verdict = "ACCEPT" if field != "jev_arxiv_threshold" and exposed and regressions == 0 and delta_u > 0.01 else "REJECT"
+        return {"verdict": verdict, "benchmark_field": field, "cases": n,
+                "baseline_accuracy": round(base_acc, 3), "candidate_accuracy": round(cand_acc, 3),
+                "delta_accuracy": round(cand_acc - base_acc, 3),
+                "baseline_mean_latency_sec": round(base_lat, 3), "candidate_mean_latency_sec": round(cand_lat, 3),
+                "baseline_median_latency_sec": round(median(base_lats), 3),
+                "candidate_median_latency_sec": round(median(cand_lats), 3),
+                "baseline_p95_latency_sec": round(base_p95, 3),
+                "candidate_p95_latency_sec": round(cand_p95, 3),
+                "baseline_mean_compute_cost_units": round(base_cost, 3),
+                "candidate_mean_compute_cost_units": round(cand_cost, 3),
+                "pareto_utility": round(cand_u, 4), "delta_utility": round(delta_u, 4),
+                "regressions": regressions, "changed_outputs": changed_outputs,
+                "generalization_score": round(cand_acc, 3),
+                "reason": ("arXiv acquisition cost is unmeasured; mutation held for a real fetch benchmark"
+                           if field == "jev_arxiv_threshold" else
+                           f"{field}: {n} paired runs; {regressions} regressions; {changed_outputs} changed outputs; ΔU={delta_u:+.4f}")}
 
     def evolve_step(self, harness_runner=None) -> Dict[str, Any]:
         """
@@ -317,9 +345,13 @@ class RRSIEngine:
         curr_gen = self.config.get("generation", 0)
         next_gen = curr_gen + 1
         budget = self.compute_budget(curr_gen)
+        attempt = self.config.get("attempt", curr_gen)
+        self.config["attempt"] = attempt + 1
+        self._save_config(self.config)
 
         # 1. Propose
-        proposal = self.propose_mutation(curr_gen, budget)
+        proposal = self.propose_mutation(attempt, budget)
+        proposal["generation"] = next_gen
 
         # 2. Invariant Tests (SymPy + Z3)
         candidate_cfg = dict(self.config)
@@ -329,49 +361,51 @@ class RRSIEngine:
 
         invar_res = self.run_real_invariants(candidate_cfg)
         if not invar_res["all_passed"]:
-            return {
+            return self._record_rejection({
                 "success": False,
                 "status": "invariants_failed",
+                "generation": next_gen,
                 "proposal": proposal,
                 "invariants": invar_res
-            }
+            })
 
         # 3. Empirical Paired Evaluation (Critic)
         if harness_runner:
             critic_res = self.evaluate_paired_benchmark(candidate_cfg, harness_runner)
         else:
-            # Deterministic evaluation based on invariant soundness and parameter bounds
             critic_res = {
-                "verdict": "ACCEPT",
-                "generalization_score": 1.0,
-                "delta_accuracy": 0.0,
-                "regressions": 0,
-                "reason": "Deterministic invariants passed and parameter is within operational bounds."
+                "verdict": "REJECT", "reason": "A paired harness runner is required for empirical evaluation."
             }
 
         if critic_res["verdict"] == "REJECT":
-            return {
+            return self._record_rejection({
                 "success": False,
                 "status": "critic_rejected",
+                "generation": next_gen,
                 "proposal": proposal,
-                "critic": critic_res
-            }
+                "critic": critic_res,
+                "invariants": invar_res
+            })
 
         # 4. Pruner (Zero-delta filtering)
         if proposal.get("old_val") == proposal.get("new_val"):
-            return {
+            return self._record_rejection({
                 "success": False,
                 "status": "pruned_zero_delta",
-                "proposal": proposal
-            }
+                "generation": next_gen,
+                "proposal": proposal,
+                "critic": critic_res,
+                "invariants": invar_res
+            })
 
         pruner_res = {
             "action": "KEEP",
-            "utility_score": critic_res["generalization_score"],
+            "utility_score": critic_res["pareto_utility"],
             "reason": f"Sufficient utility delta for {proposal.get('component')}"
         }
 
         # 5. Commit and Record in 3D Graph
+        candidate_cfg["history"] = list(candidate_cfg.get("history", []))
         candidate_cfg["history"].append({
             "generation": next_gen,
             "proposal": proposal,
@@ -404,3 +438,9 @@ class RRSIEngine:
             "harness_node_id": new_node_id,
             "active_config": self.config
         }
+
+    def _record_rejection(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        result["timestamp"] = time.time()
+        self.config.setdefault("rejected_attempts", []).append(result)
+        self._save_config(self.config)
+        return result

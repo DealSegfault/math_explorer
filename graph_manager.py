@@ -9,12 +9,17 @@ import os
 import json
 import time
 import threading
+import shutil
+from config import DATA_DIR
 from typing import Dict, Any, List, Optional
 
-GRAPH_FILE_DEFAULT = "/Users/mac/.gemini/antigravity/scratch/math_explorer/data/graph_state.json"
+GRAPH_FILE_DEFAULT = str(DATA_DIR / "graph_state.json")
+LEGACY_GRAPH_FILE = os.path.join(os.path.expanduser("~"), ".gemini", "antigravity", "scratch", "math_explorer", "data", "graph_state.json")
 
 # Color Palette for 3D Graph Nodes
 NODE_COLORS = {
+    "sympy_proof": "#1de9b6",
+    "z3_proof": "#1de9b6",
     "query": "#00e5ff",            # Vivid Cyan
     "jev_decision": "#ffd600",     # Warm Gold/Yellow
     "document": "#2979ff",         # Deep Blue
@@ -64,6 +69,8 @@ class GraphManager:
         self.filepath = filepath
         self._lock = threading.Lock()
         os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
+        if self.filepath == GRAPH_FILE_DEFAULT and not os.path.exists(self.filepath) and os.path.isfile(LEGACY_GRAPH_FILE):
+            shutil.copy2(LEGACY_GRAPH_FILE, self.filepath)
         self.nodes: Dict[str, Dict[str, Any]] = {}
         self.links: List[Dict[str, Any]] = []
         self._load_or_initialize()
@@ -76,6 +83,8 @@ class GraphManager:
                         data = json.load(f)
                         self.nodes = {n["id"]: n for n in data.get("nodes", [])}
                         self.links = data.get("links", [])
+                        if self._seed_math_graph():
+                            self._save_unlocked()
                         return
                 except Exception as e:
                     print(f"Error loading graph file: {e}. Reinitializing baseline.", flush=True)
@@ -156,7 +165,11 @@ class GraphManager:
                 "curvature": 0.1
             })
 
-        # Seed Mathematical Concept Graph (Theorems, Lemmata, Definitions, Conjectures)
+        self._seed_math_graph()
+
+    def _seed_math_graph(self) -> bool:
+        """Add missing foundational concepts to new or older persisted graphs."""
+        changed = False
         try:
             from math_knowledge_graph import MathKnowledgeGraph
             mkg = MathKnowledgeGraph()
@@ -164,10 +177,16 @@ class GraphManager:
             for m_node in mkg_data["nodes"]:
                 if m_node["id"] not in self.nodes:
                     self.nodes[m_node["id"]] = m_node
+                    changed = True
+            existing_links = {(link["source"], link["target"], link.get("label")) for link in self.links}
             for m_link in mkg_data["links"]:
-                self.links.append(m_link)
+                key = (m_link["source"], m_link["target"], m_link.get("label"))
+                if key not in existing_links:
+                    self.links.append(m_link)
+                    changed = True
         except Exception as e:
             print(f"Notice: MathKnowledgeGraph seeding bypassed: {e}")
+        return changed
 
     def _save_unlocked(self):
         data = {
@@ -253,7 +272,7 @@ class GraphManager:
         Records an end-to-end exploration execution as an interconnected sub-graph:
         HarnessGen -> Query -> JevDecision -> [Retrieved Tree Nodes] -> SolverProof -> Verification + SymbolicCheck
         """
-        ts = int(time.time() * 1000)
+        ts = time.time_ns()
         query_id = f"query_{ts}"
         jev_id = f"jev_{ts}"
         proof_id = f"proof_{ts}"
@@ -305,8 +324,12 @@ class GraphManager:
 
         # 4. Solver Proof Node (Violetto or Codex Astra)
         is_astra = (solver_engine == "codex_astra")
-        proof_type = "astra_proof" if is_astra else "violetto_proof"
-        solver_name = "Codex Astra (gpt-6-astra xhigh)" if is_astra else "Limite 1B Violetto (MPS)"
+        proof_type, solver_name = {
+            "codex_astra": ("astra_proof", "Codex Astra"),
+            "local_violetto": ("violetto_proof", "Limite 1B Violetto (MPS)"),
+            "sympy_cas": ("sympy_proof", "SymPy CAS"),
+            "z3_smt": ("z3_proof", "Z3 SMT"),
+        }[solver_engine]
         self.add_node(
             node_id=proof_id,
             node_type=proof_type,
@@ -322,36 +345,22 @@ class GraphManager:
         self.add_link(jev_id, proof_id, label="dispatched_to", color="#00e676" if is_astra else "#d500f9", particles=True)
 
         # 5. Verification Gate Node
-        plausible = gate_result.get("is_plausible", {}).get("noul", 0.0) if isinstance(gate_result, dict) else 1.0
-        rigor = gate_result.get("rigor_score", {}).get("score", 0.0) if isinstance(gate_result, dict) else 2.0
+        verification = gate_result.get("ensemble", {})
+        status = verification.get("status", "UNVERIFIED")
         self.add_node(
-            node_id=gate_id,
-            node_type="verification",
-            label=f"JEV Gate: {plausible:.0%} Plausible | Rigor {rigor:.1f}",
-            title="Verification & Confidence Gating",
-            data=gate_result,
-            generation=generation
-        )
-        self.add_link(proof_id, gate_id, label="verified_by", color="#76ff03")
+            node_id=gate_id, node_type="verification", label=f"Verification: {status}",
+            title=f"Answer verification: {status}", data=gate_result, generation=generation)
+        self.add_link(proof_id, gate_id, label="checked_by", color="#76ff03")
 
-        # 6. Symbolic Verification Node (SymPy)
         if symbolic_result:
-            sound = symbolic_result.get("is_formally_sound", True)
-            valid_steps = symbolic_result.get("valid_steps", 0)
-            total_steps = symbolic_result.get("total_steps_checked", 0)
-            ans = symbolic_result.get("extracted_answer", "")
-            lbl = f"SymPy: {valid_steps}/{total_steps} Steps Valid"
-            if ans:
-                lbl += f" (Ans: {ans})"
+            status = symbolic_result.get("status", "UNVERIFIED")
+            valid = symbolic_result.get("cas_checks", {}).get("valid", 0) + symbolic_result.get("smt_checks", {}).get("valid", 0)
+            total = symbolic_result.get("total_checks", 0)
             self.add_node(
-                node_id=sym_id,
-                node_type="symbolic_verification",
-                label=lbl,
-                title=f"SymPy Verification: {'SOUND' if sound else 'DISCREPANCY'}",
-                data=symbolic_result,
-                generation=generation
-            )
-            self.add_link(proof_id, sym_id, label="symbolically_verified_by", color="#1de9b6")
+                node_id=sym_id, node_type="symbolic_verification",
+                label=f"{status}: {valid}/{total} checked steps",
+                title=f"Answer verification: {status}", data=symbolic_result, generation=generation)
+            self.add_link(proof_id, sym_id, label="symbolically_checked_by", color="#1de9b6")
 
         # 7. Mathematical Concept Knowledge Graph Linking
         combined_text = (query + " " + solution_text).lower()
@@ -382,7 +391,7 @@ class GraphManager:
         Records an RRSI self-improvement cycle:
         HarnessGen(g) -> Proposal -> Critic -> Pruner -> Invariants -> HarnessGen(g+1)
         """
-        ts = int(time.time() * 1000)
+        ts = time.time_ns()
         prop_id = f"rrsi_prop_g{new_generation}_{ts}"
         critic_id = f"rrsi_critic_g{new_generation}_{ts}"
         pruner_id = f"rrsi_prune_g{new_generation}_{ts}"

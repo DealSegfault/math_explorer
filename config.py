@@ -29,7 +29,7 @@ CODEX_BIN = os.getenv("CODEX_BIN", DEFAULT_CODEX_BIN)
 
 # Network / Server settings
 SERVER_PORT = int(os.getenv("PORT", "8765"))
-SERVER_HOST = os.getenv("HOST", "0.0.0.0")
+SERVER_HOST = os.getenv("HOST", "127.0.0.1")
 
 # Ensure required directories exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)

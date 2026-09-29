@@ -15,8 +15,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
-  <!-- Three.js & 3D Force Graph -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- 3D Force Graph includes its own Three.js runtime -->
   <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
 
   <!-- App Stylesheet -->
@@ -73,10 +72,10 @@
       </div>
 
       <div class="preset-chips">
-        <span class="chip" data-q="Count all integers n < 1000 such that n is divisible by 6, not divisible by 4, and not divisible by 9.">Arithmetic Sieve (Violetto)</span>
-        <span class="chip" data-q="State and prove Gauss's Law of Quadratic Reciprocity for distinct odd primes p and q. Compute (11/13).">Reciprocity Law (Literature)</span>
-        <span class="chip" data-q="Let G be a finite group and V an irreducible complex representation. Prove that the character chi satisfies sum_{g in G} |chi(g)|^2 = |G|.">Group Character Orthogonality</span>
-        <span class="chip" data-q="Explain how Artin Reciprocity in class field theory unifies classical quadratic and cubic reciprocity laws.">Artin Reciprocity (Frontier)</span>
+        <button type="button" class="chip" data-q="Count all integers n < 1000 such that n is divisible by 6, not divisible by 4, and not divisible by 9.">Arithmetic Sieve (Violetto)</button>
+        <button type="button" class="chip" data-q="State and prove Gauss's Law of Quadratic Reciprocity for distinct odd primes p and q. Compute (11/13).">Reciprocity Law (Literature)</button>
+        <button type="button" class="chip" data-q="Let G be a finite group and V an irreducible complex representation. Prove that the character chi satisfies sum_{g in G} |chi(g)|^2 = |G|.">Group Character Orthogonality</button>
+        <button type="button" class="chip" data-q="Explain how Artin Reciprocity in class field theory unifies classical quadratic and cubic reciprocity laws.">Artin Reciprocity (Frontier)</button>
       </div>
 
       <div class="form-row">
@@ -101,18 +100,15 @@
         <span class="spinner hidden"></span>
       </button>
 
-      <div id="explore-progress" class="progress-box hidden">
-        <div class="progress-step active" id="step-jev">1. JEV System One Triage</div>
-        <div class="progress-step" id="step-tree">2. PageIndex Tree Retrieval</div>
-        <div class="progress-step" id="step-solve">3. Solver Proof Generation</div>
-        <div class="progress-step" id="step-verify">4. JEV Confidence Verification</div>
+      <div id="explore-progress" class="progress-box hidden" role="status" aria-live="polite">
+        <p id="explore-status" class="progress-step">Follow the live trace on the right.</p>
       </div>
     </div>
 
     <!-- Tab 2: RRSI Self-Improvement Loop -->
     <div class="tab-content" id="tab-rrsi">
       <div class="section-title">RRSI Recursive Optimization</div>
-      <p class="section-desc">Regularized harness evolution per arXiv:2609.24972: Proposer &rarr; Critic &rarr; Pruner &rarr; Invariant Tests</p>
+      <p class="section-desc">Harness evolution: proposal &rarr; invariant tests &rarr; paired benchmark &rarr; selection.</p>
 
       <div class="metric-card">
         <div class="metric-row">
@@ -128,7 +124,7 @@
         </div>
         <div class="metric-row">
           <span class="m-label">Regression Invariants</span>
-          <span class="m-val text-success" id="rrsi-invariants-val">4 / 4 PASSED</span>
+          <span class="m-val" id="rrsi-invariants-val">Not run</span>
         </div>
       </div>
 
@@ -137,13 +133,24 @@
           <span class="btn-text">Execute RRSI Evolution Step</span>
           <span class="spinner hidden"></span>
         </button>
-        <p class="hint-text">Proposes component edit &rarr; tests generalization &rarr; verifies test invariants &rarr; updates active config.</p>
+        <p class="hint-text">A candidate becomes active only after its checks pass. Blocked attempts remain in the trajectory.</p>
       </div>
 
-      <div class="section-title" style="margin-top: 20px;">Evolution Trajectory</div>
-      <div id="rrsi-history-list" class="history-list">
-        <!-- Rendered dynamically -->
+      <div class="evolution-heading">
+        <div>
+          <div class="section-title">Evolution Trajectory</div>
+          <p class="section-desc">Select a generation to inspect the change and its checks.</p>
+        </div>
+        <div class="evolution-controls">
+          <button type="button" id="rrsi-prev" aria-label="Previous generation">←</button>
+          <button type="button" id="rrsi-next" aria-label="Next generation">→</button>
+        </div>
       </div>
+      <div id="rrsi-history-list" class="evolution-track" role="group" aria-label="Harness generations"></div>
+      <div id="rrsi-generation-detail" class="evolution-detail" aria-live="polite">
+        <p class="hint-text">Loading harness history…</p>
+      </div>
+      <div id="rrsi-score-chart" class="evolution-chart"></div>
     </div>
 
     <!-- Tab 3: Benchmarks & Empirical Evaluation -->
@@ -154,15 +161,11 @@
       <div class="metric-card">
         <div class="metric-row">
           <span class="m-label">Overall Accuracy</span>
-          <span class="m-val text-success" id="bm-accuracy">66.7%</span>
+          <span class="m-val" id="bm-accuracy">—</span>
         </div>
         <div class="metric-row">
           <span class="m-label">SymPy Step Validation</span>
-          <span class="m-val" id="bm-step-pass">100.0%</span>
-        </div>
-        <div class="metric-row">
-          <span class="m-label">Z3 SMT Check Rate</span>
-          <span class="m-val" id="bm-smt-pass">100.0%</span>
+          <span class="m-val" id="bm-step-pass">—</span>
         </div>
       </div>
 
@@ -172,9 +175,7 @@
       </button>
 
       <div class="section-title">Problem Outcome Ledger</div>
-      <div id="benchmark-ledger" class="history-list">
-        <!-- Rendered dynamically -->
-      </div>
+      <div id="benchmark-ledger" class="history-list" aria-live="polite">Loading benchmark results…</div>
     </div>
 
     <!-- Tab 4: Active Harness Configuration -->
@@ -188,26 +189,46 @@
     </div>
   </aside>
 
-  <!-- Right Inspector Panel (Opens on node click) -->
-  <aside class="sidebar-right glass-panel" id="inspector-panel">
-    <div class="inspector-header">
-      <div class="node-meta">
-        <span class="node-pill" id="insp-type">QUERY</span>
-        <span class="node-gen" id="insp-gen">GEN 0</span>
+  <!-- Live operations and selected graph node -->
+  <aside class="sidebar-right glass-panel" id="inspector-panel" aria-label="Live activity and node details">
+    <div class="rail-header">
+      <div class="rail-tabs" aria-label="Right panel">
+        <button id="tab-trace" class="rail-tab active" aria-pressed="true" aria-controls="trace-view">Live trace</button>
+        <button id="tab-node" class="rail-tab" aria-pressed="false" aria-controls="inspector-view">Node detail</button>
       </div>
-      <button class="close-btn" id="btn-close-inspector">&times;</button>
+      <button class="close-btn rail-close" id="btn-close-panel" aria-label="Close right panel">&times;</button>
     </div>
-
-    <h2 class="node-title" id="insp-title">Select a node in 3D space</h2>
-    <div class="timestamp" id="insp-time"></div>
-
-    <div class="inspector-body" id="insp-body">
-      <p class="placeholder-text">Click on any glowing sphere in the 3D graph to view its detailed mathematical proof, theorem dependencies, PageIndex tree fragments, or RRSI mutation records.</p>
-    </div>
+    <section id="trace-view" class="trace-view" aria-labelledby="tab-trace">
+      <div class="trace-overline">
+        <span class="trace-state" id="trace-state"><span class="trace-light"></span> IDLE</span>
+        <span class="trace-clock" id="trace-clock">—</span>
+      </div>
+      <h2 class="trace-title" id="trace-title">Waiting for a task</h2>
+      <p class="trace-caption">Live operations · route, tools, verification and graph updates</p>
+      <div class="trace-progress" aria-hidden="true"><span id="trace-progress-fill"></span></div>
+      <ol class="trace-list" id="trace-events" aria-label="Operation log" aria-live="polite">
+        <li class="trace-empty">Submit a question to watch the solver work.</li>
+      </ol>
+    </section>
+    <section id="inspector-view" class="inspector-view" aria-labelledby="tab-node" hidden>
+      <div class="inspector-header">
+        <div class="node-meta">
+          <span class="node-pill" id="insp-type">QUERY</span>
+          <span class="node-gen" id="insp-gen">GEN 0</span>
+        </div>
+        <button class="close-btn node-back" id="btn-close-inspector" aria-label="Back to live trace">← Trace</button>
+      </div>
+      <h2 class="node-title" id="insp-title">Select a node in 3D space</h2>
+      <div class="timestamp" id="insp-time"></div>
+      <div class="inspector-body" id="insp-body">
+        <p class="placeholder-text">Click a node in the graph to inspect its proof, tool output and dependencies.</p>
+      </div>
+    </section>
   </aside>
 
   <!-- Floating 3D Navigation Controls -->
   <div class="floating-controls">
+    <button class="icon-btn trace-toggle" id="btn-open-trace" aria-label="Open live trace">Live trace</button>
     <button class="icon-btn" id="btn-reset-cam" title="Reset Camera">Center</button>
     <button class="icon-btn" id="btn-toggle-physics" title="Pause/Resume Layout">Physics</button>
     <button class="icon-btn" id="btn-reset-graph" title="Reset Graph to Baseline">Reset</button>
@@ -226,6 +247,6 @@
   </footer>
 
   <!-- Application Logic -->
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=20260929-math-render-2"></script>
 </body>
 </html>

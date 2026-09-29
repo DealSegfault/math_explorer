@@ -111,15 +111,27 @@ High-speed mathematical exploration harness combining ultra-fast System One rout
 
 ### 1. Requirements
 - Python 3.10+
-- Apple Silicon Mac (for local MPS Violetto inference) or CUDA device
-- Codex CLI configured with `gpt-6-astra`
-- TypeSafe API Key saved in `~/.typesafe_key`
+- Apple Silicon Mac for local MPS Violetto inference (CPU is also supported, but slower)
+- For remote reasoning: Codex CLI configured with `gpt-6-astra`
+- For JEV routing: TypeSafe API key in `TYPESAFE_API_KEY` or `~/.typesafe_key`
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python smoke_check.py  # checks startup, graph migration, and API bounds without GPU or API key
+```
 
 ### 2. Start 3D Web Dashboard
 ```bash
-python3 server.py
+python server.py
 # Open http://localhost:8765
 ```
+
+The server listens on `127.0.0.1` by default. `PORT` changes the port, and
+`MATH_EXPLORER_DATA_DIR` changes where local state is stored. Setting `HOST`
+to a network address exposes the API, including benchmark and RRSI actions;
+provide access control before doing so.
 
 ### 3. CLI Exploration
 ```bash

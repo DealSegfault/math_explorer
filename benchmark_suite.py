@@ -14,6 +14,7 @@ import argparse
 from typing import Dict, Any, List, Optional
 
 from math_explorer import UnifiedMathHarness
+from benchmark_data import load_aime
 
 BENCHMARK_PROBLEMS = [
     {
@@ -63,12 +64,14 @@ BENCHMARK_PROBLEMS = [
 from config import DATA_DIR
 
 class BenchmarkSuite:
-    def __init__(self, output_path: str = str(DATA_DIR / "benchmark_results.json")):
+    def __init__(self, output_path: str = str(DATA_DIR / "benchmark_results.json"), harness=None):
         self.output_path = output_path
-        self.harness = UnifiedMathHarness()
+        self.harness = harness if harness is not None else UnifiedMathHarness()
 
     def run_benchmark(self, engine_override: Optional[str] = None, problems: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
-        suite = problems or BENCHMARK_PROBLEMS
+        suite = BENCHMARK_PROBLEMS if problems is None else problems
+        if not suite:
+            raise ValueError("Benchmark set is empty")
         print(f"\n=======================================================", flush=True)
         print(f"STARTING MATH EXPLORER BENCHMARK SUITE ({len(suite)} Problems)", flush=True)
         print(f"Engine Policy: {engine_override or 'Auto (JEV Gated Triage)'}", flush=True)
@@ -84,10 +87,12 @@ class BenchmarkSuite:
             print(f"\n--- [{idx}/{len(suite)}] Problem: {pid} (Domain: {prob['domain']}, GT: {gt}) ---", flush=True)
 
             t0 = time.time()
-            exp_res = self.harness.explore(
+            exp_res = self.harness.run_with_config(
                 query=query,
+                config=self.harness.rrsi.get_current_harness(),
                 engine=engine_override,
-                ground_truth=gt
+                ground_truth=gt,
+                persist=False,
             )
             elapsed = round(time.time() - t0, 2)
 
@@ -100,6 +105,7 @@ class BenchmarkSuite:
                 "id": pid,
                 "domain": prob["domain"],
                 "difficulty_tier": prob["difficulty_tier"],
+                "source": prob.get("source", "local_smoke"),
                 "jev_domain": routing.get("domain"),
                 "jev_difficulty": routing.get("difficulty_score"),
                 "engine_used": exp_res.get("solver_engine"),
@@ -173,7 +179,11 @@ class BenchmarkSuite:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Math Explorer Benchmarking Suite")
     parser.add_argument("--engine", choices=["local_violetto", "codex_astra"], help="Force solver engine")
+    parser.add_argument("--dataset", choices=["local", "aime"], default="local")
+    parser.add_argument("--split", choices=["all", "development", "evaluation"], default="evaluation")
+    parser.add_argument("--limit", type=int, default=20, help="AIME questions to run; 0 runs the full split")
     args = parser.parse_args()
 
     suite = BenchmarkSuite()
-    suite.run_benchmark(engine_override=args.engine)
+    problems = load_aime(args.split, None if args.limit == 0 else args.limit) if args.dataset == "aime" else None
+    suite.run_benchmark(engine_override=args.engine, problems=problems)

@@ -13,6 +13,7 @@ import time
 import argparse
 from typing import Dict, Any, Optional
 
+from config import DATA_DIR
 from math_explorer import UnifiedMathHarness
 
 SAMPLE_CONJECTURES = [
@@ -45,8 +46,8 @@ SAMPLE_CONJECTURES = [
 ]
 
 class ConjectureCrawler:
-    def __init__(self):
-        self.harness = UnifiedMathHarness()
+    def __init__(self, harness=None):
+        self.harness = harness if harness is not None else UnifiedMathHarness()
 
     def explore_conjecture(self, conjecture_item: Dict[str, Any]) -> Dict[str, Any]:
         cid = conjecture_item["id"]
@@ -72,7 +73,7 @@ class ConjectureCrawler:
             top_k_nodes=3
         )
 
-        out_path = f"/Users/mac/.gemini/antigravity/scratch/math_explorer/data/conjecture_{cid}.json"
+        out_path = DATA_DIR / f"conjecture_{cid}.json"
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2)
 

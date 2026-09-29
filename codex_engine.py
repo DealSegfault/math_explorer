@@ -1,6 +1,7 @@
 import os
 import subprocess
 import re
+from config import CODEX_BIN
 from typing import Optional, Dict, Any
 
 class CodexAstraEngine:
@@ -8,7 +9,7 @@ class CodexAstraEngine:
     OpenAI Codex CLI Engine with gpt-6-astra (reasoning effort xhigh).
     Used as the frontier deep reasoning layer for ultra-complex or open math problems.
     """
-    def __init__(self, codex_bin: str = "/Users/mac/.local/bin/codex", model: str = "gpt-6-astra"):
+    def __init__(self, codex_bin: str = CODEX_BIN, model: str = "gpt-6-astra"):
         self.codex_bin = codex_bin
         self.model = model
 
@@ -48,9 +49,14 @@ class CodexAstraEngine:
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            timeout=300
         )
 
+        if result.returncode != 0:
+            raise RuntimeError(f"Codex exited with status {result.returncode}: {result.stderr[-1000:]}")
+        if not result.stdout.strip():
+            raise RuntimeError("Codex returned an empty answer")
         output = result.stdout
         # Extract response text between 'codex' and 'tokens used'
         codex_match = re.search(r'\ncodex\n([\s\S]*?)(?:\ntokens used|$)', output)

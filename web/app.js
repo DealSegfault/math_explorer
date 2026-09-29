@@ -7,6 +7,16 @@ let Graph = null;
 let rawGraphData = { nodes: [], links: [] };
 let activeFilter = 'all';
 let isPhysicsActive = true;
+let graphShape = '';
+let graphRequest = 0;
+let graphFitTicks = 0;
+let harnessRequest = 0;
+let harnessSignature = '';
+let evolutionEntries = [];
+let selectedEvolution = 'baseline';
+let traceRunId = null;
+let lastTraceSeq = 0;
+let traceRequestBusy = false;
 
 // DOM Elements
 const elGraph = document.getElementById('3d-graph');
@@ -21,6 +31,13 @@ const elInspGen = document.getElementById('insp-gen');
 const elInspTitle = document.getElementById('insp-title');
 const elInspTime = document.getElementById('insp-time');
 const elInspBody = document.getElementById('insp-body');
+const elTraceView = document.getElementById('trace-view');
+const elNodeView = document.getElementById('inspector-view');
+const elTraceList = document.getElementById('trace-events');
+const elTraceTitle = document.getElementById('trace-title');
+const elTraceState = document.getElementById('trace-state');
+const elTraceClock = document.getElementById('trace-clock');
+const elTraceProgress = document.getElementById('trace-progress-fill');
 
 const elQueryInput = document.getElementById('query-input');
 const elEngineSelect = document.getElementById('engine-select');
@@ -42,8 +59,88 @@ document.addEventListener('DOMContentLoaded', () => {
   setupUIEvents();
   fetchGraph();
   fetchHarness();
-  setInterval(fetchGraph, 10000); // Polling background updates
+  fetchBenchmark();
+  fetchTrace();
+  setInterval(() => { fetchGraph(); fetchHarness(); }, 10000);
+  setInterval(fetchTrace, 1000);
 });
+
+function showRailView(view) {
+  const trace = view === 'trace';
+  elTraceView.hidden = !trace;
+  elNodeView.hidden = trace;
+  for (const [id, selected] of [['tab-trace', trace], ['tab-node', !trace]]) {
+    const tab = document.getElementById(id);
+    tab.classList.toggle('active', selected);
+    tab.setAttribute('aria-pressed', String(selected));
+  }
+  elInspector.classList.add('open');
+}
+
+async function fetchTrace() {
+  if (traceRequestBusy) return;
+  traceRequestBusy = true;
+  try {
+    const res = await fetch('/api/trace', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    renderTrace(await res.json());
+  } catch {
+    elTraceState.className = 'trace-state error';
+    elTraceState.innerHTML = '<span class="trace-light"></span> DISCONNECTED';
+  } finally {
+    traceRequestBusy = false;
+  }
+}
+
+function renderTrace(data) {
+  if (data.id !== traceRunId) {
+    traceRunId = data.id;
+    lastTraceSeq = 0;
+    elTraceList.replaceChildren();
+  }
+  const follow = elTraceList.scrollHeight - elTraceList.scrollTop - elTraceList.clientHeight < 80;
+  for (const event of data.events || []) {
+    if (event.seq <= lastTraceSeq) continue;
+    const row = document.createElement('li');
+    const stage = ['task', 'interaction', 'preflight', 'route', 'retrieve', 'tool', 'solve', 'verify', 'graph', 'error'].includes(event.stage) ? event.stage : 'task';
+    row.className = 'trace-entry trace-' + stage;
+    const dot = document.createElement('span');
+    dot.className = 'trace-entry-dot';
+    const content = document.createElement('div');
+    const meta = document.createElement('span');
+    meta.className = 'trace-entry-meta';
+    meta.textContent = new Date(event.ts * 1000).toLocaleTimeString() + '  ·  ' + event.stage.toUpperCase();
+    const message = document.createElement('strong');
+    message.textContent = event.message;
+    content.append(meta, message);
+    if (event.detail) {
+      const detail = document.createElement('small');
+      detail.textContent = event.detail;
+      content.append(detail);
+    }
+    renderMath(content);
+    row.append(dot, content);
+    elTraceList.append(row);
+    lastTraceSeq = event.seq;
+  }
+  while (elTraceList.childElementCount > 100) elTraceList.firstElementChild.remove();
+  if (!elTraceList.childElementCount) {
+    const empty = document.createElement('li');
+    empty.className = 'trace-empty';
+    empty.textContent = 'Submit a question to watch the solver work.';
+    elTraceList.append(empty);
+  }
+  if (follow) elTraceList.scrollTop = elTraceList.scrollHeight;
+  elTraceTitle.textContent = data.title || 'Waiting for a task';
+  renderMath(elTraceTitle);
+  elTraceState.className = 'trace-state ' + (data.status || 'idle');
+  elTraceState.innerHTML = '<span class="trace-light"></span> ' + (data.status || 'idle').toUpperCase();
+  const latest = data.events?.at(-1);
+  elTraceClock.textContent = latest ? new Date(latest.ts * 1000).toLocaleTimeString() : '—';
+  const progress = { task: 8, interaction: 10, preflight: 18, route: 34, retrieve: 50, tool: 65, solve: 72, verify: 88, graph: 96, error: 100 };
+  const reached = Math.max(0, ...(data.events || []).map(event => progress[event.stage] || 0));
+  elTraceProgress.style.width = (data.status === 'done' ? 100 : reached) + '%';
+}
 
 /**
  * Initialize 3D Force Graph via Three.js
@@ -54,9 +151,11 @@ function initGraph() {
     .nodeRelSize(1)
     .nodeVal(n => n.val || 12)
     .nodeColor(n => n.color || '#00e5ff')
-    .nodeLabel(n => `[${(n.type || '').toUpperCase()}] ${n.label || n.title || n.id}`)
+    .nodeLabel(n => escapeHtml(`[${(n.type || '').toUpperCase()}] ${n.label || n.title || n.id}`))
     .nodeOpacity(0.92)
     .nodeResolution(24)
+    .warmupTicks(200)
+    .cooldownTicks(20)
     .linkWidth(link => link.particles ? 2.5 : 1.2)
     .linkColor(link => link.color || '#546e7a')
     .linkCurvature(link => link.curvature || 0.0)
@@ -67,7 +166,7 @@ function initGraph() {
     .onNodeClick(node => {
       // Zoom camera smoothly to node
       const distance = 160;
-      const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+      const distRatio = 1 + distance / (Math.hypot(node.x, node.y, node.z) || 1);
       Graph.cameraPosition(
         { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
         node,
@@ -77,31 +176,70 @@ function initGraph() {
     })
     .onBackgroundClick(() => {
       hideInspector();
+    })
+    .onEngineTick(() => {
+      if (graphFitTicks && --graphFitTicks === 0) fitGraph();
     });
 
-  // Enable subtle Bloom / Three.js scene tuning
-  const scene = Graph.scene();
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-  scene.add(ambientLight);
-
-  const dirLight = new THREE.DirectionalLight(0x00e5ff, 0.8);
-  dirLight.position.set(100, 200, 100);
-  scene.add(dirLight);
-
   // Initial camera orientation
-  Graph.cameraPosition({ x: 0, y: 150, z: 450 });
+  Graph.cameraPosition(defaultCamera(), { x: 0, y: 0, z: 0 });
+  const resizeGraph = () => Graph.width(elGraph.clientWidth).height(elGraph.clientHeight);
+  resizeGraph();
+  window.addEventListener('resize', resizeGraph);
+}
+
+function defaultCamera() {
+  return { x: 0, y: elGraph.clientWidth < 600 ? 0 : 150, z: elGraph.clientWidth < 600 ? 900 : 450 };
+}
+
+function fitGraph() {
+  const bounds = Graph.getGraphBbox();
+  if (!bounds) return;
+  const center = Object.fromEntries(['x', 'y', 'z'].map(axis => [axis, (bounds[axis][0] + bounds[axis][1]) / 2]));
+  const padding = elGraph.clientWidth > 900 ? 80 : 40;
+  const width = Math.max(1, elGraph.clientWidth - 2 * padding);
+  const height = Math.max(1, elGraph.clientHeight - 2 * padding);
+  const span = Math.max((bounds.x[1] - bounds.x[0]) * elGraph.clientHeight / width,
+    (bounds.y[1] - bounds.y[0]) * elGraph.clientHeight / height, 80);
+  const distance = span / (2 * Math.tan(Graph.camera().fov * Math.PI / 360));
+  Graph.cameraPosition({ x: center.x, y: center.y, z: bounds.z[1] + distance * .75 + 40 }, center, 600);
 }
 
 /**
  * Fetch Full Graph Data from FastAPI Backend
  */
 async function fetchGraph() {
+  const request = ++graphRequest;
   try {
     const res = await fetch('/api/graph');
     if (!res.ok) return;
     const data = await res.json();
-    rawGraphData = data;
-    applyFilter();
+    if (request !== graphRequest) return;
+    const oldNodes = new Map(rawGraphData.nodes.map(node => [node.id, node]));
+    const nodes = data.nodes.map(node => {
+      const existing = oldNodes.get(node.id);
+      return existing ? Object.assign(existing, node) : node;
+    });
+    const shape = JSON.stringify([data.nodes.map(node => node.id), data.links.map(link => [link.source, link.target, link.label])]);
+    if (shape !== graphShape) {
+      const byId = new Map(nodes.map(node => [node.id, node]));
+      for (const node of nodes) {
+        if (oldNodes.has(node.id)) continue;
+        const edge = data.links.find(link => (link.source === node.id && Number.isFinite(byId.get(link.target)?.x)) ||
+          (link.target === node.id && Number.isFinite(byId.get(link.source)?.x)));
+        const anchor = edge && byId.get(edge.source === node.id ? edge.target : edge.source);
+        if (anchor) {
+          node.x = anchor.x + (Math.random() - 0.5) * 24;
+          node.y = anchor.y + (Math.random() - 0.5) * 24;
+          node.z = anchor.z + (Math.random() - 0.5) * 24;
+        }
+      }
+      rawGraphData = { ...data, nodes };
+      graphShape = shape;
+      applyFilter();
+    } else {
+      rawGraphData = { ...data, nodes };
+    }
     updateTelemetry(data);
   } catch (err) {
     console.error('Failed to load graph data:', err);
@@ -112,10 +250,15 @@ async function fetchGraph() {
  * Fetch Current Harness Configuration from Backend
  */
 async function fetchHarness() {
+  const request = ++harnessRequest;
   try {
     const res = await fetch('/api/harness');
     if (!res.ok) return;
     const cfg = await res.json();
+    if (request !== harnessRequest) return;
+    const signature = JSON.stringify([cfg.generation, cfg.history?.length, cfg.rejected_attempts?.length]);
+    if (signature === harnessSignature) return;
+    harnessSignature = signature;
     renderHarnessConfig(cfg);
   } catch (err) {
     console.error('Failed to load harness config:', err);
@@ -153,7 +296,7 @@ function applyFilter() {
   if (!rawGraphData || !rawGraphData.nodes) return;
 
   const mathTypes = ['theorem', 'lemma', 'definition', 'conjecture', 'method'];
-  const proofTypes = ['query', 'jev_decision', 'document', 'pageindex_node', 'violetto_proof', 'astra_proof', 'verification', 'symbolic_verification'];
+  const proofTypes = ['query', 'jev_decision', 'document', 'pageindex_node', 'violetto_proof', 'astra_proof', 'sympy_proof', 'z3_proof', 'verification', 'symbolic_verification'];
   const rrsiTypes = ['harness_state', 'mutation_proposal', 'critic_eval', 'pruner_decision', 'invariant_test'];
 
   let filteredNodes = rawGraphData.nodes;
@@ -164,22 +307,26 @@ function applyFilter() {
   } else if (activeFilter === 'rrsi') {
     filteredNodes = rawGraphData.nodes.filter(n => rrsiTypes.includes(n.type));
   }
+  if (activeFilter !== 'all') {
+    filteredNodes = filteredNodes.map(({ x, y, z, vx, vy, vz, ...node }) => node);
+  }
 
   const nodeIds = new Set(filteredNodes.map(n => n.id));
   const filteredLinks = rawGraphData.links.filter(l => {
     const src = typeof l.source === 'object' ? l.source.id : l.source;
     const tgt = typeof l.target === 'object' ? l.target.id : l.target;
     return nodeIds.has(src) && nodeIds.has(tgt);
-  });
+  }).map(l => ({ ...l, source: l.source.id || l.source, target: l.target.id || l.target }));
 
   Graph.graphData({ nodes: filteredNodes, links: filteredLinks });
+  graphFitTicks = 5;
 }
 
 /**
  * Display Node Details in Right Inspector
  */
 function showInspector(node) {
-  elInspector.classList.add('open');
+  showRailView('node');
   elInspType.textContent = (node.type || 'NODE').toUpperCase();
   elInspType.style.background = node.color || '#00e5ff';
   elInspGen.textContent = node.generation !== undefined ? `GEN ${node.generation}` : 'MATH THEOREM';
@@ -196,6 +343,11 @@ function showInspector(node) {
       <div class="inspector-section">
         <div class="ins-label">Full Query Input</div>
         <p><strong>${escapeHtml(d.query || node.title)}</strong></p>
+      </div>
+      <div class="inspector-section">
+        <div class="ins-label">Harness used for this task</div>
+        <p>Generation ${escapeHtml(String(node.generation ?? 0))}</p>
+        <button type="button" class="inspect-evolution" data-generation="${Number(node.generation) || 0}">Inspect harness evolution →</button>
       </div>
     `;
   } else if (node.type === 'jev_decision') {
@@ -223,34 +375,30 @@ function showInspector(node) {
         <pre>${escapeHtml(d.text || d.content || JSON.stringify(d, null, 2))}</pre>
       </div>
     `;
-  } else if (node.type === 'violetto_proof' || node.type === 'astra_proof') {
+  } else if (['violetto_proof', 'astra_proof', 'sympy_proof', 'z3_proof'].includes(node.type)) {
     const isAstra = node.type === 'astra_proof';
     const metrics = d.metrics || {};
     html = `
       <div class="inspector-section">
         <div class="ins-label">Solver Execution Metrics</div>
-        <p><strong>Engine:</strong> ${isAstra ? 'Codex CLI (gpt-6-astra xhigh)' : 'Limite 1B Violetto (Apple Silicon MPS)'}</p>
-        ${metrics.tokens_used ? `<p><strong>Tokens Used:</strong> ${metrics.tokens_used}</p>` : ''}
-        ${metrics.generation_time_sec ? `<p><strong>Execution Latency:</strong> ${metrics.generation_time_sec}s</p>` : ''}
+        <p><strong>Engine:</strong> ${escapeHtml(d.engine || (isAstra ? 'codex_astra' : 'local_violetto'))}</p>
+        ${metrics.tokens_used ? `<p><strong>Tokens Used:</strong> ${escapeHtml(String(metrics.tokens_used))}</p>` : ''}
+        ${metrics.execution_time_sec ? `<p><strong>Execution Latency:</strong> ${metrics.execution_time_sec}s</p>` : ''}
       </div>
       <div class="inspector-section">
         <div class="ins-label">Mathematical Proof & Reasoning Trace</div>
-        <pre class="math-proof">${escapeHtml(d.solution || 'No solution trace.')}</pre>
+        <div class="math-proof">${escapeHtml(d.solution || 'No solution trace.')}</div>
       </div>
     `;
   } else if (node.type === 'verification') {
-    const plaus = d.is_plausible ? (d.is_plausible.noul * 100).toFixed(1) + '%' : 'N/A';
-    const rigor = d.rigor_score ? d.rigor_score.score.toFixed(1) + ' / 2.0' : 'N/A';
+    const verification = d.ensemble || {};
     html = `
       <div class="inspector-section">
-        <div class="ins-label">JEV Confidence Gate Verification</div>
-        <p><strong>Mathematical Plausibility:</strong> ${plaus}</p>
-        <p><strong>Formal Rigor Score:</strong> ${rigor}</p>
+        <div class="ins-label">Answer Verification</div>
+        <p><strong>Status:</strong> ${escapeHtml(verification.status || 'UNVERIFIED')}</p>
+        <p>${escapeHtml(verification.rejection_reason || 'Final answer checked against an exact reference. This does not certify the full proof.')}</p>
       </div>
-      <div class="inspector-section">
-        <div class="ins-label">Raw Verification Payload</div>
-        <pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>
-      </div>
+      <pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>
     `;
   } else if (node.type === 'harness_state') {
     html = `
@@ -304,7 +452,8 @@ function showInspector(node) {
       </div>
     `;
   } else if (node.type === 'symbolic_verification') {
-    const isSound = d.is_verified || d.is_formally_sound;
+    const status = d.status || 'UNVERIFIED';
+    const isSound = status === 'VERIFIED';
     const casV = d.cas_checks ? d.cas_checks.valid : d.valid_steps;
     const casT = d.cas_checks ? d.cas_checks.total : d.total_steps_checked;
     const smtV = d.smt_checks ? d.smt_checks.valid : 0;
@@ -314,11 +463,12 @@ function showInspector(node) {
     html = `
       <div class="inspector-section">
         <div class="ins-label">Deterministic Verification Ensemble (SymPy + Z3)</div>
-        <p><strong>Status:</strong> <span class="badge ${isSound ? 'badge-links' : 'badge-gen'}">${isSound ? 'FORMALLY SOUND' : 'STEP DISCREPANCY'}</span></p>
+        <p><strong>Status:</strong> <span class="badge ${isSound ? 'badge-links' : 'badge-gen'}">${escapeHtml(status)}</span></p>
+        <p>${escapeHtml(d.rejection_reason || 'Final answer checked against an exact reference; full proof not certified.')}</p>
         <p><strong>SymPy CAS Equalities:</strong> ${casV}/${casT} Valid</p>
         ${smtT > 0 ? `<p><strong>Z3 SMT Congruences:</strong> ${smtV}/${smtT} Valid</p>` : ''}
         ${d.extracted_answer ? `<p><strong>Extracted Boxed Answer:</strong> <code>${escapeHtml(d.extracted_answer)}</code></p>` : ''}
-        ${d.ground_truth !== undefined && d.ground_truth !== null ? `<p><strong>Ground Truth:</strong> <code>${escapeHtml(d.ground_truth)}</code> (${d.ground_truth_matched ? 'MATCHED' : 'MISMATCH'})</p>` : ''}
+        ${d.ground_truth !== undefined && d.ground_truth !== null ? `<p><strong>Ground Truth:</strong> <code>${escapeHtml(d.ground_truth)}</code> (${d.ground_truth_matched === null ? 'UNCONFIRMED' : d.ground_truth_matched ? 'MATCHED' : 'MISMATCH'})</p>` : ''}
       </div>
       ${cexs && cexs.length > 0 ? `
         <div class="inspector-section">
@@ -336,7 +486,7 @@ function showInspector(node) {
       <div class="inspector-section">
         <div class="ins-label">Mathematical ${node.type.toUpperCase()}</div>
         <h3 style="color: #fff; margin: 4px 0 10px 0;">${escapeHtml(node.title)}</h3>
-        <p style="font-size: 13px; line-height: 1.5;">${escapeHtml(node.description || node.data.content || '')}</p>
+        <p style="font-size: 13px; line-height: 1.5;">${escapeHtml(node.description || d.content || '')}</p>
         ${node.centrality !== undefined ? `<p style="margin-top: 8px;"><strong>NetworkX PageRank Centrality:</strong> ${node.centrality}</p>` : ''}
       </div>
     `;
@@ -346,16 +496,20 @@ function showInspector(node) {
 
   elInspBody.innerHTML = html;
 
-  // Render KaTeX math equations if KaTeX is present
+  renderMath(elInspBody);
+}
+
+function renderMath(element) {
   if (window.renderMathInElement) {
     try {
-      renderMathInElement(elInspBody, {
+      renderMathInElement(element, {
         delimiters: [
           { left: '$$', right: '$$', display: true },
           { left: '$', right: '$', display: false },
           { left: '\\[', right: '\\]', display: true },
           { left: '\\(', right: '\\)', display: false }
         ],
+        ignoredTags: ['script', 'noscript', 'style', 'textarea', 'option', 'code'],
         throwOnError: false
       });
     } catch (e) {
@@ -365,13 +519,18 @@ function showInspector(node) {
 }
 
 function hideInspector() {
-  elInspector.classList.remove('open');
+  showRailView('trace');
 }
 
 /**
  * Render Active Harness Config Table & History
  */
 function renderHarnessConfig(cfg) {
+  const lastInvariants = cfg.history?.at(-1)?.invariants;
+  if (lastInvariants) {
+    elRRSIInvariantsVal.textContent = `${lastInvariants.passed} / ${lastInvariants.total} ${lastInvariants.all_passed ? 'PASSED' : 'FAILED'}`;
+    elRRSIInvariantsVal.classList.toggle('text-success', !!lastInvariants.all_passed);
+  }
   const fields = [
     ['prompt_system_style', 'Prompt Framing'],
     ['jev_difficulty_threshold', 'Difficulty Routing Cutoff'],
@@ -389,33 +548,93 @@ function renderHarnessConfig(cfg) {
     html += `
       <div class="config-row">
         <span class="config-key">${label}</span>
-        <span class="config-val">${val}</span>
+        <span class="config-val">${escapeHtml(String(val))}</span>
       </div>
     `;
   }
   elConfigTable.innerHTML = html;
 
-  // Render History
-  const history = cfg.history || [];
-  if (history.length === 0) {
-    elRRSIHistoryList.innerHTML = '<p class="hint-text">No self-improvement iterations yet.</p>';
+  const wasLatest = selectedEvolution === evolutionEntries.at(-1)?.key || evolutionEntries.length === 0;
+  evolutionEntries = [
+    { key: 'baseline', generation: 0, status: 'baseline', timestamp: 0 },
+    ...(cfg.history || []).map(h => ({ ...h, key: `g${h.generation}`, status: 'accepted' })),
+    ...(cfg.rejected_attempts || []).map((h, i) => ({ ...h, key: `r${i}` }))
+  ].sort((a, b) => a.timestamp - b.timestamp);
+  if (wasLatest || !evolutionEntries.some(h => h.key === selectedEvolution)) {
+    selectedEvolution = evolutionEntries.at(-1).key;
+  }
+  renderEvolution();
+}
+
+function renderEvolution() {
+  elRRSIHistoryList.innerHTML = evolutionEntries.map(entry => `
+    <button type="button" class="evolution-point ${entry.status === 'accepted' ? 'accepted' : entry.status === 'baseline' ? 'baseline' : 'rejected'} ${entry.key === selectedEvolution ? 'selected' : ''}"
+      data-entry="${entry.key}" aria-pressed="${entry.key === selectedEvolution}">
+      <span class="evolution-dot" aria-hidden="true"></span>
+      <span class="evolution-point-label">${entry.status === 'baseline' ? 'H₀' : entry.status === 'accepted' ? `G${entry.generation}` : '×'}</span>
+      <small>${entry.status === 'baseline' ? 'Base' : entry.status === 'accepted' ? 'Kept' : 'Blocked'}</small>
+    </button>
+  `).join('');
+
+  const scored = evolutionEntries.filter(entry => entry.status === 'accepted' && Number.isFinite(entry.critic?.generalization_score));
+  document.getElementById('rrsi-score-chart').innerHTML = scored.length ? `
+    <div class="chart-label">Recorded critic score · accepted generations</div>
+    <svg viewBox="0 0 320 76" role="img" aria-label="Recorded critic score across accepted generations">
+      <path d="M 12 64 H 308" class="chart-axis"/>
+      <polyline class="chart-line" points="${scored.map((entry, i) => `${12 + i * 296 / Math.max(1, scored.length - 1)},${64 - Math.max(0, Math.min(1, entry.critic.generalization_score)) * 50}`).join(' ')}"/>
+      ${scored.map((entry, i) => `<circle cx="${12 + i * 296 / Math.max(1, scored.length - 1)}" cy="${64 - Math.max(0, Math.min(1, entry.critic.generalization_score)) * 50}" r="${entry.key === selectedEvolution ? 5 : 3}" class="${entry.key === selectedEvolution ? 'chart-active' : 'chart-dot'}"><title>G${entry.generation}: ${entry.critic.generalization_score.toFixed(2)}</title></circle>`).join('')}
+    </svg>
+  ` : '';
+
+  const index = evolutionEntries.findIndex(entry => entry.key === selectedEvolution);
+  document.getElementById('rrsi-prev').disabled = index <= 0;
+  document.getElementById('rrsi-next').disabled = index >= evolutionEntries.length - 1;
+  const entry = evolutionEntries[index];
+  const checked = entry.invariants;
+  elRRSIInvariantsVal.textContent = checked?.total ? `${checked.passed} / ${checked.total} PASSED` : 'Not run';
+  elRRSIInvariantsVal.classList.toggle('text-success', checked?.total > 0 && checked.passed === checked.total);
+  const detail = document.getElementById('rrsi-generation-detail');
+  if (entry.status === 'baseline') {
+    detail.innerHTML = '<div class="evolution-status">H₀ · Baseline</div><h3>Starting harness</h3><p>Initial configuration before the first RRSI proposal. Select a later point to see exactly what changed and why it was kept or blocked.</p>';
   } else {
-    let histHtml = '';
-    for (let i = history.length - 1; i >= 0; i--) {
-      const h = history[i];
-      const p = h.proposal || {};
-      const c = h.critic || {};
-      histHtml += `
-        <div class="history-item">
-          <span class="gen-tag">G${h.generation}</span>
-          <strong>${escapeHtml(p.change_summary || p.component || '')}</strong>
-          <div style="color: #94a3b8; margin-top: 2px;">
-            Critic: ${c.verdict || 'ACCEPT'} (${(c.generalization_score || 0).toFixed(2)}) &bull; Invariants: ${h.invariants ? h.invariants.passed : 4}/4
-          </div>
-        </div>
-      `;
-    }
-    elRRSIHistoryList.innerHTML = histHtml;
+    const p = entry.proposal || {};
+    const c = entry.critic || {};
+    const pruner = entry.pruner || {};
+    const invariants = entry.invariants || {};
+    const accepted = entry.status === 'accepted';
+    const change = p.field ? `<div class="evolution-diff"><span>${escapeHtml(p.field)}</span><del>${escapeHtml(String(p.old_val ?? '—'))}</del><span aria-hidden="true">→</span><ins>${escapeHtml(String(p.new_val ?? '—'))}</ins></div>` : '';
+    const measure = Number.isFinite(c.delta_accuracy) ? `<p>Accuracy Δ: ${(c.delta_accuracy * 100).toFixed(1)} pts${Number.isFinite(c.delta_utility) ? ` · Utility Δ: ${c.delta_utility.toFixed(3)}` : ''}</p>` : '';
+    detail.innerHTML = `
+      <div class="evolution-status ${accepted ? 'kept' : 'blocked'}">${accepted ? `G${entry.generation} · Kept` : `Candidate for G${entry.generation} · Blocked`}</div>
+      <h3>${escapeHtml(p.component || 'Harness proposal')}</h3>
+      ${change}
+      <div class="evolution-stage"><span>01 · Proposal</span><p>${escapeHtml(p.hypothesis || p.change_summary || 'No hypothesis recorded.')}</p>${Number.isFinite(p.budget) ? `<small>Edit budget ${p.budget.toFixed(3)}</small>` : ''}</div>
+      <div class="evolution-stage"><span>02 · Invariants</span><p>${invariants.total !== undefined ? `${invariants.passed}/${invariants.total} passed` : 'Not reached'}</p></div>
+      <div class="evolution-stage"><span>03 · Critic</span><p>${escapeHtml(c.reason || 'Not reached')}</p>${measure}</div>
+      <div class="evolution-stage"><span>04 · Selection</span><p>${escapeHtml(pruner.reason || (entry.status === 'pruned_zero_delta' ? 'No parameter change to keep.' : accepted ? 'Change accepted.' : 'Candidate rejected before selection.'))}</p></div>
+    `;
+  }
+  elRRSIHistoryList.querySelector('.selected')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
+function selectEvolution(key, focusGraph = false) {
+  if (!evolutionEntries.some(entry => entry.key === key)) return;
+  selectedEvolution = key;
+  renderEvolution();
+  document.querySelector('.evolution-heading').scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  if (!focusGraph) return;
+  const entry = evolutionEntries.find(item => item.key === key);
+  if (entry.status !== 'accepted' && entry.status !== 'baseline') return;
+  const generation = entry.generation;
+  const node = rawGraphData.nodes.find(n => n.id === `harness_gen_${generation}`);
+  if (!node) return;
+  if (activeFilter !== 'rrsi') {
+    activeFilter = 'rrsi';
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === 'rrsi'));
+    applyFilter();
+  }
+  if (Number.isFinite(node.x) && Number.isFinite(node.y) && Number.isFinite(node.z)) {
+    Graph.cameraPosition({ x: node.x, y: node.y, z: node.z + 170 }, node, 1100);
   }
 }
 
@@ -423,6 +642,33 @@ function renderHarnessConfig(cfg) {
  * Event Listeners & Controls
  */
 function setupUIEvents() {
+  elRRSIHistoryList.addEventListener('click', event => {
+    const point = event.target.closest('[data-entry]');
+    if (point) {
+      selectEvolution(point.dataset.entry, true);
+      elRRSIHistoryList.querySelector('.selected')?.focus();
+    }
+  });
+  elRRSIHistoryList.addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    document.getElementById(event.key === 'ArrowLeft' ? 'rrsi-prev' : 'rrsi-next').click();
+    elRRSIHistoryList.querySelector('.selected')?.focus();
+  });
+  document.getElementById('rrsi-prev').addEventListener('click', () => {
+    const index = evolutionEntries.findIndex(entry => entry.key === selectedEvolution);
+    if (index > 0) selectEvolution(evolutionEntries[index - 1].key, true);
+  });
+  document.getElementById('rrsi-next').addEventListener('click', () => {
+    const index = evolutionEntries.findIndex(entry => entry.key === selectedEvolution);
+    if (index < evolutionEntries.length - 1) selectEvolution(evolutionEntries[index + 1].key, true);
+  });
+  elInspector.addEventListener('click', event => {
+    const link = event.target.closest('.inspect-evolution');
+    if (!link) return;
+    document.querySelector('[data-tab="tab-rrsi"]').click();
+    selectEvolution(Number(link.dataset.generation) ? `g${link.dataset.generation}` : 'baseline', true);
+  });
   // Tabs Switcher
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -431,12 +677,16 @@ function setupUIEvents() {
       btn.classList.add('active');
       const target = document.getElementById(btn.dataset.tab);
       if (target) target.classList.add('active');
+      if (btn.dataset.tab === 'tab-rrsi') {
+        elRRSIHistoryList.querySelector('.selected')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+      }
     });
   });
 
   // Filter Buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (activeFilter === btn.dataset.filter) return;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeFilter = btn.dataset.filter;
@@ -451,8 +701,12 @@ function setupUIEvents() {
     });
   });
 
-  // Close Inspector Button
+  // Right panel navigation
   document.getElementById('btn-close-inspector').addEventListener('click', hideInspector);
+  document.getElementById('tab-trace').addEventListener('click', () => showRailView('trace'));
+  document.getElementById('tab-node').addEventListener('click', () => showRailView('node'));
+  document.getElementById('btn-open-trace').addEventListener('click', () => showRailView('trace'));
+  document.getElementById('btn-close-panel').addEventListener('click', () => elInspector.classList.remove('open'));
 
   // Dispatch Exploration
   elBtnExplore.addEventListener('click', async () => {
@@ -471,21 +725,18 @@ function setupUIEvents() {
     elBtnExplore.querySelector('.spinner').classList.remove('hidden');
     elBtnExplore.querySelector('.btn-text').textContent = 'Exploring...';
     elExploreProgress.classList.remove('hidden');
+    showRailView('trace');
+    elTraceTitle.textContent = query;
 
-    resetProgressSteps();
-    setStepActive('step-jev');
+    elExploreProgress.setAttribute('aria-busy', 'true');
+    document.getElementById('explore-status').textContent = 'Exploration in progress · follow the live trace on the right.';
 
     try {
-      setTimeout(() => setStepActive('step-tree'), 300);
-      setTimeout(() => setStepActive('step-solve'), 1200);
-
       const res = await fetch('/api/explore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, engine, force_arxiv: forceArxiv })
       });
-
-      setStepActive('step-verify');
 
       if (!res.ok) {
         const err = await res.json();
@@ -493,15 +744,17 @@ function setupUIEvents() {
       }
 
       const result = await res.json();
-      setAllStepsDone();
+      await fetchTrace();
+      document.getElementById('explore-status').textContent = 'Exploration complete.';
 
       // Refresh graph and locate newly created query node
       await fetchGraph();
 
       if (result.query_node_id) {
-        const targetNode = rawGraphData.nodes.find(n => n.id === result.query_node_id);
+        const proofLink = rawGraphData.links.find(l => l.label === 'dispatched_to' && (l.source.id || l.source) === result.query_node_id.replace('query_', 'jev_'));
+        const proofId = proofLink && (proofLink.target.id || proofLink.target);
+        const targetNode = rawGraphData.nodes.find(n => n.id === (proofId || result.query_node_id));
         if (targetNode) {
-          showInspector(targetNode);
           Graph.cameraPosition(
             { x: targetNode.x * 1.5, y: targetNode.y * 1.5, z: targetNode.z + 180 },
             targetNode,
@@ -510,8 +763,11 @@ function setupUIEvents() {
         }
       }
     } catch (err) {
+      await fetchTrace();
+      document.getElementById('explore-status').textContent = `Exploration failed: ${err.message}`;
       alert(`Exploration Error: ${err.message}`);
     } finally {
+      elExploreProgress.setAttribute('aria-busy', 'false');
       elBtnExplore.disabled = false;
       elBtnExplore.querySelector('.spinner').classList.add('hidden');
       elBtnExplore.querySelector('.btn-text').textContent = 'Dispatch Exploration';
@@ -546,6 +802,9 @@ function setupUIEvents() {
           );
         }
       }
+      if (!data.success) {
+        document.querySelector('[data-tab="tab-rrsi"]').click();
+      }
     } catch (err) {
       alert(`RRSI Step Error: ${err.message}`);
     } finally {
@@ -557,7 +816,7 @@ function setupUIEvents() {
 
   // 3D Controls
   document.getElementById('btn-reset-cam').addEventListener('click', () => {
-    Graph.cameraPosition({ x: 0, y: 150, z: 450 }, { x: 0, y: 0, z: 0 }, 1200);
+    fitGraph();
   });
 
   document.getElementById('btn-toggle-physics').addEventListener('click', () => {
@@ -575,10 +834,15 @@ function setupUIEvents() {
   document.getElementById('btn-reset-graph').addEventListener('click', async () => {
     if (!confirm('Reset graph to baseline seed?')) return;
     try {
-      await fetch('/api/graph/reset', { method: 'POST' });
+      const res = await fetch('/api/graph/reset', { method: 'POST' });
+      if (!res.ok) throw new Error((await res.json()).detail || 'Graph reset failed');
       await fetchGraph();
       await fetchHarness();
       hideInspector();
+    } catch (err) {
+      alert(`Graph reset error: ${err.message}`);
+    }
+  });
   // Run Benchmark Suite Button
   const btnRunBm = document.getElementById('btn-run-benchmark');
   if (btnRunBm) {
@@ -607,14 +871,14 @@ function setupUIEvents() {
 }
 
 async function fetchBenchmark() {
+  const elAcc = document.getElementById('bm-accuracy');
+  const elStep = document.getElementById('bm-step-pass');
+  const elLedger = document.getElementById('benchmark-ledger');
   try {
     const res = await fetch('/api/benchmark');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('Benchmark results unavailable');
     const data = await res.json();
     if (data.results && data.results.length > 0) {
-      const elAcc = document.getElementById('bm-accuracy');
-      const elStep = document.getElementById('bm-step-pass');
-      const elLedger = document.getElementById('benchmark-ledger');
       if (elAcc) elAcc.textContent = `${(data.overall_accuracy * 100).toFixed(1)}% (${data.solved_correctly}/${data.total_problems})`;
       if (elStep) elStep.textContent = `${(data.symbolic_avg_pass_rate * 100).toFixed(1)}%`;
       
@@ -623,39 +887,25 @@ async function fetchBenchmark() {
         html += `
           <div class="history-item">
             <span class="gen-tag">${escapeHtml(r.id)}</span>
-            <strong>${r.correct ? '<span style="color:#00e676">PASS</span>' : '<span style="color:#ff1744">FAIL</span>'}</strong>
+            <strong>${r.correct === true ? 'PASS' : r.correct === false ? 'FAIL' : 'UNCONFIRMED'}</strong>
             <div style="color: #94a3b8; margin-top: 2px;">
-              Engine: <code>${escapeHtml(r.engine_used)}</code> &bull; Ans: ${escapeHtml(r.extracted_answer || 'N/A')} &bull; Latency: ${r.latency_sec}s
+              Engine: <code>${escapeHtml(r.engine_used)}</code> &bull; Ans: ${escapeHtml(r.extracted_answer || 'N/A')} &bull; Latency: ${escapeHtml(r.latency_sec)}s
             </div>
           </div>
         `;
       }
       if (elLedger) elLedger.innerHTML = html;
+    } else {
+      if (elAcc) elAcc.textContent = '—';
+      if (elStep) elStep.textContent = '—';
+      if (elLedger) elLedger.textContent = 'No benchmark run yet.';
     }
   } catch (err) {
+    if (elAcc) elAcc.textContent = '—';
+    if (elStep) elStep.textContent = '—';
+    if (elLedger) elLedger.textContent = 'Benchmark results unavailable.';
     console.error('Failed to load benchmark:', err);
   }
-}
-
-function resetProgressSteps() {
-  document.querySelectorAll('.progress-step').forEach(step => {
-    step.classList.remove('active', 'done');
-  });
-}
-
-function setStepActive(stepId) {
-  const step = document.getElementById(stepId);
-  if (step) {
-    document.querySelectorAll('.progress-step').forEach(s => s.classList.remove('active'));
-    step.classList.add('active');
-  }
-}
-
-function setAllStepsDone() {
-  document.querySelectorAll('.progress-step').forEach(step => {
-    step.classList.remove('active');
-    step.classList.add('done');
-  });
 }
 
 function escapeHtml(text) {

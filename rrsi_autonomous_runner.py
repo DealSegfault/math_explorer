@@ -13,15 +13,15 @@ import argparse
 from typing import Dict, Any, List
 
 from rrsi_engine import RRSIEngine
-from graph_manager import GraphManager
+from config import DATA_DIR
 from math_explorer import UnifiedMathHarness
 
 class AutonomousRRSIRunner:
-    def __init__(self, target_generations: int = 10):
+    def __init__(self, target_generations: int = 10, harness=None):
         self.target_generations = target_generations
-        self.gm = GraphManager()
-        self.rrsi = RRSIEngine(graph_manager=self.gm)
-        self.harness = UnifiedMathHarness()
+        self.harness = harness if harness is not None else UnifiedMathHarness()
+        self.gm = self.harness.gm
+        self.rrsi = self.harness.rrsi
 
     def run_evolution_loop(self) -> Dict[str, Any]:
         initial_cfg = self.rrsi.get_current_harness()
@@ -76,7 +76,8 @@ class AutonomousRRSIRunner:
         summary = {
             "start_generation": start_gen,
             "final_generation": final_cfg.get("generation"),
-            "cycles_executed": len(history),
+            "cycles_executed": self.target_generations,
+            "cycles_accepted": len(history),
             "total_time_sec": total_time,
             "initial_config": initial_cfg,
             "final_optimized_config": final_cfg,
@@ -85,7 +86,7 @@ class AutonomousRRSIRunner:
         }
 
         # Save evolution summary
-        out_path = "/Users/mac/.gemini/antigravity/scratch/math_explorer/data/rrsi_evolution_summary.json"
+        out_path = DATA_DIR / "rrsi_evolution_summary.json"
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2)
 

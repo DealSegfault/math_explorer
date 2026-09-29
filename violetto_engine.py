@@ -52,7 +52,8 @@ class ViolettoEngine:
         temperature: float = 0.6,
         top_k: int = 50,
         repetition_penalty: float = 1.05,
-        stream: bool = False
+        stream: bool = False,
+        seed: Optional[int] = None
     ) -> str:
         """
         Generates mathematical reasoning using native PyTorch/MPS accelerated generation.
@@ -89,6 +90,9 @@ class ViolettoEngine:
             gen_kwargs["temperature"] = temperature
             gen_kwargs["top_k"] = top_k
 
+        if seed is not None and stream:
+            raise ValueError("Seeded streaming is unsupported")
+
         if stream:
             streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=False)
             gen_kwargs["streamer"] = streamer
@@ -104,7 +108,19 @@ class ViolettoEngine:
             return full_output
         else:
             with torch.inference_mode():
-                outputs = self.model.generate(**inputs, **gen_kwargs)
+                if seed is None:
+                    outputs = self.model.generate(**inputs, **gen_kwargs)
+                else:
+                    with ViolettoEngine._lock:
+                        cpu_state = torch.get_rng_state()
+                        mps_state = torch.mps.get_rng_state() if self.device == "mps" else None
+                        try:
+                            torch.manual_seed(seed)
+                            outputs = self.model.generate(**inputs, **gen_kwargs)
+                        finally:
+                            torch.set_rng_state(cpu_state)
+                            if mps_state is not None:
+                                torch.mps.set_rng_state(mps_state)
             # Slice off input tokens
             input_len = inputs.input_ids.shape[-1]
             generated_tokens = outputs[0, input_len:]

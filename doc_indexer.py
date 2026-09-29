@@ -22,6 +22,7 @@ class MathDocIndexer:
         os.makedirs(self.cache_dir, exist_ok=True)
         self.index_file = os.path.join(self.cache_dir, "index_registry.json")
         self.registry: Dict[str, Any] = self._load_registry()
+        self.registry_version = cache.hash_key(self.registry)
         
         # Build Tantivy in-memory index
         self._init_tantivy()
@@ -37,6 +38,7 @@ class MathDocIndexer:
         self._reindex_tantivy()
 
     def _reindex_tantivy(self):
+        self.tantivy_index = tantivy.Index(self.schema)
         writer = self.tantivy_index.writer()
         all_nodes = self.get_all_nodes()
         for n in all_nodes:
@@ -62,6 +64,7 @@ class MathDocIndexer:
     def _save_registry(self):
         with open(self.index_file, "w", encoding="utf-8") as f:
             json.dump(self.registry, f, indent=2, ensure_ascii=False)
+        self.registry_version = cache.hash_key(self.registry)
         self._reindex_tantivy()
 
     def index_document(self, file_path: str, doc_name: Optional[str] = None) -> str:
@@ -166,7 +169,9 @@ class MathDocIndexer:
         doc_name: Optional[str] = None,
         lexical_top_k: int = 25,
         final_top_k: int = 3,
-        max_workers: int = 8
+        max_workers: int = 8,
+        strategy: str = "hierarchical_pageindex",
+        use_cache: bool = True
     ) -> Dict[str, Any]:
         """
         Two-stage retrieval pipeline with bounded concurrency and SQLite caching.
@@ -175,8 +180,12 @@ class MathDocIndexer:
         t0 = time.perf_counter_ns()
         
         # 0. Check multi-level retrieval cache
-        cache_key = cache.hash_key("retrieval", query, doc_name or "all", final_top_k)
-        cached = cache.get("retrieval_cache", cache_key)
+        if strategy not in ("hierarchical_pageindex", "flat_topk"):
+            raise ValueError(f"Unknown search strategy: {strategy}")
+        relevance_version = getattr(router, "RELEVANCE_VERSION", "legacy") if router else "none"
+        cache_key = cache.hash_key("retrieval", self.registry_version, relevance_version, query,
+                                   doc_name or "all", lexical_top_k, final_top_k, strategy)
+        cached = cache.get("retrieval_cache", cache_key) if use_cache else None
         if cached:
             cached["metrics"]["cached"] = True
             cached["metrics"]["total_ms"] = round((time.perf_counter_ns() - t0) / 1e6, 2)
@@ -184,29 +193,44 @@ class MathDocIndexer:
 
         # 1. Stage 1: Tantivy BM25 Lexical Pre-filtering
         t_bm25_0 = time.perf_counter_ns()
-        candidates = self.lexical_search(query, top_k=lexical_top_k)
+        candidates = self.lexical_search(query, top_k=len(self.get_all_nodes()) if doc_name else lexical_top_k)
         if doc_name:
-            candidates = [c for c in candidates if c.get("doc_name") == doc_name]
+            candidates = [c for c in candidates if c.get("doc_name") == doc_name][:lexical_top_k]
         bm25_ms = round((time.perf_counter_ns() - t_bm25_0) / 1e6, 2)
 
         if not candidates:
             return {"nodes": [], "metrics": {"bm25_ms": bm25_ms, "rerank_ms": 0.0, "total_ms": bm25_ms, "cached": False}}
 
+        if strategy == "flat_topk":
+            payload = {"nodes": candidates[:final_top_k], "metrics": {
+                "bm25_candidates_count": len(candidates), "bm25_ms": bm25_ms,
+                "rerank_ms": 0.0, "total_ms": round((time.perf_counter_ns() - t0) / 1e6, 2),
+                "cached": False}}
+            if use_cache:
+                cache.set("retrieval_cache", cache_key, payload)
+            return payload
+
         # 2. Stage 2: Bounded Concurrent JEV Semantic Reranking
         t_rerank_0 = time.perf_counter_ns()
 
         def _score_candidate(cand: Dict[str, Any]) -> Dict[str, Any]:
-            content = f"{cand.get('title', '')}: {cand.get('text', '')[:300]}"
-            cand_key = cache.hash_key("jev_relevance", query, cand.get("node_id"), content)
-            cached_score = cache.get("jev_score", cand_key)
-            if cached_score is not None:
-                score = float(cached_score)
+            if hasattr(router, "assess_node_relevance"):
+                assessment = router.assess_node_relevance(
+                    query=query,
+                    node_title=cand.get("title", ""),
+                    node_text=cand.get("text", ""),
+                )
+                score = float(assessment["score"])
             else:
-                score = router.score_node_relevance(query, content)
-                cache.set("jev_score", cand_key, score)
-            
+                score = router.score_node_relevance(
+                    query, cand.get("title", ""), cand.get("text", ""))
+                assessment = {"score": score, "signals": {}, "usage": {}, "failure_mode": None}
+
             res = dict(cand)
             res["jev_score"] = score
+            res["jev_signals"] = assessment.get("signals", {})
+            res["jev_usage"] = assessment.get("usage", {})
+            res["jev_failure_mode"] = assessment.get("failure_mode")
             return res
 
         # Parallelize scoring across candidates with bounded thread pool
@@ -218,6 +242,11 @@ class MathDocIndexer:
         top_results = scored[:final_top_k]
         rerank_ms = round((time.perf_counter_ns() - t_rerank_0) / 1e6, 2)
         total_ms = round((time.perf_counter_ns() - t0) / 1e6, 2)
+        jev_input_tokens = sum(n.get("jev_usage", {}).get("input_tokens", 0) for n in scored)
+        jev_output_tokens = sum(n.get("jev_usage", {}).get("output_tokens", 0) for n in scored)
+        jev_failure_modes = sorted({
+            n["jev_failure_mode"] for n in scored if n.get("jev_failure_mode")
+        })
 
         payload = {
             "nodes": top_results,
@@ -226,10 +255,14 @@ class MathDocIndexer:
                 "bm25_ms": bm25_ms,
                 "rerank_ms": rerank_ms,
                 "total_ms": total_ms,
+                "jev_input_tokens": jev_input_tokens,
+                "jev_output_tokens": jev_output_tokens,
+                "jev_failure_modes": jev_failure_modes,
                 "cached": False
             }
         }
-        cache.set("retrieval_cache", cache_key, payload)
+        if use_cache:
+            cache.set("retrieval_cache", cache_key, payload)
         return payload
 
     def hierarchical_search(

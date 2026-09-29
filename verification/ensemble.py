@@ -1,23 +1,26 @@
-#!/usr/bin/env python3
-"""
-Fail-Closed Deterministic Verification Ensemble for Mathematical Proofs.
-Combines CAS (SymPy), SMT Counterexample Search (Z3), and Numerical Spot-Checks.
-Enforces a 3-state verification contract: VERIFIED, REFUTED, UNVERIFIED.
-Fail-closed: 0 checks or parse failures ALWAYS yield UNVERIFIED, never PASS.
-"""
+"""Check arithmetic steps and final answers without certifying free-form proofs."""
 
 import re
-import random
 from enum import Enum
 from dataclasses import dataclass, asdict, field
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple, TypedDict
 import sympy as sp
-import z3
+from verification.expressions import parse_expression
+
 
 class VerificationStatus(str, Enum):
     VERIFIED = "VERIFIED"
     REFUTED = "REFUTED"
     UNVERIFIED = "UNVERIFIED"
+
+
+class VerificationEvidence(TypedDict, total=False):
+    exact_result: str
+    method: str
+    constraints: Dict[str, Any]
+    witness: List[int]
+    unsat_certificate: str
+
 
 @dataclass
 class VerificationResult:
@@ -33,225 +36,134 @@ class VerificationResult:
     smt_checks: Dict[str, Any]
     steps: List[Dict[str, Any]] = field(default_factory=list)
     rejection_reason: Optional[str] = None
+    verification_basis: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         d = asdict(self)
         d["status"] = self.status.value
         return d
 
-class VerificationEnsemble:
-    def __init__(self):
-        self.x, self.y, self.z, self.n, self.k = sp.symbols('x y z n k', integer=True)
 
+class VerificationEnsemble:
     def extract_boxed_answer(self, text: str) -> Optional[str]:
-        """Extracts content inside \\boxed{...}."""
-        matches = re.findall(r'\\boxed\{([^{}]+)\}', text)
-        if matches:
-            return matches[-1].strip()
-        m = re.search(r'(?:the\s+answer\s+is|result\s+is|yields)\s*[:=]?\s*([0-9\-\+/]+)', text, re.IGNORECASE)
-        if m:
-            return m.group(1).strip()
-        return None
+        starts = list(re.finditer(r'\\boxed\s*\{', text))
+        if starts:
+            start = starts[-1].end()
+            depth = 1
+            for i in range(start, len(text)):
+                depth += (text[i] == '{') - (text[i] == '}')
+                if depth == 0:
+                    return text[start:i].strip() or None
+            return None
+        matches = re.findall(
+            r'(?:final\s+answer\s*:|the\s+answer\s+is|result\s+is)\s*([-+]?\d+(?:\.\d+)?(?:/\d+)?)\s*[.!]?\s*$',
+            text, re.IGNORECASE | re.MULTILINE)
+        return matches[-1] if matches else None
 
     def clean_expr(self, s: str) -> str:
-        s = s.strip().rstrip('.,;:')
-        prose_prefixes = [
-            r'^(?:we\s+find\s+that|we\s+have|we\s+get|we\s+see|we\s+obtain)\s+',
-            r'^(?:it\s+follows\s+that|this\s+implies\s+that|this\s+gives)\s+',
-            r'^(?:also|and|then|hence|thus|so|where|therefore|since|now|let|find\s+that|see\s+that|get)\s+'
-        ]
-        for p in prose_prefixes:
-            s = re.sub(p, '', s, flags=re.IGNORECASE)
-        s = re.sub(r',.*$', '', s)
-        s = re.sub(r'\s+(?:and|then|hence|thus|so|where|therefore|since|which|yields|concludes|giving|leads|for|with)\b.*$', '', s, flags=re.IGNORECASE)
-        s = re.sub(r'\\cdot', '*', s)
-        s = re.sub(r'\\times', '*', s)
-        s = re.sub(r'\\frac\{([^{}]+)\}\{([^{}]+)\}', r'(\1)/(\2)', s)
-        s = re.sub(r'\\left\(|\\right\)', '', s)
-        s = re.sub(r'\\left\[|\\right\]', '', s)
-        s = re.sub(r'\^\{([^{}]+)\}', r'**(\1)', s)
-        s = re.sub(r'\^([0-9a-zA-Z\+\-]+)', r'**(\1)', s)
-        s = re.sub(r'[{}\$\\]', '', s)
-        return s.strip()
+        s = s.strip().strip('$').strip().rstrip('.,;:')
+        s = re.sub(r'^(?:we have|we get|thus|hence|therefore|so)\s+', '', s, flags=re.I)
+        s = s.replace(r'\left', '').replace(r'\right', '')
+        s = s.replace(r'\cdot', '*').replace(r'\times', '*')
+        # Nested fractions are reduced from the inside out.
+        for _ in range(8):
+            previous = s
+            s = re.sub(r'\\frac\{([^{}]+)\}\{([^{}]+)\}', r'((\1)/(\2))', s)
+            s = re.sub(r'\\sqrt\{([^{}]+)\}', r'sqrt(\1)', s)
+            s = re.sub(r'\^\{([^{}]+)\}', r'**(\1)', s)
+            if s == previous:
+                break
+        return s.replace('^', '**').strip()
 
     def check_cas_equality(self, lhs_str: str, rhs_str: str) -> Tuple[Optional[bool], str]:
-        """CAS check: verifies LHS - RHS == 0 using SymPy. Returns (None, ...) on parse failure."""
         try:
-            lhs = sp.sympify(self.clean_expr(lhs_str))
-            rhs = sp.sympify(self.clean_expr(rhs_str))
+            lhs = parse_expression(self.clean_expr(lhs_str))
+            rhs = parse_expression(self.clean_expr(rhs_str))
             diff = sp.simplify(lhs - rhs)
             if diff == 0:
                 return True, "Symbolically identical (diff = 0)"
-            return False, f"Refuted: non-zero difference ({diff})"
-        except Exception as e:
-            return None, f"CAS parse error: {e}"
+            if lhs.free_symbols or rhs.free_symbols:
+                return None, "Equality may depend on assumptions or variable assignments."
+            if diff.is_zero is False:
+                return False, f"Constant equality refuted (difference = {diff})"
+            return None, "Equality could not be decided."
+        except (ValueError, TypeError, SyntaxError, ArithmeticError, RecursionError) as e:
+            return None, f"Unsupported expression: {e}"
 
-    def check_z3_congruence(self, a_str: str, b_str: str, m_str: str) -> Tuple[Optional[bool], Optional[Dict[str, int]], str]:
-        """
-        SMT check: tests congruence a == b (mod m).
-        Uses Z3 to verify whether any counterexample exists. Returns (None, ...) on parse error.
-        """
+    def check_z3_congruence(self, a_str, b_str, m_str):
         try:
-            a_val = int(sp.sympify(self.clean_expr(a_str)))
-            b_val = int(sp.sympify(self.clean_expr(b_str)))
-            m_val = int(sp.sympify(self.clean_expr(m_str)))
-
-            if m_val == 0:
+            values = [parse_expression(self.clean_expr(s)) for s in (a_str, b_str, m_str)]
+            if not all(v.is_Integer for v in values):
+                return None, None, "Congruence requires exact integers."
+            a, b, m = map(int, values)
+            if m == 0:
                 return False, None, "Modulo 0 is undefined."
+            remainder = (a - b) % m
+            if remainder == 0:
+                return True, None, "Exact integer congruence holds."
+            return False, {"a": a, "b": b, "m": m, "remainder": remainder}, "Nonzero remainder."
+        except (ValueError, TypeError, SyntaxError, ArithmeticError, RecursionError) as e:
+            return None, None, f"Unsupported congruence: {e}"
 
-            if (a_val - b_val) % m_val == 0:
-                return True, None, f"Congruence {a_val} ≡ {b_val} (mod {m_val}) holds."
-            else:
-                rem = (a_val - b_val) % m_val
-                return False, {"a": a_val, "b": b_val, "m": m_val, "remainder": rem}, f"Refuted: remainder is {rem} != 0."
-        except Exception as e:
-            return None, None, f"Z3 congruence unparseable: {e}"
-
-    def numerical_spot_check(self, lhs_str: str, rhs_str: str, samples: int = 5) -> Tuple[Optional[bool], str]:
-        """
-        Numerical spot-check: evaluates free variables at multiple random integers.
-        Fail-closed: parse error yields None (UNVERIFIED), NEVER True.
-        """
-        try:
-            lhs = sp.sympify(self.clean_expr(lhs_str))
-            rhs = sp.sympify(self.clean_expr(rhs_str))
-            free = list(lhs.free_symbols.union(rhs.free_symbols))
-            if not free:
-                is_zero = (sp.simplify(lhs - rhs) == 0)
-                return is_zero, ("Static constant verified" if is_zero else "Static constant refuted")
-
-            for _ in range(samples):
-                subs = {v: random.randint(2, 50) for v in free}
-                v_lhs = lhs.subs(subs)
-                v_rhs = rhs.subs(subs)
-                if sp.simplify(v_lhs - v_rhs) != 0:
-                    return False, f"Numerical spot-check refuted at {subs}: {v_lhs} != {v_rhs}"
-            return True, f"Numerical spot-check passed across {samples} valuations"
-        except Exception as e:
-            return None, f"Numerical spot check unparseable: {e}"
-
-    def verify(
-        self,
-        solution_text: str,
-        ground_truth: Optional[str] = None,
-        strictness: float = 0.75
-    ) -> VerificationResult:
-        """
-        Runs fail-closed verification ensemble:
-        - 3 states: VERIFIED, REFUTED, UNVERIFIED.
-        - Fail-closed: 0 checks or unparseable text => UNVERIFIED (is_verified = False).
-        - Any contradiction => REFUTED (is_verified = False).
-        """
+    def verify(self, solution_text: str, ground_truth: Optional[str] = None,
+               strictness: float = 0.75, reference_answer: Optional[str] = None,
+               evidence: Optional[VerificationEvidence] = None) -> VerificationResult:
         extracted = self.extract_boxed_answer(solution_text)
-        lines = solution_text.split('\n')
-        
-        cas_checks = []
-        smt_checks = []
-        counterexamples = []
-        checked_pairs = set()
-
-        for line in lines:
-            line = line.strip()
+        if evidence and evidence.get("exact_result") is not None:
+            exact = str(evidence["exact_result"])
+            if reference_answer is None:
+                reference_answer = exact
+            if extracted is None:
+                extracted = exact
+        cas_checks, smt_checks, counterexamples = [], [], []
+        checked = set()
+        for line in solution_text.splitlines():
+            line = line.strip().strip('$').strip()
             if not line or line.startswith('#'):
                 continue
-
-            # Modular congruences
-            cong_m = re.search(r'([^\\]+)\s*(?:\\equiv|≡)\s*([^\\\(]+)\s*(?:\\pmod|\(mod\))\s*\{?([0-9a-zA-Z]+)\}?', line)
-            if cong_m:
-                a_s, b_s, m_s = cong_m.group(1).strip(), cong_m.group(2).strip(), cong_m.group(3).strip()
-                k = (a_s, b_s, m_s)
-                if k not in checked_pairs and len(a_s) < 30 and len(b_s) < 30:
-                    checked_pairs.add(k)
-                    ok, cex, msg = self.check_z3_congruence(a_s, b_s, m_s)
-                    if ok is not None:
-                        smt_checks.append({"claim": f"{a_s} ≡ {b_s} (mod {m_s})", "valid": ok, "reason": msg})
-                        if cex:
-                            counterexamples.append(cex)
+            cong = re.fullmatch(r'(.+?)\s*(?:\\equiv|≡)\s*(.+?)\s*(?:\\pmod\{([^{}]+)\}|\(mod\s+([^()]+)\))\.?', line)
+            if cong:
+                a, b, m1, m2 = cong.groups()
+                ok, cex, reason = self.check_z3_congruence(a, b, m1 or m2)
+                smt_checks.append({"claim": line, "valid": ok, "reason": reason})
+                if cex:
+                    counterexamples.append(cex)
                 continue
+            # Exclude inequalities, assignments (:=), and implications (=>).
+            parts = re.split(r'(?<![<>=!:])=(?![=>])', line)
+            for left, right in zip(parts, parts[1:]):
+                pair = (left.strip(), right.strip())
+                if pair in checked:
+                    continue
+                checked.add(pair)
+                ok, reason = self.check_cas_equality(*pair)
+                cas_checks.append({"claim": f"{left} = {right}", "valid": ok,
+                                   "refuted": ok is False, "reason": reason})
 
-            # Equations A = B
-            parts = [p.strip() for p in line.split('=') if p.strip()]
-            if 2 <= len(parts) <= 3:
-                p1, p2 = parts[0], parts[1]
-                if len(p1) < 40 and len(p2) < 40 and re.search(r'[0-9\+\-\*\/\^]', p1) and re.search(r'[0-9\+\-\*\/\^]', p2):
-                    pair = (p1, p2)
-                    if pair not in checked_pairs:
-                        checked_pairs.add(pair)
-                        cas_ok, cas_msg = self.check_cas_equality(p1, p2)
-                        num_ok, num_msg = self.numerical_spot_check(p1, p2)
-                        
-                        # Only record if at least one check parsed successfully
-                        if cas_ok is not None or num_ok is not None:
-                            effective_valid = (cas_ok is True) or (num_ok is True)
-                            effective_refuted = (cas_ok is False) or (num_ok is False)
-                            cas_checks.append({
-                                "claim": f"{p1} = {p2}",
-                                "valid": effective_valid and not effective_refuted,
-                                "refuted": effective_refuted,
-                                "reason": cas_msg if cas_ok is not None else num_msg
-                            })
-
-        valid_cas = sum(1 for c in cas_checks if c["valid"])
-        refuted_cas = sum(1 for c in cas_checks if c.get("refuted"))
-        total_cas = len(cas_checks)
-
-        valid_smt = sum(1 for s in smt_checks if s["valid"])
-        refuted_smt = sum(1 for s in smt_checks if not s["valid"])
-        total_smt = len(smt_checks)
-
-        all_checks_total = total_cas + total_smt
-        all_checks_valid = valid_cas + valid_smt
-        total_refuted = refuted_cas + refuted_smt
-
-        # Calculate pass rate: strictly 0.0 if no checks were performable
-        pass_rate = round(all_checks_valid / all_checks_total, 3) if all_checks_total > 0 else 0.0
-
-        # Ground truth validation
-        gt_match = None
-        if ground_truth is not None and extracted is not None:
-            c_ext = self.clean_expr(extracted)
-            c_gt = self.clean_expr(str(ground_truth))
-            try:
-                diff = sp.simplify(sp.sympify(c_ext) - sp.sympify(c_gt))
-                gt_match = (diff == 0)
-            except Exception:
-                gt_match = (c_ext.lower() == c_gt.lower())
-
-        # Determine 3-state status
-        if gt_match is False or total_refuted > 0 or len(counterexamples) > 0:
+        valid_cas = sum(c["valid"] is True for c in cas_checks)
+        valid_smt = sum(c["valid"] is True for c in smt_checks)
+        refuted_cas = sum(c["valid"] is False for c in cas_checks)
+        refuted_smt = sum(c["valid"] is False for c in smt_checks)
+        total = len(cas_checks) + len(smt_checks)
+        pass_rate = round((valid_cas + valid_smt) / total, 3) if total else 0.0
+        gt_match = self.check_cas_equality(extracted, str(ground_truth))[0] if extracted is not None and ground_truth is not None else None
+        ref_match = self.check_cas_equality(extracted, str(reference_answer))[0] if extracted is not None and reference_answer is not None else None
+        basis = None
+        if gt_match is False or ref_match is False or refuted_cas or refuted_smt:
             status = VerificationStatus.REFUTED
-            is_verified = False
-            rejection_reason = "Refuted by counterexample, ground-truth contradiction, or algebraic violation."
-        elif gt_match is True:
-            # Explicit ground truth match confirmed
+            reason = "Contradiction with a reference answer or an exact arithmetic statement."
+        elif (gt_match is True or ref_match is True) and (not total or pass_rate >= strictness or
+                                                           (evidence and evidence.get("exact_result") is not None)):
             status = VerificationStatus.VERIFIED
-            is_verified = True
-            rejection_reason = None
-        elif all_checks_total == 0:
-            # FAIL-CLOSED: No verifiable equations detected in solution
-            status = VerificationStatus.UNVERIFIED
-            is_verified = False
-            rejection_reason = "Fail-closed: No formal algebraic or congruence equations could be extracted."
-        elif pass_rate >= strictness and total_refuted == 0:
-            status = VerificationStatus.VERIFIED
-            is_verified = True
-            rejection_reason = None
+            basis = "ground_truth_answer" if gt_match is True else "deterministic_answer"
+            reason = None
         else:
             status = VerificationStatus.UNVERIFIED
-            is_verified = False
-            rejection_reason = f"Pass rate {pass_rate:.1%} below required strictness {strictness:.1%}."
-
+            reason = "Answer lacks an independent reference or checked steps fall below strictness."
         return VerificationResult(
-            status=status,
-            is_verified=is_verified,
-            pass_rate=pass_rate,
-            extracted_answer=extracted,
-            ground_truth=ground_truth,
-            ground_truth_matched=gt_match,
-            strictness_used=strictness,
-            total_checks=all_checks_total,
-            cas_checks={"valid": valid_cas, "total": total_cas, "refuted": refuted_cas},
-            smt_checks={"valid": valid_smt, "total": total_smt, "counterexamples": counterexamples},
-            steps=cas_checks[:8] + smt_checks[:4],
-            rejection_reason=rejection_reason
-        )
+            status=status, is_verified=status == VerificationStatus.VERIFIED,
+            pass_rate=pass_rate, extracted_answer=extracted, ground_truth=ground_truth,
+            ground_truth_matched=gt_match, strictness_used=strictness, total_checks=total,
+            cas_checks={"valid": valid_cas, "total": len(cas_checks), "refuted": refuted_cas},
+            smt_checks={"valid": valid_smt, "total": len(smt_checks), "counterexamples": counterexamples},
+            steps=cas_checks[:8] + smt_checks[:4], rejection_reason=reason, verification_basis=basis)
