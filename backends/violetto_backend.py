@@ -30,11 +30,13 @@ class ViolettoBackend(SolverBackend):
         temperature: float = 0.6,
         top_k: int = 50,
         max_tokens: int = 1500,
+        seed: Optional[int] = None,
+        use_cache: bool = True,
         **kwargs
     ) -> Dict[str, Any]:
         # Check solver cache
-        cache_key = cache.hash_key(self.name, query, context or "", prompt_style, temperature, top_k, max_tokens)
-        cached = cache.get("solver_output", cache_key)
+        cache_key = cache.hash_key(self.name, query, context or "", prompt_style, temperature, top_k, max_tokens, seed)
+        cached = cache.get("solver_output", cache_key) if use_cache else None
         if cached:
             cached["metrics"]["cached"] = True
             cached["trace"].append("Retrieved from SQLite solver cache (0ms)")
@@ -57,6 +59,7 @@ class ViolettoBackend(SolverBackend):
             max_tokens=max_tokens,
             temperature=temperature,
             top_k=top_k,
+            seed=seed,
             stream=False
         )
         elapsed = round(time.time() - t0, 3)
@@ -73,5 +76,6 @@ class ViolettoBackend(SolverBackend):
             },
             "trace": [f"Executed Violetto 1B on MPS (style: {prompt_style}, temp: {temperature}, elapsed: {elapsed}s)"]
         }
-        cache.set("solver_output", cache_key, result)
+        if use_cache:
+            cache.set("solver_output", cache_key, result)
         return result

@@ -18,6 +18,11 @@ from pydantic import BaseModel
 import uvicorn
 
 from math_explorer import UnifiedMathHarness
+from benchmark_data import load_aime
+from best_of_n import solve_best_of_n
+from formal_claims import cegis
+from lean_worker import LeanWorker
+from lean_auto import autoformalize
 
 app = FastAPI(title="Math Explorer 3D // RRSI Harness API")
 
@@ -31,6 +36,7 @@ app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
 # Initialize Unified Math Harness (Lazy or on startup)
 print("Initializing Unified Math Harness...", flush=True)
 harness = UnifiedMathHarness()
+lean_worker = LeanWorker()
 print("Harness ready for server requests.", flush=True)
 
 class ExploreRequest(BaseModel):
@@ -121,15 +127,23 @@ async def get_benchmark():
 
 class BenchmarkRunRequest(BaseModel):
     engine: Optional[str] = None
+    dataset: str = "local"
+    split: str = "evaluation"
+    limit: int = 20
 
 @app.post("/api/benchmark/run")
 async def post_benchmark_run(req: BenchmarkRunRequest):
     """Executes automated benchmark suite across AIME / AMC / Putnam problems."""
     from benchmark_suite import BenchmarkSuite
     try:
+        if req.dataset not in {"local", "aime"} or req.split not in {"all", "development", "evaluation"} or not 0 <= req.limit <= 1000:
+            raise HTTPException(status_code=400, detail="Invalid benchmark selection")
         suite = BenchmarkSuite()
-        res = suite.run_benchmark(engine_override=req.engine)
+        problems = load_aime(req.split, None if req.limit == 0 else req.limit) if req.dataset == "aime" else None
+        res = suite.run_benchmark(engine_override=req.engine, problems=problems)
         return JSONResponse(content=res)
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -167,6 +181,71 @@ async def post_conjecture_explore(req: ConjectureRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class CegisRequest(BaseModel):
+    problem: str
+    claim: dict
+    engine: str = "local_violetto"
+    max_rounds: int = 3
+
+
+@app.post("/api/cegis")
+def post_cegis(req: CegisRequest):
+    if req.engine not in {"local_violetto", "codex_astra"} or not 0 <= req.max_rounds <= 5:
+        raise HTTPException(status_code=400, detail="Invalid CEGIS options")
+    backend = harness.registry.get_backend(req.engine)
+    result = cegis(req.problem, req.claim, lambda prompt: backend.solve(prompt, max_tokens=500)["solution"], req.max_rounds)
+    return JSONResponse(content=result)
+
+
+class BestOfNRequest(BaseModel):
+    query: str
+    n: int = 4
+    max_tokens: int = 384
+    temperature: float = 0.6
+    seed: Optional[int] = None
+
+
+@app.post("/api/solve/best-of-n")
+def post_best_of_n(req: BestOfNRequest):
+    if not 1 <= req.n <= 8 or not 1 <= req.max_tokens <= 1500 or not 0.05 < req.temperature <= 2:
+        raise HTTPException(status_code=400, detail="Invalid sampling options")
+    result = solve_best_of_n(harness.registry.violetto.engine, req.query, n=req.n,
+                             max_tokens=req.max_tokens, temperature=req.temperature, seed=req.seed)
+    return JSONResponse(content=result)
+
+
+class LeanProofRequest(BaseModel):
+    formal_statement: str
+    proof: str
+    header: str = "import Init"
+
+
+@app.post("/api/lean/prove")
+def post_lean_prove(req: LeanProofRequest):
+    return JSONResponse(content=lean_worker.prove(req.formal_statement, req.proof, req.header))
+
+
+class LeanAutoRequest(BaseModel):
+    problem: str
+    engine: str = "codex_astra"
+    header: str = "import Init"
+
+
+@app.post("/api/lean/auto")
+def post_lean_auto(req: LeanAutoRequest):
+    if req.engine not in {"local_violetto", "codex_astra"}:
+        raise HTTPException(status_code=400, detail="Invalid solver engine")
+    backend = harness.registry.get_backend(req.engine)
+    return JSONResponse(content=autoformalize(req.problem, lambda prompt: backend.solve(prompt, max_tokens=500)["solution"],
+                                               lean_worker, req.header))
+
+
+@app.post("/api/conjecture/scan")
+def post_conjecture_scan():
+    from conjecture_scan import scan
+    return JSONResponse(content=scan())
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8765))

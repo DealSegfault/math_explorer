@@ -153,7 +153,7 @@ function applyFilter() {
   if (!rawGraphData || !rawGraphData.nodes) return;
 
   const mathTypes = ['theorem', 'lemma', 'definition', 'conjecture', 'method'];
-  const proofTypes = ['query', 'jev_decision', 'document', 'pageindex_node', 'violetto_proof', 'astra_proof', 'verification', 'symbolic_verification'];
+  const proofTypes = ['query', 'jev_decision', 'document', 'pageindex_node', 'violetto_proof', 'astra_proof', 'verification', 'symbolic_verification', 'counterexample'];
   const rrsiTypes = ['harness_state', 'mutation_proposal', 'critic_eval', 'pruner_decision', 'invariant_test'];
 
   let filteredNodes = rawGraphData.nodes;
@@ -211,12 +211,14 @@ function showInspector(node) {
       </div>
     `;
   } else if (node.type === 'document' || node.type === 'pageindex_node') {
+    const paperUrl = /^https:\/\/arxiv\.org\/abs\/\d{4}\.\d{4,5}$/.test(d.abs_url || '') ? d.abs_url : null;
     html = `
       <div class="inspector-section">
         <div class="ins-label">Literature Node (PageIndex Vectorless Hierarchy)</div>
         <p><strong>Title:</strong> ${escapeHtml(node.title)}</p>
         ${d.doc_name ? `<p><strong>Corpus Document:</strong> ${escapeHtml(d.doc_name)}</p>` : ''}
         ${d.jev_score ? `<p><strong>JEV Relevance:</strong> ${(d.jev_score * 100).toFixed(1)}%</p>` : ''}
+        ${paperUrl ? `<p><a href="${paperUrl}" target="_blank" rel="noopener noreferrer">Open arXiv paper</a></p>` : ''}
       </div>
       <div class="inspector-section">
         <div class="ins-label">Excerpt / Content</div>
@@ -304,7 +306,7 @@ function showInspector(node) {
       </div>
     `;
   } else if (node.type === 'symbolic_verification') {
-    const isSound = d.is_verified || d.is_formally_sound;
+    const status = d.status || (d.is_formally_sound ? 'STEP_CHECKED' : 'UNVERIFIED');
     const casV = d.cas_checks ? d.cas_checks.valid : d.valid_steps;
     const casT = d.cas_checks ? d.cas_checks.total : d.total_steps_checked;
     const smtV = d.smt_checks ? d.smt_checks.valid : 0;
@@ -314,7 +316,7 @@ function showInspector(node) {
     html = `
       <div class="inspector-section">
         <div class="ins-label">Deterministic Verification Ensemble (SymPy + Z3)</div>
-        <p><strong>Status:</strong> <span class="badge ${isSound ? 'badge-links' : 'badge-gen'}">${isSound ? 'FORMALLY SOUND' : 'STEP DISCREPANCY'}</span></p>
+        <p><strong>Status:</strong> <span class="badge ${status === 'REFUTED' ? 'badge-gen' : 'badge-links'}">${escapeHtml(status)}</span></p>
         <p><strong>SymPy CAS Equalities:</strong> ${casV}/${casT} Valid</p>
         ${smtT > 0 ? `<p><strong>Z3 SMT Congruences:</strong> ${smtV}/${smtT} Valid</p>` : ''}
         ${d.extracted_answer ? `<p><strong>Extracted Boxed Answer:</strong> <code>${escapeHtml(d.extracted_answer)}</code></p>` : ''}
@@ -332,11 +334,15 @@ function showInspector(node) {
       </div>
     `;
   } else if (['theorem', 'lemma', 'definition', 'conjecture', 'method'].includes(node.type)) {
+    const candidateUrl = /^https:\/\/arxiv\.org\/abs\/\d{4}\.\d{4,5}$/.test(d.source || '') ? d.source : null;
     html = `
       <div class="inspector-section">
         <div class="ins-label">Mathematical ${node.type.toUpperCase()}</div>
         <h3 style="color: #fff; margin: 4px 0 10px 0;">${escapeHtml(node.title)}</h3>
-        <p style="font-size: 13px; line-height: 1.5;">${escapeHtml(node.description || node.data.content || '')}</p>
+        <p style="font-size: 13px; line-height: 1.5;">${escapeHtml(d.statement || node.description || d.content || '')}</p>
+        ${d.status ? `<p><strong>Status:</strong> ${escapeHtml(d.status)}</p>` : ''}
+        ${d.check ? `<p><strong>Machine check:</strong> ${escapeHtml(d.check.status)}</p>` : ''}
+        ${candidateUrl ? `<p><a href="${candidateUrl}" target="_blank" rel="noopener noreferrer">Source arXiv</a></p>` : ''}
         ${node.centrality !== undefined ? `<p style="margin-top: 8px;"><strong>NetworkX PageRank Centrality:</strong> ${node.centrality}</p>` : ''}
       </div>
     `;
@@ -518,6 +524,24 @@ function setupUIEvents() {
     }
   });
 
+  document.getElementById('btn-scan-arxiv').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const status = document.getElementById('scan-arxiv-status');
+    button.disabled = true;
+    status.textContent = 'Scanning recent papers…';
+    try {
+      const response = await fetch('/api/conjecture/scan', { method: 'POST' });
+      if (!response.ok) throw new Error((await response.json()).detail || 'arXiv scan failed');
+      const result = await response.json();
+      await fetchGraph();
+      status.textContent = `${result.new_papers} new papers, ${result.new_candidates} candidate statements`;
+    } catch (error) {
+      status.textContent = `Scan failed: ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
   // RRSI Step Execution
   elBtnRRSIStep.addEventListener('click', async () => {
     elBtnRRSIStep.disabled = true;
@@ -579,6 +603,11 @@ function setupUIEvents() {
       await fetchGraph();
       await fetchHarness();
       hideInspector();
+    } catch (err) {
+      alert(`Graph reset error: ${err.message}`);
+    }
+  });
+
   // Run Benchmark Suite Button
   const btnRunBm = document.getElementById('btn-run-benchmark');
   if (btnRunBm) {

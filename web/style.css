@@ -347,6 +347,8 @@ textarea:focus, select:focus {
   filter: brightness(1.15);
 }
 
+.scan-button { margin-top: 8px; }
+
 .spinner {
   width: 14px;
   height: 14px;

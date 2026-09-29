@@ -16,6 +16,8 @@ import z3
 from typing import Dict, Any, List, Tuple, Optional
 from config import DATA_DIR
 from graph_manager import GraphManager
+from benchmark_data import load_aime, paired_improvement_pvalue
+from verification.ensemble import VerificationEnsemble
 
 HARNESS_CONFIG_PATH = str(DATA_DIR / "current_harness.json")
 
@@ -42,30 +44,6 @@ PROMPT_STYLES = [
 SEARCH_STRATEGIES = [
     "hierarchical_pageindex",
     "flat_topk"
-]
-
-# Held-out empirical benchmark suite for RRSI paired evaluations
-HELD_OUT_BENCHMARK = [
-    {
-        "id": "ARITHMETIC_SIEVE_6_4_9",
-        "query": "Count all integers n < 1000 such that n is divisible by 6, not divisible by 4, and not divisible by 9.",
-        "ground_truth": "55"
-    },
-    {
-        "id": "DIVISORS_2024_MULT_4",
-        "query": "How many positive integer factors of 2024 are multiples of 4?",
-        "ground_truth": "8"
-    },
-    {
-        "id": "QUADRATIC_RECIPROCITY_11_13",
-        "query": "Compute the Legendre symbol (11/13) using the Law of Quadratic Reciprocity.",
-        "ground_truth": "-1"
-    },
-    {
-        "id": "ROOTS_OF_UNITY_DIVISIBILITY",
-        "query": "Find the number of positive integers n <= 100 such that x^2 + x + 1 divides x^(2n) + 1 in R[x].",
-        "ground_truth": "0"
-    }
 ]
 
 class RRSIEngine:
@@ -189,6 +167,10 @@ class RRSIEngine:
         Strictly evaluated without any hardcoded 'passed: True'.
         """
         tests = []
+        tests.append({"name": "Harness parameter bounds", "engine": "config",
+                      "passed": (0 < candidate_config.get("verification_strictness", 0) <= 1
+                                 and 0 <= candidate_config.get("violetto_temperature", -1) <= 2
+                                 and 1 <= candidate_config.get("top_k_retrieval", 0) <= 25)})
 
         # 1. Fermat Little Theorem: 2^(p-1) == 1 (mod p) for primes 11, 13, 17
         flt_passed = all(pow(2, p - 1, p) == 1 for p in [11, 13, 17])
@@ -257,46 +239,52 @@ class RRSIEngine:
         Runs baseline harness vs candidate harness on held-out problems.
         Computes exact delta accuracy, latency, and regressions.
         """
-        baseline_results = []
-        candidate_results = []
-        regressions = 0
+        all_problems = load_aime("development")
+        sample_size = max(1, min(len(all_problems), int(os.getenv("MATH_RRSI_BENCHMARK_SIZE", "24"))))
+        problems = [all_problems[i * len(all_problems) // sample_size] for i in range(sample_size)]
+        baseline_results, candidate_results = [], []
+        baseline_latencies, candidate_latencies = [], []
+        verifier = VerificationEnsemble()
 
-        for prob in HELD_OUT_BENCHMARK:
+        for index, prob in enumerate(problems):
             q = prob["query"]
             gt = prob["ground_truth"]
 
-            # Run with baseline config (no graph state pollution)
-            base_out = harness_runner(q, config=self.config, ground_truth=gt, persist=False)
+            # The answer key is never passed to either solver.
+            base_out = harness_runner(q, config=self.config, ground_truth=None, persist=False,
+                                      seed=index + 1, use_cache=False)
             base_v = base_out.get("verification") or base_out.get("symbolic_verification", {})
-            base_correct = (base_v.get("ground_truth_matched") is True)
+            base_answer = base_v.get("extracted_answer")
+            base_correct = base_answer is not None and verifier.check_cas_equality(base_answer, gt)[0] is True
             baseline_results.append(base_correct)
 
-            # Run with candidate config (no graph state pollution)
-            cand_out = harness_runner(q, config=candidate_config, ground_truth=gt, persist=False)
+            cand_out = harness_runner(q, config=candidate_config, ground_truth=None, persist=False,
+                                      seed=index + 1, use_cache=False)
             cand_v = cand_out.get("verification") or cand_out.get("symbolic_verification", {})
-            cand_correct = (cand_v.get("ground_truth_matched") is True)
+            cand_answer = cand_v.get("extracted_answer")
+            cand_correct = cand_answer is not None and verifier.check_cas_equality(cand_answer, gt)[0] is True
             candidate_results.append(cand_correct)
 
-            base_lat = base_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0
-            cand_lat = cand_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0
-
-            if base_correct and not cand_correct:
-                regressions += 1
+            baseline_latencies.append(base_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0)
+            candidate_latencies.append(cand_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0)
 
         base_acc = sum(baseline_results) / len(baseline_results)
         cand_acc = sum(candidate_results) / len(candidate_results)
         delta_acc = round(cand_acc - base_acc, 3)
+        wins = sum(not b and c for b, c in zip(baseline_results, candidate_results))
+        regressions = sum(b and not c for b, c in zip(baseline_results, candidate_results))
+        pvalue = paired_improvement_pvalue(wins, regressions)
 
         # Multi-objective Pareto Utility: U = Q - λ_L * L - λ_C * C (arXiv:2609.24972 Section 4)
         lambda_L = 0.12
-        norm_base_lat = min(1.0, base_lat / 15.0)
-        norm_cand_lat = min(1.0, cand_lat / 15.0)
+        norm_base_lat = min(1.0, (sum(baseline_latencies) / len(baseline_latencies)) / 15.0)
+        norm_cand_lat = min(1.0, (sum(candidate_latencies) / len(candidate_latencies)) / 15.0)
 
         base_u = round(base_acc - lambda_L * norm_base_lat, 3)
         cand_u = round(cand_acc - lambda_L * norm_cand_lat, 3)
         delta_u = round(cand_u - base_u, 3)
 
-        verdict = "ACCEPT" if (regressions == 0 and (delta_u >= 0.0 or delta_acc > 0.0)) else "REJECT"
+        verdict = "ACCEPT" if delta_acc > 0 and delta_u > 0 and pvalue <= 0.05 else "REJECT"
 
         return {
             "verdict": verdict,
@@ -306,8 +294,12 @@ class RRSIEngine:
             "pareto_utility": cand_u,
             "delta_utility": delta_u,
             "regressions": regressions,
+            "wins": wins,
+            "p_value": round(pvalue, 6),
+            "sample_size": len(problems),
+            "benchmark_split": "AIME development (<=2022)",
             "generalization_score": round(cand_acc, 3),
-            "reason": f"Paired benchmark: {sum(candidate_results)}/{len(candidate_results)} passed (regressions: {regressions}, Δacc: {delta_acc:+.2f}, Δutility: {delta_u:+.2f})"
+            "reason": f"Paired AIME development: {sum(candidate_results)}/{len(candidate_results)} correct (wins: {wins}, regressions: {regressions}, p={pvalue:.4f}, Δutility: {delta_u:+.2f})"
         }
 
     def evolve_step(self, harness_runner=None) -> Dict[str, Any]:
@@ -340,14 +332,8 @@ class RRSIEngine:
         if harness_runner:
             critic_res = self.evaluate_paired_benchmark(candidate_cfg, harness_runner)
         else:
-            # Deterministic evaluation based on invariant soundness and parameter bounds
-            critic_res = {
-                "verdict": "ACCEPT",
-                "generalization_score": 1.0,
-                "delta_accuracy": 0.0,
-                "regressions": 0,
-                "reason": "Deterministic invariants passed and parameter is within operational bounds."
-            }
+            return {"success": False, "status": "benchmark_unavailable", "proposal": proposal,
+                    "invariants": invar_res}
 
         if critic_res["verdict"] == "REJECT":
             return {

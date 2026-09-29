@@ -76,7 +76,9 @@ class UnifiedMathHarness:
         force_arxiv: bool = False,
         doc_name: Optional[str] = None,
         top_k_nodes: Optional[int] = None,
-        max_tokens: int = 1500
+        max_tokens: int = 1500,
+        seed: Optional[int] = None,
+        use_cache: bool = True
     ) -> Dict[str, Any]:
         """
         Executes exploration under a specific candidate or baseline harness configuration.
@@ -104,7 +106,8 @@ class UnifiedMathHarness:
 
             if probe_result.get("is_exact") and probe_result.get("extracted_answer") is not None:
                 t_ver_0 = time.perf_counter_ns()
-                v_res = self.ensemble.verify(probe_result.get("solution", ""), ground_truth=ground_truth, strictness=strictness)
+                v_res = self.ensemble.verify(probe_result.get("solution", ""), ground_truth=ground_truth,
+                                             strictness=strictness, reference_answer=probe_result.get("extracted_answer"))
                 t_ver_ms = round((time.perf_counter_ns() - t_ver_0) / 1e6, 2)
                 t_total_ms = round((time.perf_counter_ns() - t_global_0) / 1e6, 2)
 
@@ -219,7 +222,9 @@ class UnifiedMathHarness:
             prompt_style=prompt_style,
             temperature=temperature,
             top_k=top_k_sampling,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
+            seed=seed,
+            use_cache=use_cache
         )
         solution_text = solve_result.get("solution", "")
         metrics = solve_result.get("metrics", {})
@@ -244,7 +249,9 @@ class UnifiedMathHarness:
                     prompt_style=prompt_style,
                     temperature=temperature,
                     top_k=top_k_sampling,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
+                    seed=seed,
+                    use_cache=use_cache
                 )
                 solution_text = solve_result.get("solution", "")
                 metrics = solve_result.get("metrics", {})
@@ -255,7 +262,9 @@ class UnifiedMathHarness:
         # 5. TIER 5: FAIL-CLOSED VERIFICATION & ADAPTIVE ESCALATION
         # ----------------------------------------------------
         t_ver_0 = time.perf_counter_ns()
-        v_res = self.ensemble.verify(solution_text, ground_truth=ground_truth, strictness=strictness)
+        reference = solve_result.get("extracted_answer") if target_engine in {"sympy_cas", "z3_smt"} and solve_result.get("is_exact") else None
+        v_res = self.ensemble.verify(solution_text, ground_truth=ground_truth, strictness=strictness,
+                                     reference_answer=reference)
         t_ver_ms = round((time.perf_counter_ns() - t_ver_0) / 1e6, 2)
 
         # Adaptive Escalation: If local Violetto is UNVERIFIED or REFUTED and engine not locked

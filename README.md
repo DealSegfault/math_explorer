@@ -135,6 +135,19 @@ python3 math_explorer.py index corpus/algebraic_number_theory.md --name ANT_Reci
 
 ---
 
+## Research pipeline
+
+```bash
+python3 -m unittest discover -s tests -v
+python3 benchmark_suite.py --dataset aime --split evaluation --limit 20
+python3 best_of_n_benchmark.py --split evaluation --limit 8 --n 4
+python3 conjecture_scan.py --max-papers 5
+```
+
+The server exposes `/api/cegis`, `/api/lean/prove`, `/api/lean/auto`, `/api/solve/best-of-n`, and `/api/conjecture/scan`. Lean needs a built [lean4-repl](https://github.com/leanprover-community/repl) binary; set `MATH_LEAN_REPL_CMD` to its command. For Mathlib proofs, set `MATH_LEAN_WORKDIR` to a matching Mathlib checkout and use `MATH_LEAN_REPL_CMD="lake env /path/to/repl"`. The worker checks the exact Lean statement and reports its axioms. Auto-formalized statements still need human review for equivalence to the informal question. `BOUNDED_VALID` covers only the declared integer bounds; Best-of-N consensus is an answer vote, not a proof. AIME accuracy claims require a completed paired evaluation.
+
+The arXiv scanner uses the official feed for `math.NT`, `math.AG`, and `math.CO`, indexes PDFs through PageIndex and Tantivy, and adds tentative candidates to the 3D graph. Candidate text may mention an open question without stating it fully, so each finding links to the source paper for review.
+
 ## 📜 References
 - **RRSI**: Regularized Recursive Self-Improvement of Agent Harnesses ([arXiv:2609.24972](https://arxiv.org/abs/2609.24972))
 - **Violetto**: `paradigma-inc/limite-1b-violetto` ([HuggingFace](https://huggingface.co/paradigma-inc/limite-1b-violetto))

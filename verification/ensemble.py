@@ -13,6 +13,7 @@ from dataclasses import dataclass, asdict, field
 from typing import Dict, Any, List, Optional, Tuple
 import sympy as sp
 import z3
+from verification.expressions import parse_expression
 
 class VerificationStatus(str, Enum):
     VERIFIED = "VERIFIED"
@@ -33,6 +34,7 @@ class VerificationResult:
     smt_checks: Dict[str, Any]
     steps: List[Dict[str, Any]] = field(default_factory=list)
     rejection_reason: Optional[str] = None
+    verification_basis: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         d = asdict(self)
@@ -77,8 +79,8 @@ class VerificationEnsemble:
     def check_cas_equality(self, lhs_str: str, rhs_str: str) -> Tuple[Optional[bool], str]:
         """CAS check: verifies LHS - RHS == 0 using SymPy. Returns (None, ...) on parse failure."""
         try:
-            lhs = sp.sympify(self.clean_expr(lhs_str))
-            rhs = sp.sympify(self.clean_expr(rhs_str))
+            lhs = parse_expression(self.clean_expr(lhs_str))
+            rhs = parse_expression(self.clean_expr(rhs_str))
             diff = sp.simplify(lhs - rhs)
             if diff == 0:
                 return True, "Symbolically identical (diff = 0)"
@@ -92,9 +94,9 @@ class VerificationEnsemble:
         Uses Z3 to verify whether any counterexample exists. Returns (None, ...) on parse error.
         """
         try:
-            a_val = int(sp.sympify(self.clean_expr(a_str)))
-            b_val = int(sp.sympify(self.clean_expr(b_str)))
-            m_val = int(sp.sympify(self.clean_expr(m_str)))
+            a_val = int(parse_expression(self.clean_expr(a_str)))
+            b_val = int(parse_expression(self.clean_expr(b_str)))
+            m_val = int(parse_expression(self.clean_expr(m_str)))
 
             if m_val == 0:
                 return False, None, "Modulo 0 is undefined."
@@ -105,7 +107,7 @@ class VerificationEnsemble:
                 rem = (a_val - b_val) % m_val
                 return False, {"a": a_val, "b": b_val, "m": m_val, "remainder": rem}, f"Refuted: remainder is {rem} != 0."
         except Exception as e:
-            return None, None, f"Z3 congruence unparseable: {e}"
+            return None, None, f"Integer congruence unparseable: {e}"
 
     def numerical_spot_check(self, lhs_str: str, rhs_str: str, samples: int = 5) -> Tuple[Optional[bool], str]:
         """
@@ -113,8 +115,8 @@ class VerificationEnsemble:
         Fail-closed: parse error yields None (UNVERIFIED), NEVER True.
         """
         try:
-            lhs = sp.sympify(self.clean_expr(lhs_str))
-            rhs = sp.sympify(self.clean_expr(rhs_str))
+            lhs = parse_expression(self.clean_expr(lhs_str))
+            rhs = parse_expression(self.clean_expr(rhs_str))
             free = list(lhs.free_symbols.union(rhs.free_symbols))
             if not free:
                 is_zero = (sp.simplify(lhs - rhs) == 0)
@@ -134,7 +136,8 @@ class VerificationEnsemble:
         self,
         solution_text: str,
         ground_truth: Optional[str] = None,
-        strictness: float = 0.75
+        strictness: float = 0.75,
+        reference_answer: Optional[str] = None
     ) -> VerificationResult:
         """
         Runs fail-closed verification ensemble:
@@ -212,34 +215,35 @@ class VerificationEnsemble:
             c_ext = self.clean_expr(extracted)
             c_gt = self.clean_expr(str(ground_truth))
             try:
-                diff = sp.simplify(sp.sympify(c_ext) - sp.sympify(c_gt))
+                diff = sp.simplify(parse_expression(c_ext) - parse_expression(c_gt))
                 gt_match = (diff == 0)
             except Exception:
                 gt_match = (c_ext.lower() == c_gt.lower())
 
         # Determine 3-state status
-        if gt_match is False or total_refuted > 0 or len(counterexamples) > 0:
+        reference_match = None
+        if reference_answer is not None and extracted is not None:
+            reference_match = self.check_cas_equality(extracted, reference_answer)[0]
+        verification_basis = None
+        if gt_match is False or reference_match is False or total_refuted > 0 or len(counterexamples) > 0:
             status = VerificationStatus.REFUTED
             is_verified = False
             rejection_reason = "Refuted by counterexample, ground-truth contradiction, or algebraic violation."
-        elif gt_match is True:
-            # Explicit ground truth match confirmed
+        elif reference_match is True:
+            # The reference must come from an independent deterministic backend.
             status = VerificationStatus.VERIFIED
             is_verified = True
+            verification_basis = "deterministic_answer"
             rejection_reason = None
         elif all_checks_total == 0:
             # FAIL-CLOSED: No verifiable equations detected in solution
             status = VerificationStatus.UNVERIFIED
             is_verified = False
             rejection_reason = "Fail-closed: No formal algebraic or congruence equations could be extracted."
-        elif pass_rate >= strictness and total_refuted == 0:
-            status = VerificationStatus.VERIFIED
-            is_verified = True
-            rejection_reason = None
         else:
             status = VerificationStatus.UNVERIFIED
             is_verified = False
-            rejection_reason = f"Pass rate {pass_rate:.1%} below required strictness {strictness:.1%}."
+            rejection_reason = "Matching answer or valid intermediate steps do not certify the whole proof."
 
         return VerificationResult(
             status=status,
@@ -253,5 +257,6 @@ class VerificationEnsemble:
             cas_checks={"valid": valid_cas, "total": total_cas, "refuted": refuted_cas},
             smt_checks={"valid": valid_smt, "total": total_smt, "counterexamples": counterexamples},
             steps=cas_checks[:8] + smt_checks[:4],
-            rejection_reason=rejection_reason
+            rejection_reason=rejection_reason,
+            verification_basis=verification_basis
         )

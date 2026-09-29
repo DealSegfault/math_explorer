@@ -6,12 +6,15 @@ Supports real-time node addition, edge wiring, and category filtering.
 """
 
 import os
+import fcntl
 import json
 import time
 import threading
+from contextlib import contextmanager
 from typing import Dict, Any, List, Optional
+from config import DATA_DIR
 
-GRAPH_FILE_DEFAULT = "/Users/mac/.gemini/antigravity/scratch/math_explorer/data/graph_state.json"
+GRAPH_FILE_DEFAULT = str(DATA_DIR / "graph_state.json")
 
 # Color Palette for 3D Graph Nodes
 NODE_COLORS = {
@@ -69,21 +72,32 @@ class GraphManager:
         self._load_or_initialize()
 
     def _load_or_initialize(self):
-        with self._lock:
-            if os.path.exists(self.filepath):
-                try:
-                    with open(self.filepath, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                        self.nodes = {n["id"]: n for n in data.get("nodes", [])}
-                        self.links = data.get("links", [])
-                        return
-                except Exception as e:
-                    print(f"Error loading graph file: {e}. Reinitializing baseline.", flush=True)
+        with self._lock, self._disk_lock():
+            if self._refresh_unlocked():
+                return
 
             self.nodes = {}
             self.links = []
             self._seed_baseline_graph()
             self._save_unlocked()
+
+    @contextmanager
+    def _disk_lock(self):
+        with open(self.filepath + ".lock", "a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
+
+    def _refresh_unlocked(self):
+        if not os.path.exists(self.filepath):
+            return False
+        with open(self.filepath, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        self.nodes = {node["id"]: node for node in data.get("nodes", [])}
+        self.links = data.get("links", [])
+        return True
 
     def _seed_baseline_graph(self):
         """Seeds initial generation 0 harness state and sample algebraic literature nodes."""
@@ -197,7 +211,8 @@ class GraphManager:
         data: Optional[Dict[str, Any]] = None,
         generation: int = 0
     ) -> Dict[str, Any]:
-        with self._lock:
+        with self._lock, self._disk_lock():
+            self._refresh_unlocked()
             node = {
                 "id": node_id,
                 "type": node_type,
@@ -222,7 +237,8 @@ class GraphManager:
         curvature: float = 0.0,
         particles: bool = False
     ):
-        with self._lock:
+        with self._lock, self._disk_lock():
+            self._refresh_unlocked()
             # Check for duplicates
             for link in self.links:
                 if link["source"] == source and link["target"] == target and link["label"] == label:
@@ -455,6 +471,7 @@ class GraphManager:
 
     def get_graph_data(self) -> Dict[str, Any]:
         with self._lock:
+            self._refresh_unlocked()
             return {
                 "nodes": list(self.nodes.values()),
                 "links": list(self.links),
@@ -470,7 +487,7 @@ class GraphManager:
             }
 
     def reset_graph(self):
-        with self._lock:
+        with self._lock, self._disk_lock():
             self.nodes = {}
             self.links = []
             self._seed_baseline_graph()
