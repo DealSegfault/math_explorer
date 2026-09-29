@@ -5,6 +5,14 @@ High-speed mathematical exploration harness combining ultra-fast System One rout
 ![Status](https://img.shields.io/badge/System-Active-00e5ff)
 ![RRSI](https://img.shields.io/badge/arXiv-2609.24972-ff1744)
 ![Hardware](https://img.shields.io/badge/Inference-Apple%20Silicon%20MPS-d500f9)
+![CAS](https://img.shields.io/badge/CAS-SymPy%20Deterministic-green)
+![SMT](https://img.shields.io/badge/SMT-Z3%20Theorem%20Prover-blue)
+
+<p align="center">
+  <img src="assets/graph_3d.png" alt="Math Explorer 3D Knowledge Graph" width="850">
+  <br>
+  <em>Interactive 3D WebGL topological knowledge graph of mathematical proofs, lemmata, SMT counterexamples, and RRSI evolution states.</em>
+</p>
 
 ---
 
