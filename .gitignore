@@ -19,6 +19,9 @@ data/papers/*.pdf
 data/graph_state.json
 data/index_registry.json
 data/benchmark_results.json
+data/best_of_n_results.json
+data/conjecture_scan.json
+data/*.lock
 data/rrsi_evolution_summary.json
 data/conjecture_*.json
 

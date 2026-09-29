@@ -83,6 +83,14 @@ class MathDocIndexer:
 
         flattened_nodes = []
         self._collect_nodes(tree.get("structure", []), flattened_nodes)
+        if ext == ".pdf" and flattened_nodes and not any(node["text"] for node in flattened_nodes):
+            import fitz
+            with fitz.open(file_path) as pdf:
+                pages = [page.get_text() for page in pdf]
+            for node in flattened_nodes:
+                start, end = node.get("start_page"), node.get("end_page")
+                if isinstance(start, int) and isinstance(end, int) and 1 <= start <= end <= len(pages):
+                    node["text"] = "\n".join(pages[start - 1:end])[:20000]
 
         self.registry[doc_name] = {
             "file_path": file_path,
