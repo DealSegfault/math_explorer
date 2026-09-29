@@ -60,8 +60,10 @@ BENCHMARK_PROBLEMS = [
     }
 ]
 
+from config import DATA_DIR
+
 class BenchmarkSuite:
-    def __init__(self, output_path: str = "/Users/mac/.gemini/antigravity/scratch/math_explorer/data/benchmark_results.json"):
+    def __init__(self, output_path: str = str(DATA_DIR / "benchmark_results.json")):
         self.output_path = output_path
         self.harness = UnifiedMathHarness()
 
@@ -89,10 +91,10 @@ class BenchmarkSuite:
             )
             elapsed = round(time.time() - t0, 2)
 
-            sym = exp_res.get("symbolic_verification", {})
+            ver = exp_res.get("verification") or exp_res.get("symbolic_verification", {})
             routing = exp_res.get("routing", {})
-            gt_match = sym.get("ground_truth_matched")
-            ext_ans = sym.get("extracted_answer")
+            gt_match = ver.get("ground_truth_matched")
+            ext_ans = ver.get("extracted_answer")
 
             res_entry = {
                 "id": pid,
@@ -104,10 +106,13 @@ class BenchmarkSuite:
                 "ground_truth": gt,
                 "extracted_answer": ext_ans,
                 "correct": gt_match,
-                "symbolic_valid_steps": sym.get("valid_steps", 0),
-                "symbolic_total_steps": sym.get("total_steps_checked", 0),
-                "symbolic_pass_rate": sym.get("step_pass_rate", 1.0),
+                "symbolic_valid_steps": ver.get("cas_checks", {}).get("valid", 0) + ver.get("smt_checks", {}).get("valid", 0),
+                "symbolic_total_steps": ver.get("total_checks", 0),
+                "symbolic_pass_rate": ver.get("pass_rate", 0.0),
+                "verification_status": ver.get("status"),
+                "is_verified": ver.get("is_verified", False),
                 "latency_sec": elapsed,
+                "early_exit": exp_res.get("early_exit", False),
                 "jev_gate_plausible": exp_res.get("gate", {}).get("is_plausible", {}).get("noul", 0.0),
                 "jev_gate_rigor": exp_res.get("gate", {}).get("rigor_score", {}).get("score", 0.0)
             }

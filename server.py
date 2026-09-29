@@ -90,7 +90,7 @@ async def post_explore(req: ExploreRequest):
 async def post_rrsi_step():
     """Executes one regularized recursive self-improvement cycle per arXiv:2609.24972."""
     try:
-        step_result = harness.rrsi.evolve_step()
+        step_result = harness.rrsi.evolve_step(harness_runner=harness.run_with_config)
         return JSONResponse(content=step_result)
     except Exception as e:
         import traceback

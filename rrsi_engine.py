@@ -265,14 +265,16 @@ class RRSIEngine:
             q = prob["query"]
             gt = prob["ground_truth"]
 
-            # Run with baseline config
-            base_out = harness_runner(q, config=self.config, ground_truth=gt)
-            base_correct = (base_out.get("symbolic_verification", {}).get("ground_truth_matched") is True)
+            # Run with baseline config (no graph state pollution)
+            base_out = harness_runner(q, config=self.config, ground_truth=gt, persist=False)
+            base_v = base_out.get("verification") or base_out.get("symbolic_verification", {})
+            base_correct = (base_v.get("ground_truth_matched") is True)
             baseline_results.append(base_correct)
 
-            # Run with candidate config
-            cand_out = harness_runner(q, config=candidate_config, ground_truth=gt)
-            cand_correct = (cand_out.get("symbolic_verification", {}).get("ground_truth_matched") is True)
+            # Run with candidate config (no graph state pollution)
+            cand_out = harness_runner(q, config=candidate_config, ground_truth=gt, persist=False)
+            cand_v = cand_out.get("verification") or cand_out.get("symbolic_verification", {})
+            cand_correct = (cand_v.get("ground_truth_matched") is True)
             candidate_results.append(cand_correct)
 
             base_lat = base_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0

@@ -1,14 +1,14 @@
 {
-  "generation": 12,
-  "prompt_system_style": "lemma_stepwise_decomposition",
+  "generation": 14,
+  "prompt_system_style": "rigorous_math_proof",
   "jev_difficulty_threshold": 2.59,
   "jev_arxiv_threshold": 0.61,
   "top_k_retrieval": 2,
-  "violetto_temperature": 0.62,
+  "violetto_temperature": 0.61,
   "violetto_top_k": 50,
   "search_strategy": "hierarchical_pageindex",
   "verification_strictness": 0.7,
-  "annealed_budget": 0.167,
+  "annealed_budget": 0.121,
   "history": [
     {
       "generation": 1,
@@ -633,6 +633,124 @@
         ]
       },
       "timestamp": 1790645103.362178
+    },
+    {
+      "generation": 13,
+      "proposal": {
+        "component": "prompt_style",
+        "budget": 0.142,
+        "generation": 13,
+        "timestamp": 1790647634.909952,
+        "field": "prompt_system_style",
+        "old_val": "lemma_stepwise_decomposition",
+        "new_val": "rigorous_math_proof",
+        "change_summary": "prompt_system_style: lemma_stepwise_decomposition -> rigorous_math_proof",
+        "hypothesis": "Switching prompt template to 'rigorous_math_proof' optimizes deductive precision."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "baseline_accuracy": 1.0,
+        "candidate_accuracy": 1.0,
+        "delta_accuracy": 0.0,
+        "pareto_utility": 0.999,
+        "delta_utility": 0.001,
+        "regressions": 0,
+        "generalization_score": 1.0,
+        "reason": "Paired benchmark: 4/4 passed (regressions: 0, \u0394acc: +0.00, \u0394utility: +0.00)"
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 1.0,
+        "reason": "Sufficient utility delta for prompt_style"
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Invariant",
+            "engine": "modular_arithmetic",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity (7, 13)",
+            "engine": "sympy_cas",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity N(z1*z2) == N(z1)N(z2)",
+            "engine": "sympy_symbolic_algebra",
+            "diff_evaluated": "0",
+            "passed": true
+          },
+          {
+            "name": "Z3 SMT Discrete Consistency Check",
+            "engine": "z3_smt",
+            "passed": true
+          }
+        ]
+      },
+      "timestamp": 1790647635.3535528
+    },
+    {
+      "generation": 14,
+      "proposal": {
+        "component": "sampling_params",
+        "budget": 0.121,
+        "generation": 14,
+        "timestamp": 1790647688.528296,
+        "field": "violetto_temperature",
+        "old_val": 0.62,
+        "new_val": 0.61,
+        "change_summary": "violetto_temperature: 0.62 -> 0.61",
+        "hypothesis": "Modulating temperature to 0.61 targets optimal sampling entropy."
+      },
+      "critic": {
+        "verdict": "ACCEPT",
+        "baseline_accuracy": 1.0,
+        "candidate_accuracy": 1.0,
+        "delta_accuracy": 0.0,
+        "pareto_utility": 0.999,
+        "delta_utility": 0.001,
+        "regressions": 0,
+        "generalization_score": 1.0,
+        "reason": "Paired benchmark: 4/4 passed (regressions: 0, \u0394acc: +0.00, \u0394utility: +0.00)"
+      },
+      "pruner": {
+        "action": "KEEP",
+        "utility_score": 1.0,
+        "reason": "Sufficient utility delta for sampling_params"
+      },
+      "invariants": {
+        "total": 4,
+        "passed": 4,
+        "all_passed": true,
+        "details": [
+          {
+            "name": "Fermat Little Theorem Invariant",
+            "engine": "modular_arithmetic",
+            "passed": true
+          },
+          {
+            "name": "Quadratic Reciprocity Parity (7, 13)",
+            "engine": "sympy_cas",
+            "passed": true
+          },
+          {
+            "name": "Eisenstein Norm Multiplicativity N(z1*z2) == N(z1)N(z2)",
+            "engine": "sympy_symbolic_algebra",
+            "diff_evaluated": "0",
+            "passed": true
+          },
+          {
+            "name": "Z3 SMT Discrete Consistency Check",
+            "engine": "z3_smt",
+            "passed": true
+          }
+        ]
+      },
+      "timestamp": 1790647689.024564
     }
   ]
 }

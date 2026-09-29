@@ -11,8 +11,16 @@ venv/
 # Temporary and local data
 *.tmp
 *.db
+*.sqlite
 .DS_Store
 data/papers/*.pdf
+
+# Runtime state and experiments (avoid diff bloat)
+data/graph_state.json
+data/index_registry.json
+data/benchmark_results.json
+data/rrsi_evolution_summary.json
+data/conjecture_*.json
 
 # Secrets
 .env

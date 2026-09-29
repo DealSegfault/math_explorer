@@ -14,12 +14,14 @@ from typing import Dict, Any, List
 
 from rrsi_engine import RRSIEngine
 from graph_manager import GraphManager
+from math_explorer import UnifiedMathHarness
 
 class AutonomousRRSIRunner:
     def __init__(self, target_generations: int = 10):
         self.target_generations = target_generations
         self.gm = GraphManager()
         self.rrsi = RRSIEngine(graph_manager=self.gm)
+        self.harness = UnifiedMathHarness()
 
     def run_evolution_loop(self) -> Dict[str, Any]:
         initial_cfg = self.rrsi.get_current_harness()
@@ -27,7 +29,7 @@ class AutonomousRRSIRunner:
         end_gen = start_gen + self.target_generations
 
         print(f"\n=======================================================", flush=True)
-        print(f"LAUNCHING AUTONOMOUS RRSI EVOLUTION LOOP", flush=True)
+        print(f"LAUNCHING AUTONOMOUS RRSI EVOLUTION LOOP (Empirical A/B Mode)", flush=True)
         print(f"Generations Target: Gen {start_gen} -> Gen {end_gen} (+{self.target_generations} steps)", flush=True)
         print(f"Initial Budget B({start_gen}): {self.rrsi.compute_budget(start_gen):.3f}", flush=True)
         print(f"=======================================================\n", flush=True)
@@ -40,9 +42,9 @@ class AutonomousRRSIRunner:
             budget = self.rrsi.compute_budget(curr_gen)
             print(f"[Cycle {step}/{self.target_generations}] Proposing Generation {curr_gen + 1} (Annealed Budget B={budget:.3f})...", flush=True)
 
-            res = self.rrsi.evolve_step()
+            res = self.rrsi.evolve_step(harness_runner=self.harness.run_with_config)
             if not res.get("success"):
-                print(f"  [X] Cycle Rejected: Status={res.get('status')}", flush=True)
+                print(f"  [X] Cycle Rejected: Status={res.get('status')} (Reason: {res.get('critic', {}).get('reason')})", flush=True)
                 continue
 
             prop = res["proposal"]

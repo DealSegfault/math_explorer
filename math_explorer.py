@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 Unified High-Speed Mathematical Exploration Portfolio Solver.
-Optimized with:
-- Tier 0: Deterministic CAS / SMT Speculative Fast Probe & Early Exit (< 5ms)
-- Tier 1: Local Tantivy BM25 Lexical Pruning (< 1ms) + Bounded Concurrent JEV Semantic Reranking
-- Tier 2: Native Apple Silicon MPS Violetto Engine (20 tok/s, zero CPU-MPS sync penalties)
-- Tier 3: Adaptive Escalation to Codex Astra (gpt-6-astra xhigh) for Hard Proofs / Conjectures
-- Multi-Level Thread-Safe Persistent SQLite Cache (Route, Retrieval, JEV Score, Solver, Verification)
-- Comprehensive p50/p95 Nanosecond Telemetry & Multi-Objective Pareto Utility U = Q - λ_L*L - λ_C*C
+Architecture:
+- Speculative CAS / SMT Early Exit (< 5ms)
+- Complete Fallback Cascade: SymPy CAS -> Z3 SMT -> Local Violetto MPS -> Codex Astra
+- Fail-Closed 3-State Verification Contract (VERIFIED, REFUTED, UNVERIFIED)
+- Real Empirical RRSI Evaluation via run_with_config(query, config, ground_truth, persist=False)
+- Active verification_strictness knob
+- Quickwit Tantivy BM25 + Parallel JEV Reranking
+- Multi-Level Thread-Safe Persistent SQLite Cache
 """
 
 import os
@@ -23,7 +24,7 @@ from arxiv_client import ArxivClient
 from graph_manager import GraphManager
 from rrsi_engine import RRSIEngine
 from backends.registry import SolverRegistry
-from verification.ensemble import VerificationEnsemble
+from verification.ensemble import VerificationEnsemble, VerificationStatus
 from cache_manager import cache
 
 class UnifiedMathHarness:
@@ -44,9 +45,7 @@ class UnifiedMathHarness:
         print(f"Harness ready. Active RRSI Gen: {self.rrsi.config.get('generation', 0)}. Solvers: SymPy + Z3 + Violetto + Codex Astra.\n", flush=True)
 
     def search_and_index_arxiv(self, query: str, max_papers: int = 1) -> Optional[str]:
-        """
-        Searches arXiv for papers, downloads PDF, and indexes into PageIndex tree.
-        """
+        """Searches arXiv for papers, downloads PDF, and indexes into PageIndex tree."""
         print(f"\n[arXiv Pipeline] Searching for literature on: '{query}'...", flush=True)
         papers = self.arxiv.search(query, max_results=max_papers)
         if not papers:
@@ -67,47 +66,47 @@ class UnifiedMathHarness:
                 f.write(f"# {paper['title']}\n\n## Abstract\n{paper['abstract']}\n")
             return self.indexer.index_document(md_path, doc_name=f"arxiv_{paper['id']}")
 
-    def explore(
+    def run_with_config(
         self,
         query: str,
+        config: Dict[str, Any],
+        ground_truth: Optional[str] = None,
+        persist: bool = False,
         engine: Optional[str] = None,
         force_arxiv: bool = False,
         doc_name: Optional[str] = None,
         top_k_nodes: Optional[int] = None,
-        max_tokens: int = 1500,
-        ground_truth: Optional[str] = None
+        max_tokens: int = 1500
     ) -> Dict[str, Any]:
+        """
+        Executes exploration under a specific candidate or baseline harness configuration.
+        Implements full fallback cascade and fail-closed verification.
+        When persist=False (for RRSI A/B testing), does not pollute disk graph state.
+        """
         t_global_0 = time.perf_counter_ns()
-        cfg = self.rrsi.get_current_harness()
-        active_gen = cfg.get("generation", 0)
-        top_k = top_k_nodes if top_k_nodes is not None else cfg.get("top_k_retrieval", 2)
-        diff_threshold = cfg.get("jev_difficulty_threshold", 2.5)
-        arxiv_threshold = cfg.get("jev_arxiv_threshold", 0.65)
-
-        print(f"=======================================================", flush=True)
-        print(f"MATH EXPLORATION (RRSI Gen {active_gen}): {query}", flush=True)
-        print(f"=======================================================\n", flush=True)
+        gen = config.get("generation", 0)
+        top_k = top_k_nodes if top_k_nodes is not None else config.get("top_k_retrieval", 2)
+        diff_threshold = config.get("jev_difficulty_threshold", 2.5)
+        arxiv_threshold = config.get("jev_arxiv_threshold", 0.65)
+        prompt_style = config.get("prompt_system_style", "rigorous_math_proof")
+        strictness = config.get("verification_strictness", 0.75)
+        temperature = config.get("violetto_temperature", 0.6)
+        top_k_sampling = config.get("violetto_top_k", 50)
 
         # ----------------------------------------------------
-        # 0. TIER 0: SPECULATIVE PROBE & EARLY EXIT (< 5ms)
+        # 0. TIER 0: SPECULATIVE CAS PROBE & EARLY EXIT (< 5ms)
         # ----------------------------------------------------
         sympy_backend = self.registry.get_backend("sympy_cas")
         if sympy_backend and sympy_backend.can_handle(query) and not force_arxiv and not engine:
-            print("[Tier 0: Speculative CAS Fast Probe (Early Exit)]", flush=True)
             t_probe_0 = time.perf_counter_ns()
             probe_result = sympy_backend.solve(query)
             t_probe_ms = round((time.perf_counter_ns() - t_probe_0) / 1e6, 2)
 
             if probe_result.get("is_exact") and probe_result.get("extracted_answer") is not None:
-                # Fast verification
                 t_ver_0 = time.perf_counter_ns()
-                ensemble_report = self.ensemble.verify(probe_result.get("solution", ""), ground_truth=ground_truth)
+                v_res = self.ensemble.verify(probe_result.get("solution", ""), ground_truth=ground_truth, strictness=strictness)
                 t_ver_ms = round((time.perf_counter_ns() - t_ver_0) / 1e6, 2)
                 t_total_ms = round((time.perf_counter_ns() - t_global_0) / 1e6, 2)
-
-                print(f"  ⚡ Early Exit Triggered! Solved deterministically by SymPy CAS in {t_probe_ms}ms")
-                print(f"  • Extracted Answer: {probe_result['extracted_answer']}")
-                print(f"  • Total Wall-Clock Latency: {t_total_ms}ms (Cost: $0.00)")
 
                 dummy_routing = {
                     "domain": "number_theory",
@@ -115,7 +114,6 @@ class UnifiedMathHarness:
                     "needs_arxiv": False,
                     "recommended_engine": "sympy_cas"
                 }
-
                 telemetry = {
                     "early_exit": True,
                     "tier_level": 0,
@@ -128,18 +126,21 @@ class UnifiedMathHarness:
                     "cost_usd": 0.0
                 }
 
-                query_node_id = self.gm.record_exploration(
-                    query=query,
-                    routing=dummy_routing,
-                    retrieved_nodes=[],
-                    solver_engine="sympy_cas",
-                    solution_text=probe_result.get("solution", ""),
-                    tokens_or_metrics={**probe_result.get("metrics", {}), "telemetry": telemetry},
-                    gate_result={"ensemble": ensemble_report},
-                    generation=active_gen,
-                    symbolic_result=ensemble_report
-                )
+                query_node_id = None
+                if persist:
+                    query_node_id = self.gm.record_exploration(
+                        query=query,
+                        routing=dummy_routing,
+                        retrieved_nodes=[],
+                        solver_engine="sympy_cas",
+                        solution_text=probe_result.get("solution", ""),
+                        tokens_or_metrics={**probe_result.get("metrics", {}), "telemetry": telemetry},
+                        gate_result={"ensemble": v_res.to_dict()},
+                        generation=gen,
+                        symbolic_result=v_res.to_dict()
+                    )
 
+                v_dict = v_res.to_dict()
                 return {
                     "query_node_id": query_node_id,
                     "query": query,
@@ -148,27 +149,22 @@ class UnifiedMathHarness:
                     "solver_engine": "sympy_cas",
                     "solution": probe_result.get("solution", ""),
                     "metrics": {**probe_result.get("metrics", {}), "telemetry": telemetry},
-                    "verification_ensemble": ensemble_report,
-                    "is_verified": ensemble_report.get("is_verified", True),
-                    "generation": active_gen,
+                    "verification": v_dict,
+                    "symbolic_verification": v_dict, # backward compat
+                    "verification_ensemble": v_dict, # backward compat
+                    "is_verified": v_res.is_verified,
+                    "generation": gen,
                     "early_exit": True,
-                    "graph_stats": self.gm.get_graph_data()["stats"]
+                    "graph_stats": self.gm.get_graph_data()["stats"] if persist else {}
                 }
 
         # ----------------------------------------------------
         # 1. TIER 1: JEV SYSTEM ONE FAST ROUTING (< 100ms)
         # ----------------------------------------------------
         t_route_0 = time.perf_counter_ns()
-        print("[Tier 1: TypeSafe JEV System One Triage (<100ms)]", flush=True)
         routing = self.router.route_intent(query)
         t_route_ms = round((time.perf_counter_ns() - t_route_0) / 1e6, 2)
-        print(f"  • Domain: {routing['domain']}")
-        print(f"  • Difficulty Score: {routing['difficulty_score']:.2f}/4.0 (Threshold: {diff_threshold})")
-        print(f"  • arXiv Literature Needed: {routing['needs_arxiv']} (prob: {routing['needs_arxiv_prob']:.2%}, Threshold: {arxiv_threshold:.0%})")
-        print(f"  • JEV Recommended Tool: {routing.get('recommended_engine')}")
-        print(f"  • Routing Latency: {t_route_ms}ms (cached: {routing.get('cached', False)})")
         
-        # Portfolio Backend Selection
         backend = self.registry.select_backend(
             query=query,
             routing=routing,
@@ -176,14 +172,12 @@ class UnifiedMathHarness:
             engine_override=engine
         )
         target_engine = backend.name
-        print(f"  • Selected Portfolio Engine: {target_engine}")
 
         # ----------------------------------------------------
         # 2. TIER 2: LITERATURE ACQUISITION (arXiv on demand)
         # ----------------------------------------------------
         should_fetch_arxiv = (routing.get("needs_arxiv_prob", 0.0) >= arxiv_threshold or force_arxiv)
         if should_fetch_arxiv and not doc_name:
-            print("\n[Tier 2: External Literature Acquisition via arXiv]", flush=True)
             auto_doc = self.search_and_index_arxiv(query)
             if auto_doc:
                 doc_name = auto_doc
@@ -197,7 +191,6 @@ class UnifiedMathHarness:
         t_rerank_ms = 0.0
 
         if should_fetch_arxiv or doc_name or self.indexer.list_documents():
-            print(f"\n[Tier 3: Two-Stage Retrieval (Tantivy BM25 + Parallel JEV Reranking)]", flush=True)
             retrieval_res = self.indexer.two_stage_retrieve(
                 query=query,
                 router=self.router,
@@ -210,70 +203,64 @@ class UnifiedMathHarness:
             ret_metrics = retrieval_res.get("metrics", {})
             t_prefilter_ms = ret_metrics.get("bm25_ms", 0.0)
             t_rerank_ms = ret_metrics.get("rerank_ms", 0.0)
-            print(f"  • Tantivy Lexical Candidates: {ret_metrics.get('bm25_candidates_count', 0)} in {t_prefilter_ms}ms")
-            print(f"  • Parallel JEV Rerank Latency: {t_rerank_ms}ms (cached: {ret_metrics.get('cached', False)})")
 
         if top_nodes:
-            print(f"Retrieved {len(top_nodes)} Highly Relevant Tree Nodes:")
-            for idx, node in enumerate(top_nodes, 1):
-                score = node.get("jev_score", 0.0)
+            for node in top_nodes:
                 title = node.get("title") or node.get("full_path")
-                doc = node.get("doc_name", doc_name or "")
-                print(f"  [{idx}] {title} (doc: {doc}) — JEV Relevance: {score:.2%}")
                 context_text += f"\n### {title}\n{node.get('text', '')}\n"
 
         # ----------------------------------------------------
-        # 4. TIER 4: PORTFOLIO SOLVER DISPATCH & ADAPTIVE COMPUTE
+        # 4. TIER 4: PORTFOLIO SOLVER WITH FALLBACK CASCADE
         # ----------------------------------------------------
-        prompt_style = cfg.get("prompt_system_style", "rigorous_math_proof")
-        print(f"\n[Tier 4: Portfolio Solver Dispatch -> {target_engine} (style: {prompt_style})]", flush=True)
-
         t_solve_0 = time.perf_counter_ns()
         solve_result = backend.solve(
             query=query,
             context=context_text if context_text else None,
             prompt_style=prompt_style,
-            temperature=cfg.get("violetto_temperature", 0.6),
-            top_k=cfg.get("violetto_top_k", 50),
+            temperature=temperature,
+            top_k=top_k_sampling,
             max_tokens=max_tokens
         )
-        t_solve_ms = round((time.perf_counter_ns() - t_solve_0) / 1e6, 2)
         solution_text = solve_result.get("solution", "")
         metrics = solve_result.get("metrics", {})
-        print(solution_text)
+
+        # FALLBACK CASCADE: If SymPy or Z3 was chosen but couldn't parse/extract answer
+        if target_engine in ["sympy_cas", "z3_smt"] and (solve_result.get("extracted_answer") is None or not solve_result.get("is_exact")):
+            # If SymPy failed, try Z3 if applicable
+            if target_engine == "sympy_cas" and self.registry.z3.can_handle(query):
+                target_engine = "z3_smt"
+                backend = self.registry.z3
+                solve_result = backend.solve(query=query, context=context_text, prompt_style=prompt_style)
+                solution_text = solve_result.get("solution", "")
+                metrics = solve_result.get("metrics", {})
+
+            # If still unsolved by symbolic/SMT, cascade down to local Violetto
+            if solve_result.get("extracted_answer") is None or not solve_result.get("is_exact"):
+                target_engine = "local_violetto"
+                backend = self.registry.violetto
+                solve_result = backend.solve(
+                    query=query,
+                    context=context_text if context_text else None,
+                    prompt_style=prompt_style,
+                    temperature=temperature,
+                    top_k=top_k_sampling,
+                    max_tokens=max_tokens
+                )
+                solution_text = solve_result.get("solution", "")
+                metrics = solve_result.get("metrics", {})
+
+        t_solve_ms = round((time.perf_counter_ns() - t_solve_0) / 1e6, 2)
 
         # ----------------------------------------------------
-        # 5. TIER 5: DETERMINISTIC VERIFICATION & ADAPTIVE ESCALATION
+        # 5. TIER 5: FAIL-CLOSED VERIFICATION & ADAPTIVE ESCALATION
         # ----------------------------------------------------
-        print(f"\n[Tier 5: Deterministic Verification Ensemble (CAS + SMT + Spot Checks)]", flush=True)
         t_ver_0 = time.perf_counter_ns()
-        ensemble_report = self.ensemble.verify(solution_text, ground_truth=ground_truth)
+        v_res = self.ensemble.verify(solution_text, ground_truth=ground_truth, strictness=strictness)
         t_ver_ms = round((time.perf_counter_ns() - t_ver_0) / 1e6, 2)
 
-        is_verified = ensemble_report.get("is_verified", False)
-        pass_rate = ensemble_report.get("pass_rate", 0.0)
-        ext_ans = ensemble_report.get("extracted_answer")
-        gt_match = ensemble_report.get("ground_truth_matched")
-        
-        cas_v = ensemble_report["cas_checks"]["valid"]
-        cas_t = ensemble_report["cas_checks"]["total"]
-        smt_v = ensemble_report["smt_checks"]["valid"]
-        smt_t = ensemble_report["smt_checks"]["total"]
-        cexs = ensemble_report["smt_checks"]["counterexamples"]
-
-        print(f"  • Formally Verified: {is_verified} (Overall Step Pass Rate: {pass_rate:.1%})")
-        print(f"  • SymPy CAS Checks: {cas_v}/{cas_t} Valid Equalities")
-        print(f"  • Z3 SMT Congruence Checks: {smt_v}/{smt_t} Valid")
-        if cexs:
-            print(f"  [!] Z3 Counterexample Discovered: {cexs[0]}")
-        print(f"  • Extracted Boxed Answer: {ext_ans}")
-        if ground_truth is not None:
-            print(f"  • Ground Truth Match: {gt_match} (Expected: {ground_truth})")
-
-        # Adaptive Escalation: If local Violetto failed verification and engine wasn't forced, escalate to Codex Astra
+        # Adaptive Escalation: If local Violetto is UNVERIFIED or REFUTED and engine not locked
         tier_level = 1 if target_engine == "local_violetto" else (3 if target_engine == "codex_astra" else 0)
-        if not is_verified and target_engine == "local_violetto" and engine is None:
-            print("\n[Adaptive Compute Escalation] Local Violetto unverified -> Escalating to Codex Astra xhigh...", flush=True)
+        if not v_res.is_verified and target_engine == "local_violetto" and engine is None:
             astra_backend = self.registry.get_backend("codex_astra")
             if astra_backend:
                 t_esc_0 = time.perf_counter_ns()
@@ -288,8 +275,7 @@ class UnifiedMathHarness:
                 target_engine = "codex_astra"
                 tier_level = 3
                 # Re-verify
-                ensemble_report = self.ensemble.verify(solution_text, ground_truth=ground_truth)
-                is_verified = ensemble_report.get("is_verified", False)
+                v_res = self.ensemble.verify(solution_text, ground_truth=ground_truth, strictness=strictness)
 
         t_total_ms = round((time.perf_counter_ns() - t_global_0) / 1e6, 2)
         cost_usd = 0.05 if target_engine == "codex_astra" else 0.0
@@ -307,21 +293,23 @@ class UnifiedMathHarness:
         }
 
         # ----------------------------------------------------
-        # 6. GRAPH PERSISTENCE (Knowledge Graph Node Integration)
+        # 6. GRAPH PERSISTENCE (Only if persist=True)
         # ----------------------------------------------------
-        query_node_id = self.gm.record_exploration(
-            query=query,
-            routing=routing,
-            retrieved_nodes=top_nodes,
-            solver_engine=target_engine,
-            solution_text=solution_text,
-            tokens_or_metrics={**metrics, "telemetry": telemetry},
-            gate_result={"ensemble": ensemble_report},
-            generation=active_gen,
-            symbolic_result=ensemble_report
-        )
+        query_node_id = None
+        v_dict = v_res.to_dict()
+        if persist:
+            query_node_id = self.gm.record_exploration(
+                query=query,
+                routing=routing,
+                retrieved_nodes=top_nodes,
+                solver_engine=target_engine,
+                solution_text=solution_text,
+                tokens_or_metrics={**metrics, "telemetry": telemetry},
+                gate_result={"ensemble": v_dict},
+                generation=gen,
+                symbolic_result=v_dict
+            )
 
-        print(f"\n=== Exploration Done in {t_total_ms}ms (Logged to Graph Node: {query_node_id}) ===\n", flush=True)
         return {
             "query_node_id": query_node_id,
             "query": query,
@@ -330,12 +318,38 @@ class UnifiedMathHarness:
             "solver_engine": target_engine,
             "solution": solution_text,
             "metrics": {**metrics, "telemetry": telemetry},
-            "verification_ensemble": ensemble_report,
-            "is_verified": is_verified,
-            "generation": active_gen,
+            "verification": v_dict,
+            "symbolic_verification": v_dict, # backward compat
+            "verification_ensemble": v_dict, # backward compat
+            "is_verified": v_res.is_verified,
+            "generation": gen,
             "early_exit": False,
-            "graph_stats": self.gm.get_graph_data()["stats"]
+            "graph_stats": self.gm.get_graph_data()["stats"] if persist else {}
         }
+
+    def explore(
+        self,
+        query: str,
+        engine: Optional[str] = None,
+        force_arxiv: bool = False,
+        doc_name: Optional[str] = None,
+        top_k_nodes: Optional[int] = None,
+        max_tokens: int = 1500,
+        ground_truth: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Default public exploration interface (with persistence)."""
+        cfg = self.rrsi.get_current_harness()
+        return self.run_with_config(
+            query=query,
+            config=cfg,
+            ground_truth=ground_truth,
+            persist=True,
+            engine=engine,
+            force_arxiv=force_arxiv,
+            doc_name=doc_name,
+            top_k_nodes=top_k_nodes,
+            max_tokens=max_tokens
+        )
 
 def main():
     parser = argparse.ArgumentParser(description="Unified Math Explorer: JEV + Tantivy + MPS Violetto + Codex Astra")
@@ -377,7 +391,7 @@ def main():
             nodes = harness.indexer.get_document_nodes(d)
             print(f" - {d} ({len(nodes)} sections)")
     elif args.command == "explore":
-        harness.explore(
+        res = harness.explore(
             query=args.query,
             engine=args.engine,
             force_arxiv=args.arxiv,
@@ -385,6 +399,9 @@ def main():
             top_k_nodes=args.top_k,
             max_tokens=args.max_tokens
         )
+        print(res.get("solution"))
+        v = res.get("verification", {})
+        print(f"\nVerification Status: {v.get('status')} (is_verified={v.get('is_verified')}, pass_rate={v.get('pass_rate')})")
     else:
         parser.print_help()
 

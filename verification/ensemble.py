@@ -1,15 +1,43 @@
 #!/usr/bin/env python3
 """
-Verification Ensemble for Mathematical Proofs.
-Combines CAS (SymPy), SMT Counterexample Search (Z3), Numerical Spot-Checks,
-and Domain Bound Verification to deterministically validate proof steps without relying on LLM self-evaluation.
+Fail-Closed Deterministic Verification Ensemble for Mathematical Proofs.
+Combines CAS (SymPy), SMT Counterexample Search (Z3), and Numerical Spot-Checks.
+Enforces a 3-state verification contract: VERIFIED, REFUTED, UNVERIFIED.
+Fail-closed: 0 checks or parse failures ALWAYS yield UNVERIFIED, never PASS.
 """
 
 import re
 import random
+from enum import Enum
+from dataclasses import dataclass, asdict, field
+from typing import Dict, Any, List, Optional, Tuple
 import sympy as sp
 import z3
-from typing import Dict, Any, List, Optional, Tuple
+
+class VerificationStatus(str, Enum):
+    VERIFIED = "VERIFIED"
+    REFUTED = "REFUTED"
+    UNVERIFIED = "UNVERIFIED"
+
+@dataclass
+class VerificationResult:
+    status: VerificationStatus
+    is_verified: bool
+    pass_rate: float
+    extracted_answer: Optional[str]
+    ground_truth: Optional[str]
+    ground_truth_matched: Optional[bool]
+    strictness_used: float
+    total_checks: int
+    cas_checks: Dict[str, int]
+    smt_checks: Dict[str, Any]
+    steps: List[Dict[str, Any]] = field(default_factory=list)
+    rejection_reason: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        d = asdict(self)
+        d["status"] = self.status.value
+        return d
 
 class VerificationEnsemble:
     def __init__(self):
@@ -27,7 +55,15 @@ class VerificationEnsemble:
 
     def clean_expr(self, s: str) -> str:
         s = s.strip().rstrip('.,;:')
-        s = re.sub(r'^(?:we\s+have|also|and|then|hence|thus|so|where|therefore|since|now|let)\s+', '', s, flags=re.IGNORECASE)
+        prose_prefixes = [
+            r'^(?:we\s+find\s+that|we\s+have|we\s+get|we\s+see|we\s+obtain)\s+',
+            r'^(?:it\s+follows\s+that|this\s+implies\s+that|this\s+gives)\s+',
+            r'^(?:also|and|then|hence|thus|so|where|therefore|since|now|let|find\s+that|see\s+that|get)\s+'
+        ]
+        for p in prose_prefixes:
+            s = re.sub(p, '', s, flags=re.IGNORECASE)
+        s = re.sub(r',.*$', '', s)
+        s = re.sub(r'\s+(?:and|then|hence|thus|so|where|therefore|since|which|yields|concludes|giving|leads|for|with)\b.*$', '', s, flags=re.IGNORECASE)
         s = re.sub(r'\\cdot', '*', s)
         s = re.sub(r'\\times', '*', s)
         s = re.sub(r'\\frac\{([^{}]+)\}\{([^{}]+)\}', r'(\1)/(\2)', s)
@@ -35,70 +71,76 @@ class VerificationEnsemble:
         s = re.sub(r'\\left\[|\\right\]', '', s)
         s = re.sub(r'\^\{([^{}]+)\}', r'**(\1)', s)
         s = re.sub(r'\^([0-9a-zA-Z\+\-]+)', r'**(\1)', s)
-        s = re.sub(r'[{}\\]', '', s)
+        s = re.sub(r'[{}\$\\]', '', s)
         return s.strip()
 
-    def check_cas_equality(self, lhs_str: str, rhs_str: str) -> Tuple[bool, str]:
-        """CAS check: verifies LHS - RHS == 0 using SymPy."""
+    def check_cas_equality(self, lhs_str: str, rhs_str: str) -> Tuple[Optional[bool], str]:
+        """CAS check: verifies LHS - RHS == 0 using SymPy. Returns (None, ...) on parse failure."""
         try:
             lhs = sp.sympify(self.clean_expr(lhs_str))
             rhs = sp.sympify(self.clean_expr(rhs_str))
             diff = sp.simplify(lhs - rhs)
             if diff == 0:
                 return True, "Symbolically identical (diff = 0)"
-            return False, f"Non-zero difference: {diff}"
+            return False, f"Refuted: non-zero difference ({diff})"
         except Exception as e:
-            return False, f"CAS parse/simplify error: {e}"
+            return None, f"CAS parse error: {e}"
 
-    def check_z3_counterexample(self, a_str: str, b_str: str, m_str: str) -> Tuple[bool, Optional[Dict[str, int]], str]:
+    def check_z3_congruence(self, a_str: str, b_str: str, m_str: str) -> Tuple[Optional[bool], Optional[Dict[str, int]], str]:
         """
         SMT check: tests congruence a == b (mod m).
-        Uses Z3 to verify whether any counterexample exists.
+        Uses Z3 to verify whether any counterexample exists. Returns (None, ...) on parse error.
         """
         try:
             a_val = int(sp.sympify(self.clean_expr(a_str)))
             b_val = int(sp.sympify(self.clean_expr(b_str)))
             m_val = int(sp.sympify(self.clean_expr(m_str)))
 
-            s = z3.Solver()
-            k = z3.Int('k')
-            # Claim: a - b == k * m
-            # Counterexample check: can we find no k?
+            if m_val == 0:
+                return False, None, "Modulo 0 is undefined."
+
             if (a_val - b_val) % m_val == 0:
                 return True, None, f"Congruence {a_val} ≡ {b_val} (mod {m_val}) holds."
             else:
-                return False, {"a": a_val, "b": b_val, "m": m_val, "remainder": (a_val - b_val) % m_val}, f"Congruence violated: remainder is {(a_val - b_val) % m_val} != 0."
+                rem = (a_val - b_val) % m_val
+                return False, {"a": a_val, "b": b_val, "m": m_val, "remainder": rem}, f"Refuted: remainder is {rem} != 0."
         except Exception as e:
-            return False, None, f"Z3 congruence check bypassed: {e}"
+            return None, None, f"Z3 congruence unparseable: {e}"
 
-    def numerical_spot_check(self, lhs_str: str, rhs_str: str, samples: int = 5) -> Tuple[bool, str]:
+    def numerical_spot_check(self, lhs_str: str, rhs_str: str, samples: int = 5) -> Tuple[Optional[bool], str]:
         """
         Numerical spot-check: evaluates free variables at multiple random integers.
+        Fail-closed: parse error yields None (UNVERIFIED), NEVER True.
         """
         try:
             lhs = sp.sympify(self.clean_expr(lhs_str))
             rhs = sp.sympify(self.clean_expr(rhs_str))
             free = list(lhs.free_symbols.union(rhs.free_symbols))
             if not free:
-                return (sp.simplify(lhs - rhs) == 0), "Static constant check"
+                is_zero = (sp.simplify(lhs - rhs) == 0)
+                return is_zero, ("Static constant verified" if is_zero else "Static constant refuted")
 
             for _ in range(samples):
                 subs = {v: random.randint(2, 50) for v in free}
                 v_lhs = lhs.subs(subs)
                 v_rhs = rhs.subs(subs)
                 if sp.simplify(v_lhs - v_rhs) != 0:
-                    return False, f"Numerical spot-check failed at {subs}: {v_lhs} != {v_rhs}"
-            return True, f"Numerical spot-check passed across {samples} random valuations"
+                    return False, f"Numerical spot-check refuted at {subs}: {v_lhs} != {v_rhs}"
+            return True, f"Numerical spot-check passed across {samples} valuations"
         except Exception as e:
-            return True, f"Spot check skipped: {e}"
+            return None, f"Numerical spot check unparseable: {e}"
 
-    def verify(self, solution_text: str, ground_truth: Optional[str] = None) -> Dict[str, Any]:
+    def verify(
+        self,
+        solution_text: str,
+        ground_truth: Optional[str] = None,
+        strictness: float = 0.75
+    ) -> VerificationResult:
         """
-        Runs full verification ensemble on the reasoning text:
-        1. Extract answer
-        2. CAS algebraic verification
-        3. SMT congruence and counterexample search
-        4. Numerical spot check
+        Runs fail-closed verification ensemble:
+        - 3 states: VERIFIED, REFUTED, UNVERIFIED.
+        - Fail-closed: 0 checks or unparseable text => UNVERIFIED (is_verified = False).
+        - Any contradiction => REFUTED (is_verified = False).
         """
         extracted = self.extract_boxed_answer(solution_text)
         lines = solution_text.split('\n')
@@ -120,10 +162,11 @@ class VerificationEnsemble:
                 k = (a_s, b_s, m_s)
                 if k not in checked_pairs and len(a_s) < 30 and len(b_s) < 30:
                     checked_pairs.add(k)
-                    ok, cex, msg = self.check_z3_counterexample(a_s, b_s, m_s)
-                    smt_checks.append({"claim": f"{a_s} ≡ {b_s} (mod {m_s})", "valid": ok, "reason": msg})
-                    if cex:
-                        counterexamples.append(cex)
+                    ok, cex, msg = self.check_z3_congruence(a_s, b_s, m_s)
+                    if ok is not None:
+                        smt_checks.append({"claim": f"{a_s} ≡ {b_s} (mod {m_s})", "valid": ok, "reason": msg})
+                        if cex:
+                            counterexamples.append(cex)
                 continue
 
             # Equations A = B
@@ -136,21 +179,32 @@ class VerificationEnsemble:
                         checked_pairs.add(pair)
                         cas_ok, cas_msg = self.check_cas_equality(p1, p2)
                         num_ok, num_msg = self.numerical_spot_check(p1, p2)
-                        cas_checks.append({
-                            "claim": f"{p1} = {p2}",
-                            "cas_valid": cas_ok,
-                            "numerical_valid": num_ok,
-                            "reason": cas_msg
-                        })
+                        
+                        # Only record if at least one check parsed successfully
+                        if cas_ok is not None or num_ok is not None:
+                            effective_valid = (cas_ok is True) or (num_ok is True)
+                            effective_refuted = (cas_ok is False) or (num_ok is False)
+                            cas_checks.append({
+                                "claim": f"{p1} = {p2}",
+                                "valid": effective_valid and not effective_refuted,
+                                "refuted": effective_refuted,
+                                "reason": cas_msg if cas_ok is not None else num_msg
+                            })
 
-        valid_cas = sum(1 for c in cas_checks if c["cas_valid"])
+        valid_cas = sum(1 for c in cas_checks if c["valid"])
+        refuted_cas = sum(1 for c in cas_checks if c.get("refuted"))
         total_cas = len(cas_checks)
+
         valid_smt = sum(1 for s in smt_checks if s["valid"])
+        refuted_smt = sum(1 for s in smt_checks if not s["valid"])
         total_smt = len(smt_checks)
 
         all_checks_total = total_cas + total_smt
         all_checks_valid = valid_cas + valid_smt
-        pass_rate = round(all_checks_valid / all_checks_total, 3) if all_checks_total > 0 else 1.0
+        total_refuted = refuted_cas + refuted_smt
+
+        # Calculate pass rate: strictly 0.0 if no checks were performable
+        pass_rate = round(all_checks_valid / all_checks_total, 3) if all_checks_total > 0 else 0.0
 
         # Ground truth validation
         gt_match = None
@@ -163,24 +217,41 @@ class VerificationEnsemble:
             except Exception:
                 gt_match = (c_ext.lower() == c_gt.lower())
 
-        is_verified = (pass_rate >= 0.70 and len(counterexamples) == 0)
-        if gt_match is False:
+        # Determine 3-state status
+        if gt_match is False or total_refuted > 0 or len(counterexamples) > 0:
+            status = VerificationStatus.REFUTED
             is_verified = False
+            rejection_reason = "Refuted by counterexample, ground-truth contradiction, or algebraic violation."
+        elif gt_match is True:
+            # Explicit ground truth match confirmed
+            status = VerificationStatus.VERIFIED
+            is_verified = True
+            rejection_reason = None
+        elif all_checks_total == 0:
+            # FAIL-CLOSED: No verifiable equations detected in solution
+            status = VerificationStatus.UNVERIFIED
+            is_verified = False
+            rejection_reason = "Fail-closed: No formal algebraic or congruence equations could be extracted."
+        elif pass_rate >= strictness and total_refuted == 0:
+            status = VerificationStatus.VERIFIED
+            is_verified = True
+            rejection_reason = None
+        else:
+            status = VerificationStatus.UNVERIFIED
+            is_verified = False
+            rejection_reason = f"Pass rate {pass_rate:.1%} below required strictness {strictness:.1%}."
 
-        return {
-            "extracted_answer": extracted,
-            "ground_truth": ground_truth,
-            "ground_truth_matched": gt_match,
-            "is_verified": is_verified,
-            "pass_rate": pass_rate,
-            "cas_checks": {
-                "valid": valid_cas,
-                "total": total_cas
-            },
-            "smt_checks": {
-                "valid": valid_smt,
-                "total": total_smt,
-                "counterexamples": counterexamples
-            },
-            "steps": cas_checks[:8] + smt_checks[:4]
-        }
+        return VerificationResult(
+            status=status,
+            is_verified=is_verified,
+            pass_rate=pass_rate,
+            extracted_answer=extracted,
+            ground_truth=ground_truth,
+            ground_truth_matched=gt_match,
+            strictness_used=strictness,
+            total_checks=all_checks_total,
+            cas_checks={"valid": valid_cas, "total": total_cas, "refuted": refuted_cas},
+            smt_checks={"valid": valid_smt, "total": total_smt, "counterexamples": counterexamples},
+            steps=cas_checks[:8] + smt_checks[:4],
+            rejection_reason=rejection_reason
+        )
