@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Explorer 3D // RRSI Autonomous Self-Improvement</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- KaTeX for Math Equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Three.js & 3D Force Graph -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="3d-graph"></div>
+
+  <!-- Top Navigation / Status Header -->
+  <header class="glass-header">
+    <div class="logo-area">
+      <div class="status-pulse"></div>
+      <div class="brand">
+        <span class="title">VIOLETTO // RRSI ENGINE</span>
+        <span class="subtitle">Recursive Self-Improvement & Mathematical Knowledge Graph</span>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Badges -->
+    <div class="telemetry-bar">
+      <div class="badge badge-gen" id="badge-gen">GEN 0</div>
+      <div class="badge badge-nodes" id="badge-nodes">0 NODES</div>
+      <div class="badge badge-links" id="badge-links">0 EDGES</div>
+      <div class="badge badge-budget" id="badge-budget">BUDGET: 1.00</div>
+    </div>
+
+    <!-- Layer Filter Buttons -->
+    <div class="filter-controls">
+      <button class="filter-btn active" data-filter="all">ALL</button>
+      <button class="filter-btn" data-filter="knowledge">KNOWLEDGE GRAPH</button>
+      <button class="filter-btn" data-filter="rrsi">RRSI EVOLUTION</button>
+    </div>
+  </header>
+
+  <!-- Left Sidebar: Controls & Live Operations -->
+  <aside class="sidebar-left glass-panel">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tab-explore">Math Explorer</button>
+      <button class="tab-btn" data-tab="tab-rrsi">RRSI Engine</button>
+      <button class="tab-btn" data-tab="tab-harness">Active Harness</button>
+    </div>
+
+    <!-- Tab 1: Live Mathematical Exploration -->
+    <div class="tab-content active" id="tab-explore">
+      <div class="section-title">Query Dispatch</div>
+      <p class="section-desc">Tier 1: JEV triage (&lt;100ms) &rarr; PageIndex tree &rarr; Violetto (MPS) / Codex Astra (xhigh)</p>
+
+      <div class="form-group">
+        <label for="query-input">Mathematical Conjecture or Question</label>
+        <textarea id="query-input" rows="4" placeholder="e.g. For primes p=11 and q=13, determine the Legendre symbol (11/13) using the Law of Quadratic Reciprocity."></textarea>
+      </div>
+
+      <div class="preset-chips">
+        <span class="chip" data-q="Count all integers n < 1000 such that n is divisible by 6, not divisible by 4, and not divisible by 9.">Arithmetic Sieve (Violetto)</span>
+        <span class="chip" data-q="State and prove Gauss's Law of Quadratic Reciprocity for distinct odd primes p and q. Compute (11/13).">Reciprocity Law (Literature)</span>
+        <span class="chip" data-q="Let G be a finite group and V an irreducible complex representation. Prove that the character chi satisfies sum_{g in G} |chi(g)|^2 = |G|.">Group Character Orthogonality</span>
+        <span class="chip" data-q="Explain how Artin Reciprocity in class field theory unifies classical quadratic and cubic reciprocity laws.">Artin Reciprocity (Frontier)</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label for="engine-select">Execution Tier</label>
+          <select id="engine-select">
+            <option value="auto">Auto (JEV Gated &lt;100ms)</option>
+            <option value="local_violetto">Local Violetto 1B (Apple MPS)</option>
+            <option value="codex_astra">Codex Astra (gpt-6-astra xhigh)</option>
+          </select>
+        </div>
+        <div class="form-group half checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="force-arxiv-check">
+            <span>Force arXiv Fetch</span>
+          </label>
+        </div>
+      </div>
+
+      <button id="btn-explore" class="btn btn-primary">
+        <span class="btn-text">Dispatch Exploration</span>
+        <span class="spinner hidden"></span>
+      </button>
+
+      <div id="explore-progress" class="progress-box hidden">
+        <div class="progress-step active" id="step-jev">1. JEV System One Triage</div>
+        <div class="progress-step" id="step-tree">2. PageIndex Tree Retrieval</div>
+        <div class="progress-step" id="step-solve">3. Solver Proof Generation</div>
+        <div class="progress-step" id="step-verify">4. JEV Confidence Verification</div>
+      </div>
+    </div>
+
+    <!-- Tab 2: RRSI Self-Improvement Loop -->
+    <div class="tab-content" id="tab-rrsi">
+      <div class="section-title">RRSI Recursive Optimization</div>
+      <p class="section-desc">Regularized harness evolution per arXiv:2609.24972: Proposer &rarr; Critic &rarr; Pruner &rarr; Invariant Tests</p>
+
+      <div class="metric-card">
+        <div class="metric-row">
+          <span class="m-label">Harness Generation</span>
+          <span class="m-val" id="rrsi-gen-val">Gen 0</span>
+        </div>
+        <div class="metric-row">
+          <span class="m-label">Annealed Edit Budget B(t)</span>
+          <span class="m-val" id="rrsi-budget-val">1.000</span>
+        </div>
+        <div class="budget-bar-bg">
+          <div class="budget-bar-fill" id="rrsi-budget-fill" style="width: 100%;"></div>
+        </div>
+        <div class="metric-row">
+          <span class="m-label">Regression Invariants</span>
+          <span class="m-val text-success" id="rrsi-invariants-val">4 / 4 PASSED</span>
+        </div>
+      </div>
+
+      <div class="action-box">
+        <button id="btn-rrsi-step" class="btn btn-accent">
+          <span class="btn-text">Execute RRSI Evolution Step</span>
+          <span class="spinner hidden"></span>
+        </button>
+        <p class="hint-text">Proposes component edit &rarr; tests generalization &rarr; verifies test invariants &rarr; updates active config.</p>
+      </div>
+
+      <div class="section-title" style="margin-top: 20px;">Evolution Trajectory</div>
+      <div id="rrsi-history-list" class="history-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Tab 3: Active Harness Configuration -->
+    <div class="tab-content" id="tab-harness">
+      <div class="section-title">Active Harness Parameters</div>
+      <p class="section-desc">Current parameter state governing routing thresholds and local model inference.</p>
+      
+      <div class="config-table" id="config-table">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Inspector Panel (Opens on node click) -->
+  <aside class="sidebar-right glass-panel" id="inspector-panel">
+    <div class="inspector-header">
+      <div class="node-meta">
+        <span class="node-pill" id="insp-type">QUERY</span>
+        <span class="node-gen" id="insp-gen">GEN 0</span>
+      </div>
+      <button class="close-btn" id="btn-close-inspector">&times;</button>
+    </div>
+
+    <h2 class="node-title" id="insp-title">Select a node in 3D space</h2>
+    <div class="timestamp" id="insp-time"></div>
+
+    <div class="inspector-body" id="insp-body">
+      <p class="placeholder-text">Click on any glowing sphere in the 3D graph to view its detailed mathematical proof, JEV routing decisions, PageIndex tree fragments, or RRSI mutation records.</p>
+    </div>
+  </aside>
+
+  <!-- Floating 3D Navigation Controls -->
+  <div class="floating-controls">
+    <button class="icon-btn" id="btn-reset-cam" title="Reset Camera">Center</button>
+    <button class="icon-btn" id="btn-toggle-physics" title="Pause/Resume Layout">Physics</button>
+    <button class="icon-btn" id="btn-reset-graph" title="Reset Graph to Baseline">Reset</button>
+  </div>
+
+  <!-- Bottom Legend Bar -->
+  <footer class="legend-bar glass-footer">
+    <div class="legend-item"><span class="dot" style="background: #00e5ff;"></span> Query</div>
+    <div class="legend-item"><span class="dot" style="background: #ffd600;"></span> JEV Triage</div>
+    <div class="legend-item"><span class="dot" style="background: #2979ff;"></span> Corpus / PageIndex</div>
+    <div class="legend-item"><span class="dot" style="background: #d500f9;"></span> Violetto (MPS)</div>
+    <div class="legend-item"><span class="dot" style="background: #00e676;"></span> Codex Astra</div>
+    <div class="legend-item"><span class="dot" style="background: #76ff03;"></span> Verification</div>
+    <div class="legend-item"><span class="dot" style="background: #ff1744;"></span> Harness Gen</div>
+    <div class="legend-item"><span class="dot" style="background: #ff9100;"></span> RRSI Mutation</div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

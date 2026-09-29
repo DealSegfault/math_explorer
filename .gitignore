@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Temporary and local data
+*.tmp
+.DS_Store
+data/papers/*.pdf
+
+# Secrets
+.env
+*.key
