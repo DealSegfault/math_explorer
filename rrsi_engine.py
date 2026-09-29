@@ -275,6 +275,9 @@ class RRSIEngine:
             cand_correct = (cand_out.get("symbolic_verification", {}).get("ground_truth_matched") is True)
             candidate_results.append(cand_correct)
 
+            base_lat = base_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0
+            cand_lat = cand_out.get("metrics", {}).get("telemetry", {}).get("total_ms", 1000.0) / 1000.0
+
             if base_correct and not cand_correct:
                 regressions += 1
 
@@ -282,16 +285,27 @@ class RRSIEngine:
         cand_acc = sum(candidate_results) / len(candidate_results)
         delta_acc = round(cand_acc - base_acc, 3)
 
-        verdict = "ACCEPT" if (regressions == 0 and delta_acc >= 0.0) else "REJECT"
+        # Multi-objective Pareto Utility: U = Q - λ_L * L - λ_C * C (arXiv:2609.24972 Section 4)
+        lambda_L = 0.12
+        norm_base_lat = min(1.0, base_lat / 15.0)
+        norm_cand_lat = min(1.0, cand_lat / 15.0)
+
+        base_u = round(base_acc - lambda_L * norm_base_lat, 3)
+        cand_u = round(cand_acc - lambda_L * norm_cand_lat, 3)
+        delta_u = round(cand_u - base_u, 3)
+
+        verdict = "ACCEPT" if (regressions == 0 and (delta_u >= 0.0 or delta_acc > 0.0)) else "REJECT"
 
         return {
             "verdict": verdict,
             "baseline_accuracy": base_acc,
             "candidate_accuracy": cand_acc,
             "delta_accuracy": delta_acc,
+            "pareto_utility": cand_u,
+            "delta_utility": delta_u,
             "regressions": regressions,
             "generalization_score": round(cand_acc, 3),
-            "reason": f"Paired benchmark: {sum(candidate_results)}/{len(candidate_results)} passed (regressions: {regressions}, delta: {delta_acc:+.2f})"
+            "reason": f"Paired benchmark: {sum(candidate_results)}/{len(candidate_results)} passed (regressions: {regressions}, Δacc: {delta_acc:+.2f}, Δutility: {delta_u:+.2f})"
         }
 
     def evolve_step(self, harness_runner=None) -> Dict[str, Any]:

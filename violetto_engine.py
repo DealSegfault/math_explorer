@@ -1,36 +1,48 @@
 import sys
+import time
 import torch
-import torch.nn.functional as F
-from typing import Generator, Optional
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import threading
+from typing import Optional
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
 class ViolettoEngine:
     """
     Limite 1B Violetto mathematical reasoning engine.
     High-throughput autoregressive model specialized in competition and research-level mathematics.
+    Accelerated with native Apple Silicon MPS generation and persistent memory caching.
     """
+    _shared_model = None
+    _shared_tokenizer = None
+    _shared_model_path = None
+    _lock = threading.Lock()
+
     def __init__(self, model_path: str = "/Volumes/sdcard/models/limite-1b-violetto", device: str = "mps"):
         self.model_path = model_path
         self.device = device if (device == "mps" and torch.backends.mps.is_available()) else "cpu"
         self.dtype = torch.bfloat16 if self.device == "mps" else torch.float32
-        
-        self.tokenizer = None
-        self.model = None
 
     def load(self):
-        if self.model is not None:
-            return
-            
-        print(f"Loading Limite 1B Violetto on {self.device} ({self.dtype})...", flush=True)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_path,
-            trust_remote_code=True,
-            dtype=self.dtype,
-            attn_implementation="sdpa",
-        ).to(self.device)
-        self.model.eval()
-        print("Limite 1B Violetto ready for inference.", flush=True)
+        with self._lock:
+            if ViolettoEngine._shared_model is not None and ViolettoEngine._shared_model_path == self.model_path:
+                self.tokenizer = ViolettoEngine._shared_tokenizer
+                self.model = ViolettoEngine._shared_model
+                return
+
+            print(f"Loading Limite 1B Violetto on {self.device} ({self.dtype})...", flush=True)
+            t0 = time.time()
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                trust_remote_code=True,
+                dtype=self.dtype,
+                attn_implementation="sdpa",
+            ).to(self.device)
+            self.model.eval()
+
+            ViolettoEngine._shared_model = self.model
+            ViolettoEngine._shared_tokenizer = self.tokenizer
+            ViolettoEngine._shared_model_path = self.model_path
+            print(f"Limite 1B Violetto ready for inference (loaded in {time.time() - t0:.2f}s).", flush=True)
 
     def generate(
         self,
@@ -40,10 +52,11 @@ class ViolettoEngine:
         temperature: float = 0.6,
         top_k: int = 50,
         repetition_penalty: float = 1.05,
-        stream: bool = True
+        stream: bool = False
     ) -> str:
         """
-        Generates mathematical reasoning and solution.
+        Generates mathematical reasoning using native PyTorch/MPS accelerated generation.
+        Avoids token-by-token CPU synchronization barriers and maintains high throughput.
         """
         self.load()
         
@@ -62,48 +75,41 @@ class ViolettoEngine:
         prompt_text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         inputs = self.tokenizer([prompt_text], return_tensors="pt").to(self.device)
 
-        input_ids = inputs.input_ids
-        past_key_values = None
-        generated_tokens = []
-        full_output = ""
+        gen_kwargs = {
+            "max_new_tokens": max_tokens,
+            "repetition_penalty": repetition_penalty,
+            "pad_token_id": self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
+            "eos_token_id": self.tokenizer.eos_token_id,
+        }
 
-        for step in range(max_tokens):
+        if temperature <= 0.05:
+            gen_kwargs["do_sample"] = False
+        else:
+            gen_kwargs["do_sample"] = True
+            gen_kwargs["temperature"] = temperature
+            gen_kwargs["top_k"] = top_k
+
+        if stream:
+            streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=False)
+            gen_kwargs["streamer"] = streamer
+            thread = threading.Thread(target=self._run_model_generate, kwargs={"inputs": inputs, "gen_kwargs": gen_kwargs})
+            thread.start()
+
+            full_output = ""
+            for new_text in streamer:
+                sys.stdout.write(new_text)
+                sys.stdout.flush()
+                full_output += new_text
+            thread.join()
+            return full_output
+        else:
             with torch.inference_mode():
-                if past_key_values is None:
-                    outputs = self.model(input_ids=input_ids, use_cache=True)
-                else:
-                    outputs = self.model(input_ids=input_ids[:, -1:], past_key_values=past_key_values, use_cache=True)
-                
-                past_key_values = outputs.past_key_values
-                logits = outputs.logits[:, -1, :].float().clone()
+                outputs = self.model.generate(**inputs, **gen_kwargs)
+            # Slice off input tokens
+            input_len = inputs.input_ids.shape[-1]
+            generated_tokens = outputs[0, input_len:]
+            return self.tokenizer.decode(generated_tokens, skip_special_tokens=False)
 
-                # Repetition penalty
-                if repetition_penalty != 1.0 and len(generated_tokens) > 0:
-                    for token_id in set(generated_tokens[-64:]):
-                        if logits[0, token_id] > 0:
-                            logits[0, token_id] /= repetition_penalty
-                        else:
-                            logits[0, token_id] *= repetition_penalty
-
-                # Top-k with temperature sampling
-                top_logits, top_indices = torch.topk(logits, k=top_k, dim=-1)
-                probs = F.softmax(top_logits / temperature, dim=-1)
-                
-                sample_idx = torch.multinomial(probs.cpu(), num_samples=1).to(self.device)
-                next_token = top_indices.gather(-1, sample_idx)
-                token_id = next_token[0].item()
-
-                if token_id == self.tokenizer.eos_token_id:
-                    break
-
-                generated_tokens.append(token_id)
-                input_ids = torch.cat([input_ids, next_token], dim=-1)
-                token_str = self.tokenizer.decode(next_token[0], skip_special_tokens=False)
-                
-                if stream:
-                    sys.stdout.write(token_str)
-                    sys.stdout.flush()
-                    
-                full_output += token_str
-
-        return full_output
+    def _run_model_generate(self, inputs, gen_kwargs):
+        with torch.inference_mode():
+            self.model.generate(**inputs, **gen_kwargs)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Violetto Local LLM Solver Backend (Limite 1B on Apple Silicon MPS).
+Accelerated with native Hugging Face MPS generation and persistent SQLite solver caching.
 """
 
 import time
@@ -8,6 +9,7 @@ from typing import Dict, Any, Optional
 from backends.base import SolverBackend
 from violetto_engine import ViolettoEngine
 from config import VIOLETTO_MODEL_PATH
+from cache_manager import cache
 
 class ViolettoBackend(SolverBackend):
     def __init__(self, model_path: str = VIOLETTO_MODEL_PATH):
@@ -30,6 +32,14 @@ class ViolettoBackend(SolverBackend):
         max_tokens: int = 1500,
         **kwargs
     ) -> Dict[str, Any]:
+        # Check solver cache
+        cache_key = cache.hash_key(self.name, query, context or "", prompt_style, temperature, top_k, max_tokens)
+        cached = cache.get("solver_output", cache_key)
+        if cached:
+            cached["metrics"]["cached"] = True
+            cached["trace"].append("Retrieved from SQLite solver cache (0ms)")
+            return cached
+
         t0 = time.time()
         
         # Apply active prompt style formatting
@@ -49,16 +59,19 @@ class ViolettoBackend(SolverBackend):
             top_k=top_k,
             stream=False
         )
-        elapsed = round(time.time() - t0, 2)
+        elapsed = round(time.time() - t0, 3)
 
-        return {
+        result = {
             "engine": self.name,
             "solution": solution,
             "extracted_answer": None, # Extracted by verifier
             "is_exact": False,
             "metrics": {
                 "execution_time_sec": elapsed,
-                "hardware": "apple_silicon_mps"
+                "hardware": "apple_silicon_mps",
+                "cached": False
             },
-            "trace": [f"Executed Violetto 1B on MPS (style: {prompt_style}, temp: {temperature})"]
+            "trace": [f"Executed Violetto 1B on MPS (style: {prompt_style}, temp: {temperature}, elapsed: {elapsed}s)"]
         }
+        cache.set("solver_output", cache_key, result)
+        return result

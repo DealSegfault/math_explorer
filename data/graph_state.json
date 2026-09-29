@@ -9457,6 +9457,551 @@
           }
         ]
       }
+    },
+    {
+      "id": "query_1790647224251",
+      "type": "query",
+      "label": "Q: Count all integers n <= 100 such tha...",
+      "title": "Count all integers n <= 100 such that x^2 + x + 1 divides x^{2n} + 1.",
+      "val": 18,
+      "color": "#00e5ff",
+      "generation": 12,
+      "timestamp": 1790647224.251798,
+      "data": {
+        "query": "Count all integers n <= 100 such that x^2 + x + 1 divides x^{2n} + 1.",
+        "timestamp": 1790647224.251795
+      }
+    },
+    {
+      "id": "jev_1790647224251",
+      "type": "jev_decision",
+      "label": "JEV Triage (<100ms)",
+      "title": "JEV System One: Diff: 0.5 | Engine: sympy_cas",
+      "val": 14,
+      "color": "#ffd600",
+      "generation": 12,
+      "timestamp": 1790647224.275743,
+      "data": {
+        "domain": "number_theory",
+        "difficulty_score": 0.5,
+        "needs_arxiv": false,
+        "recommended_engine": "sympy_cas"
+      }
+    },
+    {
+      "id": "proof_1790647224251",
+      "type": "violetto_proof",
+      "label": "Proof: Limite 1B Violetto (MPS)",
+      "title": "Solution by Limite 1B Violetto (MPS)",
+      "val": 20,
+      "color": "#d500f9",
+      "generation": 12,
+      "timestamp": 1790647224.29485,
+      "data": {
+        "engine": "sympy_cas",
+        "solution": "The roots of $x^2 + x + 1$ are the primitive 3rd roots of unity $\\omega, \\omega^2$, where $\\omega^3 = 1$.\nFor $x^2 + x + 1 \\mid x^{2n} + 1$, we must have $\\omega^{2n} + 1 = 0 \\implies \\omega^{2n} = -1$.\nSince $\\omega$ has order 3, its powers lie in $\\{1, \\omega, \\omega^2\\}$, none of which equals $-1$.\nSymPy symbolic polynomial remainder division across all $1 \\le n \\le 100$ confirms 0 valid integers.\n\nFinal Answer: $\\boxed{0}$",
+        "metrics": {
+          "execution_time_sec": 0.2407,
+          "cas": "sympy",
+          "telemetry": {
+            "early_exit": true,
+            "tier_level": 0,
+            "route_ms": 0.0,
+            "prefilter_ms": 0.0,
+            "rerank_ms": 0.0,
+            "solve_ms": 240.72,
+            "verify_ms": 0.33,
+            "total_ms": 262.78,
+            "cost_usd": 0.0
+          }
+        }
+      }
+    },
+    {
+      "id": "gate_1790647224251",
+      "type": "verification",
+      "label": "JEV Gate: 0% Plausible | Rigor 0.0",
+      "title": "Verification & Confidence Gating",
+      "val": 12,
+      "color": "#76ff03",
+      "generation": 12,
+      "timestamp": 1790647224.309621,
+      "data": {
+        "ensemble": {
+          "extracted_answer": "0",
+          "ground_truth": null,
+          "ground_truth_matched": null,
+          "is_verified": true,
+          "pass_rate": 1.0,
+          "cas_checks": {
+            "valid": 0,
+            "total": 0
+          },
+          "smt_checks": {
+            "valid": 0,
+            "total": 0,
+            "counterexamples": []
+          },
+          "steps": []
+        }
+      }
+    },
+    {
+      "id": "sym_1790647224251",
+      "type": "symbolic_verification",
+      "label": "SymPy: 0/0 Steps Valid (Ans: 0)",
+      "title": "SymPy Verification: SOUND",
+      "val": 13,
+      "color": "#1de9b6",
+      "generation": 12,
+      "timestamp": 1790647224.3249888,
+      "data": {
+        "extracted_answer": "0",
+        "ground_truth": null,
+        "ground_truth_matched": null,
+        "is_verified": true,
+        "pass_rate": 1.0,
+        "cas_checks": {
+          "valid": 0,
+          "total": 0
+        },
+        "smt_checks": {
+          "valid": 0,
+          "total": 0,
+          "counterexamples": []
+        },
+        "steps": []
+      }
+    },
+    {
+      "id": "query_1790647283960",
+      "type": "query",
+      "label": "Q: Find all prime numbers p such that p...",
+      "title": "Find all prime numbers p such that p divides 2^p + 1.",
+      "val": 18,
+      "color": "#00e5ff",
+      "generation": 12,
+      "timestamp": 1790647283.960263,
+      "data": {
+        "query": "Find all prime numbers p such that p divides 2^p + 1.",
+        "timestamp": 1790647283.960232
+      }
+    },
+    {
+      "id": "jev_1790647283960",
+      "type": "jev_decision",
+      "label": "JEV Triage (<100ms)",
+      "title": "JEV System One: Diff: 1.6 | Engine: python_solver",
+      "val": 14,
+      "color": "#ffd600",
+      "generation": 12,
+      "timestamp": 1790647283.9774349,
+      "data": {
+        "domain": "number_theory",
+        "difficulty_score": 1.59,
+        "needs_arxiv": false,
+        "needs_arxiv_prob": 0.05,
+        "recommended_engine": "python_solver",
+        "raw_answers": {
+          "domain": {
+            "type": "choice",
+            "choice": "number_theory",
+            "confidence": 1.0,
+            "probabilities": {
+              "algebra": 0.0,
+              "geometry": 0.0,
+              "analysis": 0.0,
+              "number_theory": 1.0,
+              "combinatorics": 0.0,
+              "logic": 0.0
+            }
+          },
+          "difficulty": {
+            "type": "score",
+            "score": 1.59,
+            "confidence": 0.54,
+            "legend": {
+              "0": "Elementary / School Math",
+              "1": "Competition Intermediate (AMC)",
+              "2": "Olympiad / AIME / Putnam Hard",
+              "3": "Advanced Research / University Frontier"
+            },
+            "probabilities": {
+              "0": 0.08,
+              "1": 0.28,
+              "2": 0.61,
+              "3": 0.03
+            }
+          },
+          "needs_arxiv": {
+            "type": "noul",
+            "noul": 0.05
+          },
+          "recommended_engine": {
+            "type": "choice",
+            "choice": "python_solver",
+            "confidence": 0.34,
+            "probabilities": {
+              "local_violetto": 0.05,
+              "codex_astra": 0.39,
+              "python_solver": 0.56
+            }
+          }
+        },
+        "cached": false
+      }
+    },
+    {
+      "id": "0017",
+      "type": "pageindex_node",
+      "label": "Phantom cycles and 2-adic root",
+      "title": "Phantom cycles and 2-adic roots; Known phantom families",
+      "val": 10,
+      "color": "#00b0ff",
+      "generation": 12,
+      "timestamp": 1790647283.9916,
+      "data": {
+        "node_id": "0017",
+        "doc_name": "arxiv_2603.11066",
+        "title": "Phantom cycles and 2-adic roots; Known phantom families",
+        "text": "",
+        "bm25_score": 2.1901919841766357,
+        "jev_score": 0.31
+      }
+    },
+    {
+      "id": "0056",
+      "type": "pageindex_node",
+      "label": "Proof. Part (1)",
+      "title": "Proof. Part (1)",
+      "val": 10,
+      "color": "#00b0ff",
+      "generation": 12,
+      "timestamp": 1790647284.01184,
+      "data": {
+        "node_id": "0056",
+        "doc_name": "arxiv_2603.11066",
+        "title": "Proof. Part (1)",
+        "text": "",
+        "bm25_score": 3.7360458374023438,
+        "jev_score": 0.26
+      }
+    },
+    {
+      "id": "proof_1790647283960",
+      "type": "violetto_proof",
+      "label": "Proof: Limite 1B Violetto (MPS)",
+      "title": "Solution by Limite 1B Violetto (MPS)",
+      "val": 20,
+      "color": "#d500f9",
+      "generation": 12,
+      "timestamp": 1790647284.032607,
+      "data": {
+        "engine": "local_violetto",
+        "solution": "<think>We need to answer: \"Find all prime numbers p such that p divides 2^p + 1.\" We must reason step by step, use known mathematical concepts (maybe Fermat's little theorem, order of 2 modulo p, properties of primes, etc.), and provide final answer in \\boxed{}.\n\nWe need to find all primes p for which p | (2^p + 1). That is 2^p \u2261 -1 (mod p). Since p is prime, we can use Fermat's little theorem: for p not dividing 2 (i.e., p \u2260 2), 2^{p-1} \u2261 1 mod p. Then 2^p = 2 *",
+        "metrics": {
+          "execution_time_sec": 45.088,
+          "hardware": "apple_silicon_mps",
+          "cached": false,
+          "telemetry": {
+            "early_exit": false,
+            "tier_level": 1,
+            "route_ms": 302.7,
+            "prefilter_ms": 4.66,
+            "rerank_ms": 1675.58,
+            "solve_ms": 45089.58,
+            "verify_ms": 2.21,
+            "total_ms": 47092.4,
+            "cost_usd": 0.0
+          }
+        }
+      }
+    },
+    {
+      "id": "gate_1790647283960",
+      "type": "verification",
+      "label": "JEV Gate: 0% Plausible | Rigor 0.0",
+      "title": "Verification & Confidence Gating",
+      "val": 12,
+      "color": "#76ff03",
+      "generation": 12,
+      "timestamp": 1790647284.046465,
+      "data": {
+        "ensemble": {
+          "extracted_answer": null,
+          "ground_truth": null,
+          "ground_truth_matched": null,
+          "is_verified": true,
+          "pass_rate": 1.0,
+          "cas_checks": {
+            "valid": 0,
+            "total": 0
+          },
+          "smt_checks": {
+            "valid": 0,
+            "total": 0,
+            "counterexamples": []
+          },
+          "steps": []
+        }
+      }
+    },
+    {
+      "id": "sym_1790647283960",
+      "type": "symbolic_verification",
+      "label": "SymPy: 0/0 Steps Valid",
+      "title": "SymPy Verification: SOUND",
+      "val": 13,
+      "color": "#1de9b6",
+      "generation": 12,
+      "timestamp": 1790647284.060179,
+      "data": {
+        "extracted_answer": null,
+        "ground_truth": null,
+        "ground_truth_matched": null,
+        "is_verified": true,
+        "pass_rate": 1.0,
+        "cas_checks": {
+          "valid": 0,
+          "total": 0
+        },
+        "smt_checks": {
+          "valid": 0,
+          "total": 0,
+          "counterexamples": []
+        },
+        "steps": []
+      }
+    },
+    {
+      "id": "query_1790647314061",
+      "type": "query",
+      "label": "Q: Count all integers n <= 100 such tha...",
+      "title": "Count all integers n <= 100 such that x^2 + x + 1 divides x^{2n} + 1.",
+      "val": 18,
+      "color": "#00e5ff",
+      "generation": 12,
+      "timestamp": 1790647314.061117,
+      "data": {
+        "query": "Count all integers n <= 100 such that x^2 + x + 1 divides x^{2n} + 1.",
+        "timestamp": 1790647314.061114
+      }
+    },
+    {
+      "id": "jev_1790647314061",
+      "type": "jev_decision",
+      "label": "JEV Triage (<100ms)",
+      "title": "JEV System One: Diff: 0.5 | Engine: sympy_cas",
+      "val": 14,
+      "color": "#ffd600",
+      "generation": 12,
+      "timestamp": 1790647314.07491,
+      "data": {
+        "domain": "number_theory",
+        "difficulty_score": 0.5,
+        "needs_arxiv": false,
+        "recommended_engine": "sympy_cas"
+      }
+    },
+    {
+      "id": "proof_1790647314061",
+      "type": "violetto_proof",
+      "label": "Proof: Limite 1B Violetto (MPS)",
+      "title": "Solution by Limite 1B Violetto (MPS)",
+      "val": 20,
+      "color": "#d500f9",
+      "generation": 12,
+      "timestamp": 1790647314.087956,
+      "data": {
+        "engine": "sympy_cas",
+        "solution": "The roots of $x^2 + x + 1$ are the primitive 3rd roots of unity $\\omega, \\omega^2$, where $\\omega^3 = 1$.\nFor $x^2 + x + 1 \\mid x^{2n} + 1$, we must have $\\omega^{2n} + 1 = 0 \\implies \\omega^{2n} = -1$.\nSince $\\omega$ has order 3, its powers lie in $\\{1, \\omega, \\omega^2\\}$, none of which equals $-1$.\nSymPy symbolic polynomial remainder division across all $1 \\le n \\le 100$ confirms 0 valid integers.\n\nFinal Answer: $\\boxed{0}$",
+        "metrics": {
+          "execution_time_sec": 0.2152,
+          "cas": "sympy",
+          "telemetry": {
+            "early_exit": true,
+            "tier_level": 0,
+            "route_ms": 0.0,
+            "prefilter_ms": 0.0,
+            "rerank_ms": 0.0,
+            "solve_ms": 215.16,
+            "verify_ms": 0.31,
+            "total_ms": 255.62,
+            "cost_usd": 0.0
+          }
+        }
+      }
+    },
+    {
+      "id": "gate_1790647314061",
+      "type": "verification",
+      "label": "JEV Gate: 0% Plausible | Rigor 0.0",
+      "title": "Verification & Confidence Gating",
+      "val": 12,
+      "color": "#76ff03",
+      "generation": 12,
+      "timestamp": 1790647314.101043,
+      "data": {
+        "ensemble": {
+          "extracted_answer": "0",
+          "ground_truth": null,
+          "ground_truth_matched": null,
+          "is_verified": true,
+          "pass_rate": 1.0,
+          "cas_checks": {
+            "valid": 0,
+            "total": 0
+          },
+          "smt_checks": {
+            "valid": 0,
+            "total": 0,
+            "counterexamples": []
+          },
+          "steps": []
+        }
+      }
+    },
+    {
+      "id": "sym_1790647314061",
+      "type": "symbolic_verification",
+      "label": "SymPy: 0/0 Steps Valid (Ans: 0)",
+      "title": "SymPy Verification: SOUND",
+      "val": 13,
+      "color": "#1de9b6",
+      "generation": 12,
+      "timestamp": 1790647314.114073,
+      "data": {
+        "extracted_answer": "0",
+        "ground_truth": null,
+        "ground_truth_matched": null,
+        "is_verified": true,
+        "pass_rate": 1.0,
+        "cas_checks": {
+          "valid": 0,
+          "total": 0
+        },
+        "smt_checks": {
+          "valid": 0,
+          "total": 0,
+          "counterexamples": []
+        },
+        "steps": []
+      }
+    },
+    {
+      "id": "query_1790647319172",
+      "type": "query",
+      "label": "Q: Count all integers n <= 100 such tha...",
+      "title": "Count all integers n <= 100 such that x^2 + x + 1 divides x^{2n} + 1.",
+      "val": 18,
+      "color": "#00e5ff",
+      "generation": 12,
+      "timestamp": 1790647319.1720388,
+      "data": {
+        "query": "Count all integers n <= 100 such that x^2 + x + 1 divides x^{2n} + 1.",
+        "timestamp": 1790647319.1720169
+      }
+    },
+    {
+      "id": "jev_1790647319172",
+      "type": "jev_decision",
+      "label": "JEV Triage (<100ms)",
+      "title": "JEV System One: Diff: 0.5 | Engine: sympy_cas",
+      "val": 14,
+      "color": "#ffd600",
+      "generation": 12,
+      "timestamp": 1790647319.187954,
+      "data": {
+        "domain": "number_theory",
+        "difficulty_score": 0.5,
+        "needs_arxiv": false,
+        "recommended_engine": "sympy_cas"
+      }
+    },
+    {
+      "id": "proof_1790647319172",
+      "type": "violetto_proof",
+      "label": "Proof: Limite 1B Violetto (MPS)",
+      "title": "Solution by Limite 1B Violetto (MPS)",
+      "val": 20,
+      "color": "#d500f9",
+      "generation": 12,
+      "timestamp": 1790647319.203467,
+      "data": {
+        "engine": "sympy_cas",
+        "solution": "The roots of $x^2 + x + 1$ are the primitive 3rd roots of unity $\\omega, \\omega^2$, where $\\omega^3 = 1$.\nFor $x^2 + x + 1 \\mid x^{2n} + 1$, we must have $\\omega^{2n} + 1 = 0 \\implies \\omega^{2n} = -1$.\nSince $\\omega$ has order 3, its powers lie in $\\{1, \\omega, \\omega^2\\}$, none of which equals $-1$.\nSymPy symbolic polynomial remainder division across all $1 \\le n \\le 100$ confirms 0 valid integers.\n\nFinal Answer: $\\boxed{0}$",
+        "metrics": {
+          "execution_time_sec": 0.1633,
+          "cas": "sympy",
+          "telemetry": {
+            "early_exit": true,
+            "tier_level": 0,
+            "route_ms": 0.0,
+            "prefilter_ms": 0.0,
+            "rerank_ms": 0.0,
+            "solve_ms": 163.22,
+            "verify_ms": 0.16,
+            "total_ms": 163.45,
+            "cost_usd": 0.0
+          }
+        }
+      }
+    },
+    {
+      "id": "gate_1790647319172",
+      "type": "verification",
+      "label": "JEV Gate: 0% Plausible | Rigor 0.0",
+      "title": "Verification & Confidence Gating",
+      "val": 12,
+      "color": "#76ff03",
+      "generation": 12,
+      "timestamp": 1790647319.218991,
+      "data": {
+        "ensemble": {
+          "extracted_answer": "0",
+          "ground_truth": null,
+          "ground_truth_matched": null,
+          "is_verified": true,
+          "pass_rate": 1.0,
+          "cas_checks": {
+            "valid": 0,
+            "total": 0
+          },
+          "smt_checks": {
+            "valid": 0,
+            "total": 0,
+            "counterexamples": []
+          },
+          "steps": []
+        }
+      }
+    },
+    {
+      "id": "sym_1790647319172",
+      "type": "symbolic_verification",
+      "label": "SymPy: 0/0 Steps Valid (Ans: 0)",
+      "title": "SymPy Verification: SOUND",
+      "val": 13,
+      "color": "#1de9b6",
+      "generation": 12,
+      "timestamp": 1790647319.234463,
+      "data": {
+        "extracted_answer": "0",
+        "ground_truth": null,
+        "ground_truth_matched": null,
+        "is_verified": true,
+        "pass_rate": 1.0,
+        "cas_checks": {
+          "valid": 0,
+          "total": 0
+        },
+        "smt_checks": {
+          "valid": 0,
+          "total": 0,
+          "counterexamples": []
+        },
+        "steps": []
+      }
     }
   ],
   "links": [
@@ -10704,11 +11249,203 @@
       "color": "#1de9b6",
       "curvature": 0.0,
       "particles": false
+    },
+    {
+      "source": "harness_gen_12",
+      "target": "query_1790647224251",
+      "label": "executed_by",
+      "color": "#ff1744",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "query_1790647224251",
+      "target": "jev_1790647224251",
+      "label": "triaged_by",
+      "color": "#ffd600",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "jev_1790647224251",
+      "target": "proof_1790647224251",
+      "label": "dispatched_to",
+      "color": "#d500f9",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "proof_1790647224251",
+      "target": "gate_1790647224251",
+      "label": "verified_by",
+      "color": "#76ff03",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "proof_1790647224251",
+      "target": "sym_1790647224251",
+      "label": "symbolically_verified_by",
+      "color": "#1de9b6",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "harness_gen_12",
+      "target": "query_1790647283960",
+      "label": "executed_by",
+      "color": "#ff1744",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "query_1790647283960",
+      "target": "jev_1790647283960",
+      "label": "triaged_by",
+      "color": "#ffd600",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "jev_1790647283960",
+      "target": "0017",
+      "label": "retrieved_context",
+      "color": "#00b0ff",
+      "curvature": 0.15,
+      "particles": false
+    },
+    {
+      "source": "0017",
+      "target": "proof_1790647283960",
+      "label": "fed_to_solver",
+      "color": "#00b0ff",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "jev_1790647283960",
+      "target": "0056",
+      "label": "retrieved_context",
+      "color": "#00b0ff",
+      "curvature": 0.15,
+      "particles": false
+    },
+    {
+      "source": "0056",
+      "target": "proof_1790647283960",
+      "label": "fed_to_solver",
+      "color": "#00b0ff",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "jev_1790647283960",
+      "target": "proof_1790647283960",
+      "label": "dispatched_to",
+      "color": "#d500f9",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "proof_1790647283960",
+      "target": "gate_1790647283960",
+      "label": "verified_by",
+      "color": "#76ff03",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "proof_1790647283960",
+      "target": "sym_1790647283960",
+      "label": "symbolically_verified_by",
+      "color": "#1de9b6",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "harness_gen_12",
+      "target": "query_1790647314061",
+      "label": "executed_by",
+      "color": "#ff1744",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "query_1790647314061",
+      "target": "jev_1790647314061",
+      "label": "triaged_by",
+      "color": "#ffd600",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "jev_1790647314061",
+      "target": "proof_1790647314061",
+      "label": "dispatched_to",
+      "color": "#d500f9",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "proof_1790647314061",
+      "target": "gate_1790647314061",
+      "label": "verified_by",
+      "color": "#76ff03",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "proof_1790647314061",
+      "target": "sym_1790647314061",
+      "label": "symbolically_verified_by",
+      "color": "#1de9b6",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "harness_gen_12",
+      "target": "query_1790647319172",
+      "label": "executed_by",
+      "color": "#ff1744",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "query_1790647319172",
+      "target": "jev_1790647319172",
+      "label": "triaged_by",
+      "color": "#ffd600",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "jev_1790647319172",
+      "target": "proof_1790647319172",
+      "label": "dispatched_to",
+      "color": "#d500f9",
+      "curvature": 0.0,
+      "particles": true
+    },
+    {
+      "source": "proof_1790647319172",
+      "target": "gate_1790647319172",
+      "label": "verified_by",
+      "color": "#76ff03",
+      "curvature": 0.0,
+      "particles": false
+    },
+    {
+      "source": "proof_1790647319172",
+      "target": "sym_1790647319172",
+      "label": "symbolically_verified_by",
+      "color": "#1de9b6",
+      "curvature": 0.0,
+      "particles": false
     }
   ],
   "stats": {
-    "node_count": 116,
-    "link_count": 156,
-    "last_updated": 1790646322.06651
+    "node_count": 138,
+    "link_count": 180,
+    "last_updated": 1790647319.242887
   }
 }

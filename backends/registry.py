@@ -77,10 +77,16 @@ class SolverRegistry:
 
     def get_backend_by_name(self, name: str) -> Optional[SolverBackend]:
         backends = {
+            "sympy": self.sympy,
             "sympy_cas": self.sympy,
             "python_solver": self.sympy,
+            "z3": self.z3,
             "z3_smt": self.z3,
             "local_violetto": self.violetto,
-            "codex_astra": self.astra
+            "violetto": self.violetto,
+            "codex_astra": self.astra,
+            "astra": self.astra
         }
         return backends.get(name)
+
+    get_backend = get_backend_by_name

@@ -3,15 +3,17 @@ import json
 import urllib.request
 import urllib.error
 from typing import List, Dict, Any, Optional
+from config import TYPESAFE_KEY_PATH
+from cache_manager import cache
 
 class JevRouter:
     """
     TypeSafe JEV System One semantic routing and evaluation client.
-    Runs in <100ms: turns fuzzy natural language & math queries into typed decisions.
+    Runs in <100ms with SQLite query and relevance caching.
     """
     API_URL = "https://api.typesafe.ai/v1/systemone"
 
-    def __init__(self, key_path: str = "/Users/mac/.typesafe_key"):
+    def __init__(self, key_path: str = TYPESAFE_KEY_PATH):
         self.api_key = self._load_key(key_path)
 
     def _load_key(self, key_path: str) -> str:
@@ -56,12 +58,14 @@ class JevRouter:
 
     def route_intent(self, query: str) -> Dict[str, Any]:
         """
-        High-speed multi-primitive intent and capability routing (<100ms):
-        - Choice: Math domain categorization (dict criteria)
-        - Score: Difficulty / Complexity (1 to 4) (list criteria)
-        - Noul: Needs external literature search (arXiv)
-        - Choice: Optimal execution engine (dict criteria)
+        High-speed multi-primitive intent routing with persistent SQLite cache.
         """
+        cache_key = cache.hash_key("route", query)
+        cached = cache.get("route_cache", cache_key)
+        if cached:
+            cached["cached"] = True
+            return cached
+
         questions = {
             "domain": {
                 "type": "choice",
@@ -110,19 +114,27 @@ class JevRouter:
         needs_arxiv_prob = answers.get("needs_arxiv", {}).get("noul", 0.0)
         engine_id = answers.get("recommended_engine", {}).get("choice", "local_violetto")
 
-        return {
+        res = {
             "domain": domain,
             "difficulty_score": difficulty_score,
             "needs_arxiv": needs_arxiv_prob >= 0.5,
             "needs_arxiv_prob": needs_arxiv_prob,
             "recommended_engine": engine_id,
-            "raw_answers": answers
+            "raw_answers": answers,
+            "cached": False
         }
+        cache.set("route_cache", cache_key, res)
+        return res
 
     def score_node_relevance(self, query: str, node_title: str, node_text: str = "") -> float:
         """
-        Uses JEV 'noul' primitive to score calibrated probability that a document node is relevant.
+        Uses JEV 'noul' primitive with persistent caching to score node relevance.
         """
+        cache_key = cache.hash_key("jev_score", query, node_title, node_text[:500])
+        cached = cache.get("jev_score", cache_key)
+        if cached is not None:
+            return float(cached)
+
         state_repr = f"Section: {node_title}\n"
         if node_text:
             state_repr += f"Content: {node_text[:800]}\n"
@@ -134,7 +146,9 @@ class JevRouter:
             }
         }
         answers = self.evaluate(state=state_repr, questions=questions)
-        return float(answers.get("relevance", {}).get("noul", 0.0))
+        score = float(answers.get("relevance", {}).get("noul", 0.0))
+        cache.set("jev_score", cache_key, score)
+        return score
 
     def rank_nodes(self, query: str, candidates: List[Dict[str, Any]], top_k: int = 3) -> List[Dict[str, Any]]:
         scored = []
@@ -153,8 +167,13 @@ class JevRouter:
 
     def verify_confidence_gate(self, query: str, solution: str) -> Dict[str, Any]:
         """
-        Confidence gating on results: checks mathematical plausibility of output.
+        Confidence gating on results with persistent caching.
         """
+        cache_key = cache.hash_key("jev_gate", query, solution[-1000:])
+        cached = cache.get("jev_gate", cache_key)
+        if cached:
+            return cached
+
         state = f"Query: {query}\nProposed Solution:\n{solution[-1000:]}"
         questions = {
             "is_plausible": {
@@ -167,4 +186,6 @@ class JevRouter:
                 "criteria": ["Flawed / Incomplete", "Mostly sound with gaps", "Fully rigorous and clear"]
             }
         }
-        return self.evaluate(state=state, questions=questions)
+        res = self.evaluate(state=state, questions=questions)
+        cache.set("jev_gate", cache_key, res)
+        return res

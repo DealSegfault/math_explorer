@@ -10,6 +10,7 @@ venv/
 
 # Temporary and local data
 *.tmp
+*.db
 .DS_Store
 data/papers/*.pdf
 
