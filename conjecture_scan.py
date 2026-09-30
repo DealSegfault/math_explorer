@@ -83,10 +83,16 @@ def _scan(max_papers, feed, indexer, graph, state_path):
     seen = set(state["seen"])
     pending = state.setdefault("pending", [])
     queued = {paper["id"] for paper in pending}
-    pending.extend(reversed([paper for paper in feed(max_results=100) if paper["id"] not in seen and paper["id"] not in queued]))
+    feed_error = None
+    try:
+        incoming = feed(max_results=100)
+    except OSError as exc:
+        incoming = []
+        feed_error = f"arXiv feed unavailable ({type(exc).__name__}: {exc}); processing queued papers only"
+    pending.extend(reversed([paper for paper in incoming if paper["id"] not in seen and paper["id"] not in queued]))
     papers = pending[:max_papers]
     if not papers:
-        return {"new_papers": 0, "new_candidates": 0, "candidates": []}
+        return {"new_papers": 0, "new_candidates": 0, "candidates": [], "feed_error": feed_error}
     indexer = indexer or MathDocIndexer(cache_dir=str(DATA_DIR))
     graph = graph or GraphManager(filepath=str(DATA_DIR / "graph_state.json"))
     arxiv = ArxivClient(download_dir=str(DATA_DIR / "papers"))
@@ -130,7 +136,7 @@ def _scan(max_papers, feed, indexer, graph, state_path):
     temporary.write_text(json.dumps(state, indent=2, ensure_ascii=False))
     temporary.replace(state_path)
     return {"new_papers": len(processed), "new_candidates": len(added), "pending_papers": len(pending),
-            "index_errors": failed,
+            "index_errors": failed, "feed_error": feed_error,
             "candidates": added}
 
 

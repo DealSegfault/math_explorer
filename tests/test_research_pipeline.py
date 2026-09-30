@@ -1,7 +1,9 @@
 import io
+import json
 import tempfile
 import unittest
 from pathlib import Path
+from urllib.error import HTTPError
 from unittest.mock import patch
 
 from arxiv_feed import recent_papers
@@ -102,6 +104,13 @@ class PipelineTest(unittest.TestCase):
             client.return_value.download_pdf.side_effect = None
             self.assertEqual(scan(feed=lambda max_results: papers, indexer=Indexer(),
                                   graph=Graph(), state_path=retry_state)["new_papers"], 1)
+            queued_state = Path(directory) / "queued.json"
+            queued_state.write_text(json.dumps({"seen": [], "pending": papers, "candidates": []}))
+            def rate_limited(max_results):
+                raise HTTPError("https://export.arxiv.org/api/query", 429, "Too Many Requests", None, None)
+            fallback = scan(feed=rate_limited, indexer=Indexer(), graph=Graph(), state_path=queued_state)
+            self.assertEqual(fallback["new_papers"], 1)
+            self.assertIn("429", fallback["feed_error"])
 
     def test_rrsi_pairs_same_questions_without_answer_leakage(self):
         problems = [{"query": f"Question {index}", "ground_truth": "2"} for index in range(6)]
